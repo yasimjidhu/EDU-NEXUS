@@ -5,13 +5,14 @@ import { RootState } from "../../components/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import {useNavigate} from 'react-router-dom'
 import { verifyOTP } from "../../components/redux/slices/authSlice";
+import { toast } from "react-toastify";
 
-const OtpVerify: React.FC = () => {
+const OtpVerifyForResetPass: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate()
-  type AppDispatch = ThunkDispatch<any, any, any>;
 
-  const userEmail = useSelector((state: RootState) => state.auth?.userEmail);
+  const email = useSelector((state:RootState)=>state.auth?.email)
+  type AppDispatch = ThunkDispatch<any, any, any>;
 
   const [otps, setOtps] = useState<string[]>(Array(4));
 
@@ -26,29 +27,20 @@ const OtpVerify: React.FC = () => {
 
     const otpValue: string = otps.join("");
 
-    // Retrieve token from local storage
-    
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error("Token not found in local storage.");
-    }
-
     try {
 
-      if (!userEmail) {
-        throw new Error("User email is not available.");
-      }
-
       const response: any = await (dispatch as AppDispatch)(
-        verifyOTP({ email: userEmail, otp: otpValue,token:token })
+        verifyOTP({otp: otpValue,email })
       );
 
       if (response.error) {
         throw new Error(response.error.message);
       }
+      toast.success('otp verified successfully')
       navigate('/home')
     } catch (error) {
       console.error("OTP verification failed:", error);
+      toast.error('OTP verification failed')
     }
   };
 
@@ -71,7 +63,7 @@ const OtpVerify: React.FC = () => {
                 <div className="flex justify-around items-center p-5">
                   {Array.from({ length: 4 }).map((_, index) => (
                     <input
-                    min={0}
+                      min={0}
                       key={index}
                       type="text"
                       value={otps[index]}
@@ -84,22 +76,13 @@ const OtpVerify: React.FC = () => {
                 <h5 className="text-center font-bold mt-5 text-red-700">
                   Otp will expire within 60 minutes
                 </h5>
-                {!allFieldsFilled ? (
-                  <button
-                    disabled
-                    type="submit"
-                    className="bg-prime-blue w-full py-3 text-white mt-5 rounded-xl font-semibold secondary-font "
-                  >
-                    Verify
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    className="bg-prime-blue w-full text-white cursor-pointer py-3 mt-5 rounded-xl font-semibold secondary-font "
-                  >
-                    Verify
-                  </button>
-                )}
+                <button
+                  disabled={!allFieldsFilled}
+                  type="submit"
+                  className="bg-prime-blue w-full py-3 text-white mt-5 rounded-xl font-semibold secondary-font "
+                >
+                  Verify
+                </button>
               </div>
             </form>
           </div>
@@ -109,4 +92,4 @@ const OtpVerify: React.FC = () => {
   );
 };
 
-export default OtpVerify;
+export default OtpVerifyForResetPass;

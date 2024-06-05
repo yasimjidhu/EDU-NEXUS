@@ -18,3 +18,7 @@
     font-style: normal;
     font-variation-settings: "wdth" 100, "wght" 500;
 }
+.google-signin-button .MuiButton-label{
+  color: black;
+  font: 800;
+}

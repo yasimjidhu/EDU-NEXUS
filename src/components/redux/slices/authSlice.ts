@@ -5,7 +5,7 @@ interface AuthState {
     user: any;
     loading: boolean;
     error: string | null;
-    userEmail: string | null; // New property to store user email
+    email: string | null;
 }
 
 interface SignupData {
@@ -15,16 +15,22 @@ interface SignupData {
 }
 
 interface OTPData {
-    email: any; 
+    email?: any; 
     otp: string;
-    token:any;
+    token?:any;
 }
 
 interface RejectValue {
     error: string;
 }
+interface LoginData{
+    email:string
+    password:string
+}
 
-
+interface ForgotPasswordData{
+    email:string
+}
 
 export const signupUser = createAsyncThunk<
     any,
@@ -60,8 +66,10 @@ OTPData,
     'auth/verifyotp',
     async (data: OTPData, { rejectWithValue }) => {
         try {
-
-            const response = await axios.post('http://localhost:4000/auth/verify-otp', data);
+            
+            const response = await axios.post('http://localhost:4000/auth/verify-otp', data,{
+                withCredentials:true
+            });
             return response.data;
             
         } catch (error) {
@@ -73,11 +81,51 @@ OTPData,
     }
 )
 
+export const userLogin = createAsyncThunk<
+any,
+LoginData,
+{rejectValue:RejectValue}
+>(
+    'auth/login',
+    async (data:LoginData,{rejectWithValue})=>{
+        try {
+          
+            const response = await axios.post('http://localhost:4000/auth/login',data)
+            return response.data
+        } catch (error) {
+            console.log(error)
+            return rejectWithValue({error:'error occured in login slice'})
+        }
+    }
+)
+
+export const forgotPassword = createAsyncThunk<
+any,
+ForgotPasswordData,
+{rejectValue:RejectValue}
+>(
+    'auth/forgot-password',
+    async (data:ForgotPasswordData,{rejectWithValue})=>{
+        console.log('data of forgotpassword',data)
+        try {
+            
+            const response = await axios.post('http://localhost:4000/auth/forgot-password',data)
+            return response.data
+        } catch (error) {
+            console.log(error)
+            return rejectWithValue({error:'error occured in forgot-password'})
+        }
+    }
+)
+
+
+
+
 const userDetails: AuthState = {
     user: null,
     loading: false,
     error: null,
-    userEmail:null
+    email:null
 }
 
 const authSlice = createSlice({
@@ -96,7 +144,7 @@ const authSlice = createSlice({
                 if (action.payload.error) {
                     state.error = action.payload.error;
                 }
-                state.userEmail = state.user ? state.user.email : null
+                state.email = state.user ? state.user.email : null
             })
             .addCase(signupUser.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
                 state.loading = false;
@@ -113,8 +161,32 @@ const authSlice = createSlice({
             .addCase(verifyOTP.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
                 state.loading = false;
                 state.error = action.payload?.error || 'An error occurred';
-            });
-    }
+            })
+            .addCase(userLogin.pending,(state)=>{
+                state.loading = true
+                state.error = null
+            })
+            .addCase(userLogin.fulfilled,(state,action:PayloadAction<any>)=>{
+                state.loading = false
+                state.user = action.payload
+            })
+            .addCase(userLogin.rejected,(state,action:PayloadAction<RejectValue | undefined>)=>{
+                state.loading = false
+                state.error = action.payload?.error || 'An error occured'
+            })
+            .addCase(forgotPassword.pending,(state)=>{
+                state.loading = true
+                state.error = null
+            })
+            .addCase(forgotPassword.fulfilled,(state,action:PayloadAction<any>)=>{
+                state.loading = false
+                state.email = action.payload
+            })
+            .addCase(forgotPassword.rejected,(state,action:PayloadAction<RejectValue | undefined>)=>{
+                state.loading = false
+                state.error = action.payload?.error || 'An error occured'
+            })
+        }
 });
 
 export default authSlice.reducer;
