@@ -134,14 +134,14 @@ const SignupPage: React.FC = () => {
                     {isSubmitting ? (
                       <button
                         type="submit"
-                        className="bg-prime-blue w-full py-2 text-xl text-white rounded-md"
+                        className="bg-strong-rose w-full py-2 text-xl text-white rounded-md"
                       >
                         <BeatLoader className="mr-4 text-center mx-auto" />
                       </button>
                     ) : (
                       <button
                         type="submit"
-                        className="bg-prime-blue w-full py-2 text-lg text-white rounded-md"
+                        className="bg-strong-rose w-full py-2 text-lg text-white rounded-md"
                       >
                         Signup
                       </button>

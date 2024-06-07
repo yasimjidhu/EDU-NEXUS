@@ -1,7 +1,7 @@
-import axios from "axios";
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Formik, Form, ErrorMessage, Field } from "formik";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import Navbar from "../../components/authentication/Navbar";
@@ -9,12 +9,15 @@ import { getLoginValidationSchema } from "../../utils/validation";
 import { userLogin } from "../../components/redux/slices/authSlice";
 import { toast } from "react-toastify";
 import GoogleSignInButton from "../../components/authentication/GoogleSigninButton";
+import { RootState } from "../../components/redux/store/store";
 
 const LoginPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   type AppDispatch = ThunkDispatch<any, any, any>;
+
+  const {loading,error} = useSelector((state:RootState)=>state.auth)
 
   const initialValues = {
     email: "",
@@ -31,27 +34,25 @@ const LoginPage: React.FC = () => {
       const response: any = await (dispatch as AppDispatch)(
         userLogin({ email, password })
       );
-      console.log(response.data);
-
-      if (response.error) {
-        throw new Error(response.error.message);
+      console.log(response)
+      if (response.payload && response.payload.error) {
+        throw new Error(response.payload.error);
       }
-
       navigate("/home");
-    } catch (error) {
+    } catch (error:any) {
+      toast.error(error.message || 'An unexpected error occurred');
       console.error("Login failed:", error);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleForgotPassword = async ()=>{
-    try {
-      
-    } catch (error) {
-      
-    }
+React.useEffect(()=>{
+  if(error){
+    toast.error(error)
   }
+},[])
+
 
   return (
     <>
@@ -110,7 +111,7 @@ const LoginPage: React.FC = () => {
                     </div>
                     <button
                       type="submit"
-                      className="bg-prime-blue w-full py-2 text-xl text-white rounded-md "
+                      className="bg-strong-rose w-full py-2 text-xl text-white rounded-md "
                     >
                       Login
                     </button>
@@ -122,7 +123,6 @@ const LoginPage: React.FC = () => {
               </div>
               <Link to='/forgot-password'><h4
                 className="text-center text-violet-950 font-semibold mt-4 cursor-pointer"
-                onClick={handleForgotPassword}
               >
                 Forgot Password
               </h4></Link>

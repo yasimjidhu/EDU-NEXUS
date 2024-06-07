@@ -39,7 +39,7 @@ const ForgotPassword:React.FC = () => {
         toast.warning('User not found, please register')
         setTimeout(()=>{
           navigate('/')
-        },1000)
+        },2000)
     }finally{
         setSubmitting(false)
     }
@@ -90,7 +90,7 @@ const ForgotPassword:React.FC = () => {
               ) : (
                 <button
                   type="submit"
-                  className="bg-prime-blue w-full p-2 text-lg text-white rounded-md"
+                  className="bg-strong-rose w-full p-2 text-lg text-white rounded-md"
                 >
                   Submit
                 </button>

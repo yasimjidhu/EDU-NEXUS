@@ -32,6 +32,11 @@ interface ForgotPasswordData{
     email:string
 }
 
+interface ResetPassword{
+    newPassword:string,
+    email:string
+}
+
 export const signupUser = createAsyncThunk<
     any,
     SignupData,
@@ -82,22 +87,27 @@ OTPData,
 )
 
 export const userLogin = createAsyncThunk<
-any,
-LoginData,
-{rejectValue:RejectValue}
+  any,
+  LoginData,
+  { rejectValue: RejectValue }
 >(
-    'auth/login',
-    async (data:LoginData,{rejectWithValue})=>{
-        try {
-          
-            const response = await axios.post('http://localhost:4000/auth/login',data)
-            return response.data
-        } catch (error) {
-            console.log(error)
-            return rejectWithValue({error:'error occured in login slice'})
-        }
+  'auth/login',
+  async (data: LoginData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('http://localhost:4000/auth/login', data);
+      console.log('response data in login thunk',response)
+      return response.data;
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        return rejectWithValue({ error: error.response.data.error });
+      } else {
+        return rejectWithValue({ error: error.message });
+      }
     }
+  }
 )
+
+
 
 export const forgotPassword = createAsyncThunk<
 any,
@@ -106,7 +116,6 @@ ForgotPasswordData,
 >(
     'auth/forgot-password',
     async (data:ForgotPasswordData,{rejectWithValue})=>{
-        console.log('data of forgotpassword',data)
         try {
             
             const response = await axios.post('http://localhost:4000/auth/forgot-password',data)
@@ -114,6 +123,26 @@ ForgotPasswordData,
         } catch (error) {
             console.log(error)
             return rejectWithValue({error:'error occured in forgot-password'})
+        }
+    }
+)
+
+export const resetPassword = createAsyncThunk<
+any,
+ResetPassword,
+{rejectValue:RejectValue}
+>(
+    'auth/reset-password',
+    async (data:ResetPassword,{rejectWithValue})=>{
+        try {
+            console.log('reset password called in slice',data)
+            const response = await axios.post('http://localhost:4000/auth/reset-password',data,{
+                withCredentials:true
+            })
+            return response.data
+        } catch (error) {
+            console.log(error)
+            return rejectWithValue({error:'error occured in reset password slice'})
         }
     }
 )
@@ -156,6 +185,7 @@ const authSlice = createSlice({
             })
             .addCase(verifyOTP.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false
+                console.log('action.payload',action.payload)
                 state.user = action.payload
             })
             .addCase(verifyOTP.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
@@ -172,7 +202,7 @@ const authSlice = createSlice({
             })
             .addCase(userLogin.rejected,(state,action:PayloadAction<RejectValue | undefined>)=>{
                 state.loading = false
-                state.error = action.payload?.error || 'An error occured'
+                state.error = action.payload?.error || 'Failed to login'
             })
             .addCase(forgotPassword.pending,(state)=>{
                 state.loading = true

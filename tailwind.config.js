@@ -11,7 +11,10 @@ module.exports = {
     },
     extend: {
       colors: {
-        'prime-blue': '#0074fc',
+        'strong-rose': '#5d001e',
+        'medium-rose':'#9A1750',
+        'lite-rose':'#E3AFBC',
+        'pure-white':'#E3E2DF'
       },
     },
   },

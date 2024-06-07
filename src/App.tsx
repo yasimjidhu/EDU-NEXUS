@@ -7,6 +7,7 @@ import Home from "./pages/HomePage/Home";
 import GoogleCallback from "./components/authentication/GoogleCallback";
 import ForgotPassword from "./pages/AuthPages/ForgotPassword";
 import OtpVerifyForResetPass from "./pages/AuthPages/OtpVerifyForResetPass";
+import ResetPassword from "./pages/AuthPages/ResetPassword";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/auth/google/callback" element={<GoogleCallback/>}/>
           <Route path="/forgot-password" element={<ForgotPassword/>}/>
           <Route path="/forgot-pass-verify-otp" element={<OtpVerifyForResetPass/>}/>
+          <Route path="/reset-pass" element={<ResetPassword/>}/>
         </Routes>
       </Router>
     </>

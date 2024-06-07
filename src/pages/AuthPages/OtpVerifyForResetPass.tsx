@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import Navbar from "../../components/authentication/Navbar";
 import { RootState } from "../../components/redux/store/store";
@@ -15,6 +15,10 @@ const OtpVerifyForResetPass: React.FC = () => {
   type AppDispatch = ThunkDispatch<any, any, any>;
 
   const [otps, setOtps] = useState<string[]>(Array(4));
+  const [timer,setTimer] = useState<number>(()=>{
+    const savedTimer = localStorage.getItem('otpTimer')
+    return savedTimer !== null ? parseInt(savedTimer,10):180
+  })
 
   const handleChange = (value: string, index: number) => {
     const newOtps = [...otps];
@@ -37,7 +41,7 @@ const OtpVerifyForResetPass: React.FC = () => {
         throw new Error(response.error.message);
       }
       toast.success('otp verified successfully')
-      navigate('/home')
+      navigate('/reset-pass')
     } catch (error) {
       console.error("OTP verification failed:", error);
       toast.error('OTP verification failed')
@@ -45,6 +49,30 @@ const OtpVerifyForResetPass: React.FC = () => {
   };
 
   const allFieldsFilled = otps.every((otp) => otp !== "");
+
+  useEffect(()=>{
+    localStorage.setItem('otpTimer',timer.toString())
+
+    if(allFieldsFilled && timer > 0){
+      var timerId = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
+
+      return () => {
+        clearInterval(timerId);
+    }
+    }
+  },[allFieldsFilled,timer])
+
+  useEffect(()=>{
+    return ()=>{
+      clearInterval(timer)
+    }
+  },[])
+
+  const minutes = Math.floor(timer/60)
+  const seconds = timer % 60
+  const formattedTimer = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
 
   return (
     <>
@@ -74,12 +102,12 @@ const OtpVerifyForResetPass: React.FC = () => {
                   ))}
                 </div>
                 <h5 className="text-center font-bold mt-5 text-red-700">
-                  Otp will expire within 60 minutes
+                  Time remaining : {formattedTimer}
                 </h5>
                 <button
                   disabled={!allFieldsFilled}
                   type="submit"
-                  className="bg-prime-blue w-full py-3 text-white mt-5 rounded-xl font-semibold secondary-font "
+                  className="bg-strong-rose w-full py-3 text-white mt-5 rounded-xl font-semibold secondary-font "
                 >
                   Verify
                 </button>
