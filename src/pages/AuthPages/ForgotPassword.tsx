@@ -49,12 +49,12 @@ const ForgotPassword:React.FC = () => {
       <Navbar />
       <div className="grid grid-cols-2  p-5">
         <div className="flex justify-center items-center">
-          <img src="/assets/images/forgot-password.png" width='80%' height='auto' alt="" />
+          <img src="/assets/images/forgot-pass.png" width='80%' height='auto' alt="" />
         </div>
-        <div className="bg-gray-200 p-12 flex  items-center rounded-3xl">
+        <div className="bg-gray-200 py-2 px-10 flex  items-center rounded-3xl">
             <div className="w-full">
             <h1 className="text-center text-xl font-bold mb-2">Forgot password</h1>
-            <p className="text-sm text-green-800 text-center">Enter your email and we'll send you an otp to reset the password</p>
+            <h4 className="text-md text-green-800 text-center">Enter your email and we'll send you an otp to reset the password</h4>
           <Formik
             initialValues={initialValues}
             validationSchema={forgotPasswordSchema}
@@ -90,7 +90,7 @@ const ForgotPassword:React.FC = () => {
               ) : (
                 <button
                   type="submit"
-                  className="bg-strong-rose w-full p-2 text-lg text-white rounded-md"
+                  className="bg-medium-rose w-full p-2 text-lg text-white rounded-md"
                 >
                   Submit
                 </button>

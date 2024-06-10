@@ -14,11 +14,78 @@
     font-style: normal;
   }
   .secondary-font {
-    font-family: omnes-variable, sans-serif;
+    font-family: "omnes-variable", sans-serif;
     font-style: normal;
     font-variation-settings: "wdth" 100, "wght" 500;
 }
 .google-signin-button .MuiButton-label{
   color: black;
   font: 800;
+}
+.prime-font{
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-size: 40px;
+}
+.thick-font {
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 40px;
+}
+.thin-font{
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+}
+.poppins-semibold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size:40px;
+}
+.poppins-normal{
+  font-family: "Poppins", sans-serif;
+}
+.categories-container {
+  display: inline-block;
+  vertical-align: top;
+}
+.prime-font-sm{
+  
+  font-size: 40px;
+}
+.thick-font {
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 40px;
+}
+.thin-font{
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+}
+.poppins-semibold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size:40px;
+}
+.poppins-normal{
+  font-family: "Poppins", sans-serif;
+}
+.categories-container {
+  display: inline-block;
+  vertical-align: top;
+}
+.prime-sm{
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }

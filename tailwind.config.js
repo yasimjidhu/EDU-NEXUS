@@ -14,7 +14,8 @@ module.exports = {
         'strong-rose': '#5d001e',
         'medium-rose':'#9A1750',
         'lite-rose':'#E3AFBC',
-        'pure-white':'#E3E2DF'
+        'pure-white':'#E3E2DF',
+        'purple':'#D4D1FA'
       },
     },
   },

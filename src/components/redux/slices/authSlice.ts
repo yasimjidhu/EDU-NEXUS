@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios, { AxiosError } from 'axios';
+import  { AxiosError } from 'axios';
+import axios from '../../../config/axiosConfig'
 
 interface AuthState {
     user: any;
@@ -94,8 +95,11 @@ export const userLogin = createAsyncThunk<
   'auth/login',
   async (data: LoginData, { rejectWithValue }) => {
     try {
-      const response = await axios.post('http://localhost:4000/auth/login', data);
-      console.log('response data in login thunk',response)
+      const response = await axios.post('http://localhost:4000/auth/login', data,
+    //     {
+    //     withCredentials:true
+    //   }
+    );
       return response.data;
     } catch (error: any) {
       if (error.response && error.response.data) {
@@ -146,6 +150,20 @@ ResetPassword,
         }
     }
 )
+
+export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue }>(
+    'auth/logout-user',
+    async (_, { rejectWithValue }) => {
+      try {
+        const response = await axios.post('http://localhost:4000/auth/logout');
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        return rejectWithValue({ error: 'Error occurred in logout slice' });
+      }
+    }
+  );
+
 
 
 

@@ -57,7 +57,7 @@ const SignupPage: React.FC = () => {
       <Navbar />
       <div className="flex justify-around">
         <div className="container mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-4 w-[90%] mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-4 justify-center items-center w-[90%] mt-4">
             <div className="bg-gray-200 px-12 rounded-3xl">
               <h2 className="text-2xl font-sans mt-3">Signup</h2>
               <Formik
@@ -141,7 +141,7 @@ const SignupPage: React.FC = () => {
                     ) : (
                       <button
                         type="submit"
-                        className="bg-strong-rose w-full py-2 text-lg text-white rounded-md"
+                        className="bg-medium-rose w-full py-2 text-lg text-white rounded-md"
                       >
                         Signup
                       </button>
