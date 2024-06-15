@@ -1,29 +1,30 @@
 import React from "react";
 
+
 const Courses = () => {
   return (
     <>
       <div className="ml-64 py-2 px-8">
-        <ul className="flex justify-between">
-          <li className="text-black poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
+        <ul className="flex justify-between md:mt-4">
+          <li className="text-black inter hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
             All courses
           </li>
-          <li className="text-black poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
+          <li className="text-black inter hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
             kindergarden
           </li>
-          <li className="text-black poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
+          <li className="text-black inter hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
             High School
           </li>
-          <li className="text-black poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
+          <li className="text-black inter hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
             college
           </li>
-          <li className="text-black poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
+          <li className="text-black inter hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
             Computer
           </li>
-          <li className="text-black poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
+          <li className="text-black inter hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
             Science
           </li>
-          <li className="text-black poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
+          <li className="text-black inter hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
             Engineering
           </li>
           <li className="text-blue-700 secondary-font hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer">
@@ -39,7 +40,7 @@ const Courses = () => {
                 alt=""
               />
             </div>
-            <div className="w-2/3 p-4 flex flex-col justify-between">
+            <div className="w-2/3 p-4 flex flex-col justify-between ">
               <div>
                 <p>by neymar junior</p>
                 <h3 className="prime-sm text-xl font-semibold">
@@ -69,7 +70,7 @@ const Courses = () => {
                 </ul>
               </div>
               <div>
-                <div className="border-b-2 border-gray-300 my-5"></div>
+                <div className="border-b-2 border-gray-300 my-4"></div>
                 <div className="flex justify-between items-center">
                   <h6 className="text-green-700 font-semibold poppins-normal">
                     $59.0 free

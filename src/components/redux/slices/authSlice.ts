@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import  { AxiosError } from 'axios';
-import axios from '../../../config/axiosConfig'
+import { axiosInstance } from "../../../constants/axiosInstance";
 
-interface AuthState {
+export interface AuthState {
     user: any;
     loading: boolean;
     error: string | null;
@@ -18,7 +17,7 @@ interface SignupData {
 interface OTPData {
     email?: any; 
     otp: string;
-    token?:any;
+    token?:any; 
 }
 
 interface RejectValue {
@@ -46,18 +45,15 @@ export const signupUser = createAsyncThunk<
     'auth/signup',
     async (data: SignupData, { rejectWithValue }) => {
         try {
-            const response = await axios.post('http://localhost:4000/auth/signup', data);
-            const token:any = response.data.token
+            const response = await axiosInstance.post('/auth/auth/signup', data);
+            console.log('response of signup',response)
+            const token:any = response.data.access_token
 
-            localStorage.setItem('token',token)
+            localStorage.setItem('access_token',token)
             return { user: response.data.user, error: null };       
-        } catch (error) {
-            console.log(error);
-            if (axios.isAxiosError(error)) {
-                const axiosError = error as AxiosError;
-                return { user: null, error: axiosError.message };
-            }
-            return { user: null, error: 'An unknown error occurred' };
+        } catch (error:any) {
+            console.log('this is the signup eror bro>>>',error.response.data.message);
+            return rejectWithValue({error:error.response.data.message})
         }
     }
 );
@@ -72,20 +68,37 @@ OTPData,
     'auth/verifyotp',
     async (data: OTPData, { rejectWithValue }) => {
         try {
-            
-            const response = await axios.post('http://localhost:4000/auth/verify-otp', data,{
-                withCredentials:true
-            });
+            console.log('data in verifyotp slice',data)
+            const response = await axiosInstance.post('/auth/auth/verify-otp', data);
+            console.log('response of verifyotp thunk',response)
             return response.data;
             
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                return rejectWithValue({ error: error.message });
-            }
-            return rejectWithValue({ error: 'An unknown error occurred' });
+        } catch (error:any) {
+            console.log('error in thunk',error.response.data.message)
+            return rejectWithValue({ error: error.response.data.message });
         }
     }
 )
+
+export const resendOtp = createAsyncThunk<
+any,
+ForgotPasswordData,
+{ rejectValue: RejectValue }
+>(
+    'auth/resendotp',
+    async (data:ForgotPasswordData, { rejectWithValue }) => {
+      try {
+        const response = await axiosInstance.post('/auth/auth/resendOtp',data);
+        console.log('response in authslice of resend otp',response)
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        return rejectWithValue({ error: 'Error occurred in logout slice' });
+      }
+    }
+  );
+
+
 
 export const userLogin = createAsyncThunk<
   any,
@@ -95,10 +108,11 @@ export const userLogin = createAsyncThunk<
   'auth/login',
   async (data: LoginData, { rejectWithValue }) => {
     try {
-      const response = await axios.post('http://localhost:4000/auth/login', data,
-    //     {
-    //     withCredentials:true
-    //   }
+      const response = await axiosInstance.post('/auth/auth/login', data,{
+        headers:{
+            'Content-Type': 'application/json',
+        }
+      }
     );
       return response.data;
     } catch (error: any) {
@@ -122,10 +136,10 @@ ForgotPasswordData,
     async (data:ForgotPasswordData,{rejectWithValue})=>{
         try {
             
-            const response = await axios.post('http://localhost:4000/auth/forgot-password',data)
+            const response = await axiosInstance.post('/auth/auth/forgot-password',data)
             return response.data
         } catch (error) {
-            console.log(error)
+            console.log('error in slice bro',error)
             return rejectWithValue({error:'error occured in forgot-password'})
         }
     }
@@ -139,10 +153,7 @@ ResetPassword,
     'auth/reset-password',
     async (data:ResetPassword,{rejectWithValue})=>{
         try {
-            console.log('reset password called in slice',data)
-            const response = await axios.post('http://localhost:4000/auth/reset-password',data,{
-                withCredentials:true
-            })
+            const response = await axiosInstance.post('/auth/auth/reset-password',data)
             return response.data
         } catch (error) {
             console.log(error)
@@ -155,7 +166,7 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
     'auth/logout-user',
     async (_, { rejectWithValue }) => {
       try {
-        const response = await axios.post('http://localhost:4000/auth/logout');
+        const response = await axiosInstance.post('/auth/auth/logout');
         return response.data;
       } catch (error) {
         console.log(error);
@@ -165,6 +176,19 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
   );
 
 
+
+  export const logoutAdmin = createAsyncThunk<any, void, { rejectValue: RejectValue }>(
+    'auth/logout-admin',
+    async (_, { rejectWithValue }) => {
+      try {
+        const response = await axiosInstance.post('/auth/auth/logout');
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        return rejectWithValue({ error: 'Error occurred in logout slice' });
+      }
+    }
+  );
 
 
 
@@ -187,6 +211,7 @@ const authSlice = createSlice({
             })
             .addCase(signupUser.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
+                console.log('user in signup authslice',action.payload)
                 state.user = action.payload.user;
                 if (action.payload.error) {
                     state.error = action.payload.error;
@@ -195,6 +220,7 @@ const authSlice = createSlice({
             })
             .addCase(signupUser.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
                 state.loading = false;
+                
                 state.error = action.payload?.error || 'An error occurred';
             })
             .addCase(verifyOTP.pending, (state) => {
@@ -203,7 +229,6 @@ const authSlice = createSlice({
             })
             .addCase(verifyOTP.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false
-                console.log('action.payload',action.payload)
                 state.user = action.payload
             })
             .addCase(verifyOTP.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
@@ -216,7 +241,8 @@ const authSlice = createSlice({
             })
             .addCase(userLogin.fulfilled,(state,action:PayloadAction<any>)=>{
                 state.loading = false
-                state.user = action.payload
+                console.log('user in loginslice',action.payload)
+                state.user = action.payload.user
             })
             .addCase(userLogin.rejected,(state,action:PayloadAction<RejectValue | undefined>)=>{
                 state.loading = false
@@ -231,6 +257,18 @@ const authSlice = createSlice({
                 state.email = action.payload
             })
             .addCase(forgotPassword.rejected,(state,action:PayloadAction<RejectValue | undefined>)=>{
+                state.loading = false
+                state.error = action.payload?.error || 'An error occured'
+            })
+            .addCase(resendOtp.pending,(state)=>{
+                state.loading = true
+                state.error = null
+            })
+            .addCase(resendOtp.fulfilled,(state)=>{
+                state.loading = false
+                state.error = null
+            })
+            .addCase(resendOtp.rejected,(state,action:PayloadAction<RejectValue | undefined>)=>{
                 state.loading = false
                 state.error = action.payload?.error || 'An error occured'
             })

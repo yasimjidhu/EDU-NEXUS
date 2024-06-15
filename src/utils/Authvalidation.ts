@@ -1,5 +1,4 @@
 import React from 'react'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 
 interface FormValues {
@@ -22,6 +21,9 @@ const getSignupValidationSchema = () => {
             .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
             .matches(/[0-9]/, 'Password must contain at least one number')
             .matches(/[@$!%*?&#]/, 'Password must contain at least one special character'),
+        confirmPassword: Yup.string()
+            .oneOf([Yup.ref('password'), null], 'Passwords must match')
+            .required('Confirm Password is required'),
     })
 }
 

@@ -1,20 +1,37 @@
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../slices/authSlice'
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import authReducer, { AuthState } from "../slices/authSlice";
+import userReducer, { StudentState } from "../slices/studentSlice";
+import otpReducer, { otpState } from "../slices/otpSlice";
+import instructorReducer,{InstructorState} from '../slices/instructorSlice'
 
+export interface RootState {
+  auth: AuthState;
+  otp: otpState;
+  user: StudentState;
+  instructor:InstructorState;
+}
+const persistConfig = {
+  key: "root",
+  storage,
+};
 
-// interface RootState{
-//     auth:{
-//         username:string;
-//         email:string;
-//         password:string;
-//     };
-// }
+const rootReducer = combineReducers({
+  auth: authReducer,
+  otp: otpReducer,
+  user: userReducer,
+  instructor:instructorReducer
+});
+
+const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);
+
 const store = configureStore({
-    reducer:{
-        auth:authReducer,
-    }
-})
+  reducer: persistedReducer,
+});
 
-export type RootState = ReturnType<typeof store.getState>;
+let persistor = persistStore(store);
 
-export default store
+export type AppDispatch = typeof store.dispatch;
+
+export { store, persistor };

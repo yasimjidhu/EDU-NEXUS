@@ -15,7 +15,7 @@ const Sidebar = ({isActive}:status) => {
             data-drawer-toggle="default-sidebar"
             aria-controls="default-sidebar"
             type="button"
-            className="inline-flex items-center p-2 mt-2 ml-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+            className="inline-flex items-center p-2 mt-2 ml-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-hash-black focus:outline-none "
           >
             <span className="sr-only">Open sidebar</span>
             <svg
@@ -44,13 +44,13 @@ const Sidebar = ({isActive}:status) => {
              <h1 className='text-white text-2xl ml-4 mb-8'>Admin</h1>
               <ul className="space-y-2 font-medium">
                 {/* Other links */}
-                <li>
+                <li className=''>
                   <Link
                     to="/admin/overview"
                     className={
                       isActive
-                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
                     }
                   >
                     <svg
@@ -70,8 +70,8 @@ const Sidebar = ({isActive}:status) => {
                     to="/admin/courses"
                     className={
                       isActive
-                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
                     }
                   >
                     <svg
@@ -91,8 +91,8 @@ const Sidebar = ({isActive}:status) => {
                     to="/admin/assessments"
                     className={
                       isActive
-                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
                     }
                   >
                     <svg
@@ -112,8 +112,8 @@ const Sidebar = ({isActive}:status) => {
                     to="/admin/categories"
                     className={
                       isActive
-                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
                     }
                   >
                     <svg
@@ -126,6 +126,58 @@ const Sidebar = ({isActive}:status) => {
                       <path d="M10 0a5 5 0 0 0 0 10A5 5 0 0 0 10 0Zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6Zm7-6h-4v2h4V2ZM7 16H2v2h5v-2Zm11 2h-4v2h4v-2Zm-8 0H9v2h1v-2Zm-2 0H5v2h1v-2ZM3 16H0v2h3v-2Zm13-4h-2v2h2v-2Zm0 4h-2v2h2v-2Zm-2 4h-1v2h1v-2ZM9 12H2v2h7v-2Zm9 0h-7v2h7v-2Z" />
                     </svg>
                     <span className="flex-1 ml-3 whitespace-nowrap">Categories</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/requests"
+                    className={
+                      isActive
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
+                    }
+                  >
+                  <img src="/assets/icon/message.png" className='w-6 h-auto' alt="" />
+                    <span className="flex-1 ml-3 whitespace-nowrap">Requests</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/complaints"
+                    className={
+                      isActive
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
+                    }
+                  >
+                  <img src="/assets/icon/chat.png" className='w-5 h-auto' alt="" />
+                    <span className="flex-1 ml-3 whitespace-nowrap">Complaints</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/transactions"
+                    className={
+                      isActive
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
+                    }
+                  >
+                  <img src="/assets/icon/banner.png" className='w-6 h-auto' alt="" />
+                    <span className="flex-1 ml-3 whitespace-nowrap">Transactions</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/transactions"
+                    className={
+                      isActive
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
+                    }
+                  >
+                  <img src="/assets/icon/settings.png" className='w-6 h-auto' alt="" />
+                    <span className="flex-1 ml-3 whitespace-nowrap">Settings</span>
                   </Link>
                 </li>
               </ul>

@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "../../components/authentication/Navbar";
 import "../../index.css";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   return (
@@ -19,9 +20,9 @@ const Home = () => {
             </p>
             <div className="flex mt-6 justify-between items-center w-[55%]">
               <div className="bg-purple-500">
-                <button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
+                <Link to='/enrollment'><button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
                   Join Now
-                </button>
+                </button></Link>
               </div>
               <div>
                 <button className="p-4 bg-lite-rose rounded-3xl font-semibold text-black">

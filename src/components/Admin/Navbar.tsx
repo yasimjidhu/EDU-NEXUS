@@ -1,6 +1,36 @@
-import React from "react";
+import { ThunkDispatch } from "@reduxjs/toolkit";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { logoutUser } from "../redux/slices/authSlice";
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  type AppDispatch = ThunkDispatch<any, any, any>;
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await (dispatch as AppDispatch)(logoutUser());
+      navigate("/login");
+      toast.success("Logout Successfull");
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
+      console.error("Logout failed:", error);
+    }
+  };
+
+  const handleProfile = () => {
+    console.log("viewing profile");
+  };
+
   return (
     <>
       <div className="grid grid-cols-12 gap-4  ml-64 p-3 border bottom-4">
@@ -35,7 +65,6 @@ const Navbar = () => {
                 id="default-search"
                 className="block p-4 ps-10 text-sm text-gray-900 rounded-lg w-full bg-gray-100"
                 placeholder="Search Mockups, Logos..."
-                required=""
               />
               <button
                 type="submit"
@@ -46,11 +75,41 @@ const Navbar = () => {
             </div>
           </form>
         </div>
-        <div className="cursor-pointer p-2 col-span-1 m-auto">
-              <img src="/assets/png/user.png" className="w-12" alt="User Profile" />
-        </div>
-        <div className="cursor-pointer p-2rounded-xl col-span-1 m-auto">
-              <img src="/assets/png/bell.png" className="w-8" alt="Notifications" />
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <div className="cursor-pointer p-2" onClick={toggleDropdown}>
+              <img
+                src="/assets/png/user.png"
+                className="w-12"
+                alt="User Profile"
+              />
+            </div>
+            {isOpen && (
+              <div className="absolute top-0 right-0 mt-10 w-40 bg-white border border-gray-200 rounded-lg shadow p-2">
+                <ul>
+                  <li
+                    className="cursor-pointer p-2 bg-pure-white text-black  hover:bg-medium-rose hover:rounded-md hover:text-white"
+                    onClick={handleProfile}
+                  >
+                    Profile
+                  </li>
+                  <li
+                    className="cursor-pointer p-2  bg-pure-white text-black hover:bg-medium-rose hover:rounded-md hover:text-white"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+          <div className="cursor-pointer p-2 bg-purple-500 rounded-xl">
+            <img
+              src="/assets/png/bell.png"
+              className="w-8"
+              alt="Notifications"
+            />
+          </div>
         </div>
       </div>
     </>

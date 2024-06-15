@@ -7,9 +7,10 @@ import { signupUser } from "../../components/redux/slices/authSlice";
 import { RootState } from "../../components/redux/store/store";
 import { BeatLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
-import { getSignupValidationSchema } from "../../utils/validation";
+import { getSignupValidationSchema } from "../../utils/Authvalidation";
 import { ErrorMessage, Field, Formik, Form } from "formik";
 import GoogleSignInButton from "../../components/authentication/GoogleSigninButton";
+import { toast } from "react-toastify";
 
 const SignupPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -38,23 +39,25 @@ const SignupPage: React.FC = () => {
       const response: any = await (dispatch as AppDispatch)(
         signupUser({ username, email, password })
       );
+      console.log("response in frontend", response);
 
       if (response.error) {
-        throw new Error(response.error.message);
+        throw new Error(response.payload.error);
       }
 
       navigate("/verify-otp");
-    } catch (error) {
+    } catch (error: any) {
+      const errorMessage = error?.message || "Signup failed. Please try again.";
+      toast.error(errorMessage);
       console.error("Signup failed:", error);
     } finally {
       setSubmitting(false);
     }
   };
 
-  
   return (
     <>
-      <Navbar />
+      <Navbar isAuthenticated={false} />
       <div className="flex justify-around">
         <div className="container mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-4 justify-center items-center w-[90%] mt-4">
@@ -68,7 +71,10 @@ const SignupPage: React.FC = () => {
                 {({ isSubmitting }) => (
                   <Form>
                     <div className="mt-4 mb-4">
-                      <label htmlFor="username" className="block w-full text-sm">
+                      <label
+                        htmlFor="username"
+                        className="block w-full text-sm"
+                      >
                         Username
                       </label>
                       <Field
@@ -100,7 +106,10 @@ const SignupPage: React.FC = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label htmlFor="password" className="block w-full text-sm">
+                      <label
+                        htmlFor="password"
+                        className="block w-full text-sm"
+                      >
                         Password
                       </label>
                       <Field
@@ -116,7 +125,10 @@ const SignupPage: React.FC = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label htmlFor="confirmPassword" className="block w-full text-sm">
+                      <label
+                        htmlFor="confirmPassword"
+                        className="block w-full text-sm"
+                      >
                         Confirm Password
                       </label>
                       <Field
@@ -136,7 +148,10 @@ const SignupPage: React.FC = () => {
                         type="submit"
                         className="bg-strong-rose w-full py-2 text-xl text-white rounded-md"
                       >
-                        <BeatLoader className="mr-4 text-center mx-auto" />
+                        <BeatLoader
+                          color="white"
+                          className="mr-4 text-center text-white mx-auto"
+                        />
                       </button>
                     ) : (
                       <button
@@ -145,14 +160,13 @@ const SignupPage: React.FC = () => {
                       >
                         Signup
                       </button>
-
                     )}
                   </Form>
                 )}
               </Formik>
               {/* <div id="g-signin2" className="g-signin2"></div> */}
               <div className="w-full mx-auto flex justify-center items-center mt-3 rounded-sm">
-              <GoogleSignInButton message='Signup'/>
+                <GoogleSignInButton message="Signup" />
               </div>
               <h5 className="text-center mt-3">
                 I have an account?{" "}
@@ -162,7 +176,10 @@ const SignupPage: React.FC = () => {
               </h5>
             </div>
             <div className="p-4">
-              <img src="/public/assets/images/signup.png" alt="Signup illustration" />
+              <img
+                src="/public/assets/images/signup.png"
+                alt="Signup illustration"
+              />
             </div>
           </div>
         </div>
