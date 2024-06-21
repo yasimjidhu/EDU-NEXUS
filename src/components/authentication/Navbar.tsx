@@ -14,6 +14,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
   const { user } = useSelector((state: RootState) => state.user);
+  console.log('user in navbar',user)
   const authData = useSelector((state: RootState) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
@@ -55,19 +56,19 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
         </div>
         <div className="w-2/5">
           <ul className="flex justify-around items-center space-x-4">
-            <li className="text-lg font-medium bg-purple-500 text-white p-2 rounded-xl">
+            <li className="text-lg font-medium inter bg-purple-500 text-white p-2 rounded-xl">
               Home
             </li>
-            <li className="text-lg font-medium bg-white p-2 rounded-xl">
+            <li className="text-lg font-medium inter bg-white p-2 rounded-xl">
               Courses
             </li>
-            <li className="text-lg font-medium bg-white p-2 rounded-xl">
+            <li className="text-lg font-medium inter bg-white p-2 rounded-xl">
               Teach
             </li>
-            <li className="text-lg font-medium bg-white p-2 rounded-xl">
+            <li className="text-lg font-medium inter bg-white p-2 rounded-xl">
               Contact Us
             </li>
-            <li className="text-lg font-medium bg-white p-2 rounded-xl">
+            <li className="text-lg font-medium inter bg-white p-2 rounded-xl">
               About Us
             </li>
           </ul>
@@ -117,7 +118,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <div
-                  className="cursor-pointer w-11 h-11 shadow-sm border-2 border-gray-500 rounded-full overflow-hidden"
+                  className="cursor-pointer w-11 h-11 shadow-sm border-2 border-gray-300 rounded-full overflow-hidden"
                   onClick={toggleDropdown}
                 >
                   {user ? (

@@ -1,90 +1,79 @@
-// import React, { useState } from "react";
-// import CategoryModal, { Category } from "../../components/Admin/CategoryModal";
+import React, { useEffect, useState } from "react";
+import CategoryModal, { Category } from "../../components/Admin/CategoryModal";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../components/redux/store/store";
+import { getAllCategories } from "../../components/redux/slices/adminSlice";
 
-// const Categories: React.FC = () => {
-//   const [isModalOpen, setIsModalOpen] = useState(false);
+const Categories: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-//   const handleAddCategory = (category: Category) => {};
+  const { categories } = useSelector((state: RootState) => state.category);
 
-//   const cloaseModal = () => {
-//     setIsModalOpen(false);
-//   };
+  const dispatch: AppDispatch = useDispatch();
 
-//   return (
-//     <>
-//       <div className=" w-full px-8 py-4 flex justify-end">
-//         <button
-//           className="bg-medium-rose py-2 px-1  rounded-md  text-white poppins-normal"
-//           onClick={() => setIsModalOpen(true)}
-//         >
-//           Create Category
-//         </button>
-//       </div>
-//       <CategoryModal
-//         isOpen={isModalOpen}
-//         onClose={cloaseModal}
-//         onAddCategory={handleAddCategory}
-//       />
-//       <div className=" grid grid-cols-2 gap-10 md:ml-64 px-8 py-2">
-//         <div className=" rounded-md flex justify-between p-4 shadow-xl">
-//           <div className="rounded-full bg-blue-500 w-28 h-28  m-auto object-cover">
-//             <img
-//               src="/assets/images/person1.png"
-//               alt="description"
-//               className="w-full h-full  rounded-full object-cover"
-//             />
-//           </div>
-//           <div className=" w-1/2 p-4 mx-auto">
-//             <p className="text-black text-sm poppins-normal">
-//               kfajifojfjfdkjijksdjksjdsdjskjlkllkljk
-//             </p>
-//             <button className="bg-white  border  border-medium-rose py-1 px-2 mt-4 rounded-md  text-medium-rose poppins-normal poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 mx-auto">
-//               Category Details
-//             </button>
-//           </div>
-//         </div>
-//         <div className=" rounded-md flex justify-between p-4 shadow-xl">
-//           <div className="rounded-full bg-blue-500 w-28 h-28  m-auto object-cover">
-//             fadf
-//           </div>
-//           <div className="bg-yellow-600 w-1/2 p-4 mx-auto">
-//             <p className="text-black text-sm poppins-normal text-center">
-//               kfajifojfjfdkjijksdjksjdsdjskjlkllkljk
-//             </p>
-//             <button className="bg-white  border  border-medium-rose py-1 px-2 mt-4 rounded-md  text-medium-rose poppins-normal poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 mx-auto">
-//               Category Details
-//             </button>
-//           </div>
-//         </div>
-//         <div className=" rounded-md flex justify-between p-4 shadow-xl">
-//           <div className="rounded-full bg-blue-500 w-28 h-28  m-auto object-cover">
-//             fadf
-//           </div>
-//           <div className="bg-yellow-600 w-1/2 p-4 mx-auto">
-//             <p className="text-black text-sm poppins-normal text-center">
-//               kfajifojfjfdkjijksdjksjdsdjskjlkllkljk
-//             </p>
-//             <button className="bg-white  border  border-medium-rose py-1 px-2 mt-4 rounded-md  text-medium-rose poppins-normal poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 mx-auto">
-//               Category Details
-//             </button>
-//           </div>
-//         </div>
-//         <div className=" rounded-md flex justify-between p-4 shadow-xl">
-//           <div className="rounded-full bg-blue-500 w-28 h-28  m-auto object-cover">
-//             fadf
-//           </div>
-//           <div className="bg-yellow-600 w-1/2 p-4 mx-auto">
-//             <p className="text-black text-sm poppins-normal text-center">
-//               kfajifojfjfdkjijksdjksjdsdjskjlkllkljk
-//             </p>
-//             <button className="bg-white  border  border-medium-rose py-1 px-2 mt-4 rounded-md  text-medium-rose poppins-normal poppins-normal hover:bg-medium-rose hover:text-white transition duration-300 mx-auto">
-//               Category Details
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// };
+  useEffect(() => {
+    dispatch(getAllCategories());
+  }, []);
 
-// export default Categories;
+  
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <>
+      <div className="w-full px-8  flex justify-end">
+        <button
+          className="bg-lite-black py-1 px-4 rounded-md text-white poppins-normal"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Create Category
+        </button>
+      </div>
+      <CategoryModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onAddCategory={(category: Category) => {
+        }}
+      />
+      {categories.length > 0 ? (
+        <div className="grid grid-cols-2 gap-8 md:ml-64 py-4 mt-4">
+          {categories.map((category) => (
+            <div
+              key={category.name}
+              className="rounded-md flex h-36 justify-around items-center p-4 shadow-xl bg-pure-white"
+            >
+              <div className="w-1/3">
+                <div className="rounded-full overflow-hidden w-24 h-24">
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              <div className="w-2/3 px-4">
+                <p className="text-black text-sm inter text-justify mb-4">
+                  {category.description}
+                </p>
+                <button className="bg-medium-rose border inter-sm border-medium-rose py-1 text-center px-2 rounded-md text-white hover:bg-strong-rose hover:text-white transition duration-300">
+                  Category Details
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex justify-center items-center mt-4">
+          <img
+            src="/assets/images/verify.png"
+            alt="No categories available"
+            className="w-1/3"
+          />
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Categories;

@@ -32,17 +32,20 @@ export interface InstructorState {
   loading: boolean;
   error: string | null;
   data: User | null;
+  allInstructors: User[] | null
 }
 
 const initialState: InstructorState = {
   loading: false,
   error: null,
   data: null,
+  allInstructors : null
 };
 
 export const fetchAllInstructors = createAsyncThunk(
-  "user/fetchAllInstructors",
+  "instructor/fetchAllInstructors",
   async (_, { rejectWithValue }) => {
+    console.log('fetch allcalled in slice')
     try {
       const response = await axiosInstance.get(`/user/user/getInstructors`);
       console.log("getInstructors  in userslice", response);
@@ -54,16 +57,27 @@ export const fetchAllInstructors = createAsyncThunk(
   }
 );
 
-
-
-
-
 export const ApproveInstructor = createAsyncThunk(
     'instructor/approve',
     async (email:string, { rejectWithValue }) => {
       try {
         console.log('request reached in register slice',email);
         const response = await axiosInstance.post('/user/user/approve',email);
+        console.log('response of approveduser',response)
+        return response.data;
+      } catch (error: any) {
+        return rejectWithValue(error.response.data);
+      }
+    }
+  );
+  
+  export const RejectInstructor = createAsyncThunk(
+    'instructor/reject',
+    async (email:string, { rejectWithValue }) => {
+      try {
+        console.log('request reached in rejection slice',email);
+        const response = await axiosInstance.post('/user/user/reject',email);
+        console.log('response of rejected user',response)
         return response.data;
       } catch (error: any) {
         return rejectWithValue(error.response.data);
@@ -81,6 +95,7 @@ const InstructorSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.data = null;
+      state.allInstructors = null
     },
   },
   extraReducers: (builder) => {
@@ -94,7 +109,7 @@ const InstructorSlice = createSlice({
         (state, action: PayloadAction<any>) => {
           state.loading = false;
           console.log("actionpaylod of fetchAllInstructors", action.payload);
-          state.data = action.payload;
+          state.allInstructors = action.payload;
           state.error = null;
         }
       )
@@ -104,7 +119,48 @@ const InstructorSlice = createSlice({
           state.loading = false;
           state.error = action.payload;
         }
-      );
+      )
+      .addCase(ApproveInstructor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        ApproveInstructor.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          console.log("actionpaylod of approved user", action.payload);
+          state.data = action.payload.user
+          state.error = null;
+        }
+      )
+      .addCase(
+        ApproveInstructor.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      )
+      .addCase(RejectInstructor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        RejectInstructor.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          console.log("actionpaylod of approved user", action.payload);
+          state.data = action.payload.user
+          state.error = null;
+        }
+      )
+      .addCase(
+        RejectInstructor.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      )
+
   },
 });
 

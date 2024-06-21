@@ -5,12 +5,15 @@ import authReducer, { AuthState } from "../slices/authSlice";
 import userReducer, { StudentState } from "../slices/studentSlice";
 import otpReducer, { otpState } from "../slices/otpSlice";
 import instructorReducer,{InstructorState} from '../slices/instructorSlice'
+import CategoryReducer,{CategoryState} from '../slices/adminSlice'
+
 
 export interface RootState {
   auth: AuthState;
   otp: otpState;
   user: StudentState;
   instructor:InstructorState;
+  category:CategoryState;
 }
 const persistConfig = {
   key: "root",
@@ -21,7 +24,8 @@ const rootReducer = combineReducers({
   auth: authReducer,
   otp: otpReducer,
   user: userReducer,
-  instructor:instructorReducer
+  instructor:instructorReducer,
+  category:CategoryReducer
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);
@@ -30,7 +34,7 @@ const store = configureStore({
   reducer: persistedReducer,
 });
 
-let persistor = persistStore(store);
+const persistor = persistStore(store);
 
 export type AppDispatch = typeof store.dispatch;
 

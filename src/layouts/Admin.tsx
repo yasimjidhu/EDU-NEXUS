@@ -5,21 +5,20 @@ import Navbar from '../components/Admin/Navbar'
 
 const Admin = () => {
   return (
-    <div>
-      <header>
-        <Sidebar isActive={true}/>
-      </header>
-      <nav>
-        <Navbar/>
-      </nav>
-      <main>
-        <Outlet/>
-      </main>
-      <footer>
-        <p>Admin Footer</p>
-      </footer>
+    <div className="flex h-screen">
+      <Sidebar isActive={true} />
+      <div className="flex flex-col flex-grow">
+        <Navbar />
+        <main className="flex-grow p-4 overflow-auto bg-gray-100">
+          <Outlet />
+        </main>
+        {/* <footer className="p-4 bg-white shadow-md">
+          <p className="text-center text-gray-600">Admin Footer</p>
+        </footer> */}
+      </div>
     </div>
-  )
-}
+  );
+};
+
 
 export default Admin

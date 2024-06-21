@@ -2,8 +2,16 @@ import React from "react";
 import Navbar from "../../components/authentication/Navbar";
 import "../../index.css";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../components/redux/store/store";
 
 const Home = () => {
+
+  const {user} = useSelector((state:RootState)=>state.user)
+  const {categories} = useSelector((state:RootState)=>state.category)
+  console.log(categories)
+  
+  
   return (
     <>
       <Navbar isAuthenticated={true} />
@@ -19,7 +27,7 @@ const Home = () => {
               a more interactive way
             </p>
             <div className="flex mt-6 justify-between items-center w-[55%]">
-              <div className="bg-purple-500">
+             <div className="bg-purple-500">
                 <Link to='/enrollment'><button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
                   Join Now
                 </button></Link>
@@ -79,60 +87,33 @@ const Home = () => {
           <p>Courses by our best mentors</p>
         </div>
       </div>
-      <div className="">
-        <button className="float-end mr-10 mt-5 rounded-3xl font-sans bg-lite-rose px-3 py-2 text-sm font-medium">
+      <div className="container mx-auto p-3">
+        <button className="float-end mr-10 mt-5 rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">
           All Categories
         </button>
       </div>
       <div className="container mx-auto p-5">
         <h2 className="text-lg font-semibold mb-5">Top Categories</h2>
+        <div>
+      {categories && categories.length > 0 && (
         <div className="grid grid-cols-4 gap-8">
-          <div className="border border-gray-300 shadow-xl rounded-md text-center p-6">
-            <div
-              className="bg-lite-rose p-5 rounded-full mx-auto"
-              style={{ width: "80px", height: "80px" }}
-            >
-              <img src="/assets/png/physics.png" alt="" />
+          {categories.map((category, index) => (
+            <div key={index} className="border border-gray-300 shadow-xl rounded-md text-center p-6">
+              <div className="rounded-full mx-auto w-24 h-24 shadow-sm border-2 border-gray-100 overflow-hidden" >
+                <img src={`${category.image}`} alt={category.name}
+                className="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <h1 className="mt-3 text-md inter ">{category.name}</h1>
+              <p className="text-sm inter-sm">11 Courses</p>
             </div>
-            <h1 className="mt-3 text-xl font-semibold font-sans">Physics</h1>
-            <p>11 Courses</p>
-          </div>
-          <div className="border  border-gray-300 shadow-xl rounded-md text-center p-6">
-            <div
-              className="bg-lite-rose p-5 rounded-full mx-auto"
-              style={{ width: "80px", height: "80px" }}
-            >
-              <img src="/assets/png/dev.png" alt="" />
-            </div>
-            <h1 className="mt-3 text-xl font-semibold font-sans">
-              Development
-            </h1>
-            <p>11 Courses</p>
-          </div>
-          <div className="border  border-gray-300 shadow-xl rounded-md text-center p-6">
-            <div
-              className="bg-lite-rose p-5 rounded-full mx-auto"
-              style={{ width: "80px", height: "80px" }}
-            >
-              <img src="/assets/png/shop.png" alt="" />
-            </div>
-            <h1 className="mt-3 text-xl font-semibold font-sans">Biology</h1>
-            <p>11 Courses</p>
-          </div>
-          <div className="border  border-gray-300 shadow-xl rounded-md text-center p-6">
-            <div
-              className="bg-lite-rose p-5 rounded-full mx-auto"
-              style={{ width: "80px", height: "80px" }}
-            >
-              <img src="/assets/png/Icon.png" alt="" />
-            </div>
-            <h1 className="mt-3 text-xl font-semibold font-sans">Chemistry</h1>
-            <p>11 Courses</p>
-          </div>
+          ))}
         </div>
+      )}
+    </div>
         <div className="mt-12 flex justify-between p-4">
           <h1 className="text-xl font-semibold">New Courses</h1>
-          <button className="p-2 bg-gray-400 rounded-md">AllCourses</button>
+          <button className=" rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">AllCourses</button>
         </div>
         <div className="grid grid-cols-4 gap-4 mt-5">
           <div className="bg-pure-white text-start rounded-sm p-4">

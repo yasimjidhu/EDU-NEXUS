@@ -229,7 +229,8 @@ const authSlice = createSlice({
             })
             .addCase(verifyOTP.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false
-                state.user = action.payload
+                console.log('payload in verifyotp fulfil',action.payload)
+                state.user = action.payload.user
             })
             .addCase(verifyOTP.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
                 state.loading = false;

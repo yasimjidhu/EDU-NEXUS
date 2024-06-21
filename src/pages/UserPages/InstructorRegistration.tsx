@@ -35,7 +35,6 @@ const InstructorRegistration: React.FC = () => {
     setFieldValue: (field: string, value: any) => void,
     field: string
   ) => {
-    console.log("file change called");
     if (e.target.files && e.target.files[0]) {
       setFieldValue(field, e.target.files[0]);
     }
@@ -46,7 +45,6 @@ const InstructorRegistration: React.FC = () => {
   };
 
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
-    console.log("submit function called", values);
     setSubmitting(true);
 
     const uploadPresetProfile = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
@@ -96,10 +94,9 @@ const InstructorRegistration: React.FC = () => {
       };
 
       const response = await dispatch(Register({ formData: payload })).unwrap();
-      console.log("response of instructor registration", response);
       if (response) {
         toast.success("User Registered Successfully");
-        navigate("/home");
+        navigate("/notVerified");
       } else {
         toast.error("Registration failed");
       }
