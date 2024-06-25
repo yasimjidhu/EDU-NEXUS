@@ -6,12 +6,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../components/redux/store/store";
 
 const Home = () => {
+  const { user } = useSelector((state: RootState) => state.user);
+  const { categories } = useSelector((state: RootState) => state.category);
+  const { allCourses } = useSelector((state: RootState) => state.course);
 
-  const {user} = useSelector((state:RootState)=>state.user)
-  const {categories} = useSelector((state:RootState)=>state.category)
-  console.log(categories)
-  
-  
   return (
     <>
       <Navbar isAuthenticated={true} />
@@ -27,10 +25,12 @@ const Home = () => {
               a more interactive way
             </p>
             <div className="flex mt-6 justify-between items-center w-[55%]">
-             <div className="bg-purple-500">
-                <Link to='/enrollment'><button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
-                  Join Now
-                </button></Link>
+              <div className="bg-purple-500">
+                <Link to="/enrollment">
+                  <button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
+                    Join Now
+                  </button>
+                </Link>
               </div>
               <div>
                 <button className="p-4 bg-lite-rose rounded-3xl font-semibold text-black">
@@ -95,200 +95,86 @@ const Home = () => {
       <div className="container mx-auto p-5">
         <h2 className="text-lg font-semibold mb-5">Top Categories</h2>
         <div>
-      {categories && categories.length > 0 && (
-        <div className="grid grid-cols-4 gap-8">
-          {categories.map((category, index) => (
-            <div key={index} className="border border-gray-300 shadow-xl rounded-md text-center p-6">
-              <div className="rounded-full mx-auto w-24 h-24 shadow-sm border-2 border-gray-100 overflow-hidden" >
-                <img src={`${category.image}`} alt={category.name}
-                className="w-full h-full object-cover rounded-full"
+          {categories && categories.length > 0 && (
+            <div className="grid grid-cols-4 gap-8">
+              {categories.map((category, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-300 shadow-xl rounded-md text-center p-6"
+                >
+                  <div className="rounded-full mx-auto w-24 h-24 shadow-sm border-2 border-gray-100 overflow-hidden">
+                    <img
+                      src={`${category.image}`}
+                      alt={category.name}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  </div>
+                  <h1 className="mt-3 text-md inter ">{category.name}</h1>
+                  <p className="text-sm inter-sm">11 Courses</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="mt-12 flex justify-between p-4">
+          <h1 className="text-xl font-semibold">New Courses</h1>
+          <button className=" rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">
+            AllCourses
+          </button>
+        </div>
+        <div className="grid grid-cols-4 gap-4 mt-5">
+          {allCourses.slice(0, 4).map((course) => (
+            <div
+              key={course._id}
+              className="bg-pure-white text-start rounded-lg p-2 hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="w-full h-44 overflow-hidden rounded-md p-1">
+                <img
+                  src={course.thumbnail}
+                  alt={course.title}
+                  className="w-full h-full object-cover object-center transform hover:scale-110 transition-transform duration-300 cursor-pointer"
                 />
               </div>
-              <h1 className="mt-3 text-md inter ">{category.name}</h1>
-              <p className="text-sm inter-sm">11 Courses</p>
+              <h1 className="font-semibold text-md mt-3 truncate">
+                {course.title}
+              </h1>
+              <div className="flex justify-between mt-3">
+                <div className="flex items-center">
+                  <img
+                    src="/assets/png/lesson.png"
+                    width=""
+                    className="w-3 h-3 mr-1"
+                    alt=""
+                  />
+                  <p className="text-sm">Lesson : {course.lessons.length}</p>
+                </div>
+                <div className="flex items-center">
+                  <img
+                    src="/assets/png/student.png"
+                    alt=""
+                    className="w-3 h-3 mr-1"
+                  />
+                  <p className="text-sm">student : 17</p>
+                </div>
+                <div className="flex items-center">
+                  <img
+                    src="/assets/png/level.png"
+                    alt=""
+                    className="w-3 h-3 mr-1"
+                  />
+                  <p className="text-sm">{course.level}</p>
+                </div>
+              </div>
+              <button className="bg-black py-1 px-3 text-white rounded-xl mt-5 flex items-center hover:bg-gray-800 transition-colors duration-300">
+                Start Course
+                <span>
+                  <img src="/assets/png/next.png" alt="" className="w-4 ml-2" />
+                </span>
+              </button>
             </div>
           ))}
         </div>
-      )}
-    </div>
-        <div className="mt-12 flex justify-between p-4">
-          <h1 className="text-xl font-semibold">New Courses</h1>
-          <button className=" rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">AllCourses</button>
-        </div>
-        <div className="grid grid-cols-4 gap-4 mt-5">
-          <div className="bg-pure-white text-start rounded-sm p-4">
-            <img
-              src="/assets/images/signup.png"
-              width="70%"
-              height="30%"
-              className="mx-auto"
-              alt=""
-            />
-            <h1 className="font-semibold text-md mt-3">Title</h1>
-            <div className="flex justify-between mt-3">
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/lesson.png"
-                  width=""
-                  className="w-3 h-3 mr-1"
-                  alt=""
-                />
-                <p className="text-sm">Lesson : 17</p>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/student.png"
-                  alt=""
-                  className="w-3 h-3 mr-1"
-                />
-                <p className="text-sm">student : 17</p>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/level.png"
-                  alt=""
-                  className="w-3 h-3 mr-1"
-                />
-                <p className="text-sm">Advanced</p>
-              </div>
-            </div>
-            <button className="bg-black py-1 px-3 text-white rounded-xl mt-5 flex items-center">
-              Start Course
-              <span>
-                <img src="/assets/png/next.png" alt="" className="w-4 ml-2" />
-              </span>
-            </button>
-          </div>
-          <div className="bg-pure-white text-start rounded-sm p-4">
-            <img
-              src="/assets/images/signup.png"
-              width="70%"
-              height="30%"
-              className="mx-auto"
-              alt=""
-            />
-            <h1 className="font-semibold text-md mt-3">Title</h1>
-            <div className="flex justify-between mt-3">
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/lesson.png"
-                  width=""
-                  className="w-3 h-3 mr-1"
-                  alt=""
-                />
-                <p className="text-sm">Lesson : 17</p>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/student.png"
-                  alt=""
-                  className="w-3 h-3 mr-1"
-                />
-                <p className="text-sm">student : 17</p>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/level.png"
-                  alt=""
-                  className="w-3 h-3 mr-1"
-                />
-                <p className="text-sm">Advanced</p>
-              </div>
-            </div>
-            <button className="bg-black py-1 px-3 text-white rounded-xl mt-5 flex items-center">
-              Start Course
-              <span>
-                <img src="/assets/png/next.png" alt="" className="w-4 ml-2" />
-              </span>
-            </button>
-          </div>
-          <div className="bg-pure-white text-start rounded-sm p-4">
-            <img
-              src="/assets/images/signup.png"
-              width="70%"
-              height="30%"
-              className="mx-auto"
-              alt=""
-            />
-            <h1 className="font-semibold text-md mt-3">Title</h1>
-            <div className="flex justify-between mt-3">
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/lesson.png"
-                  width=""
-                  className="w-3 h-3 mr-1"
-                  alt=""
-                />
-                <p className="text-sm">Lesson : 17</p>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/student.png"
-                  alt=""
-                  className="w-3 h-3 mr-1"
-                />
-                <p className="text-sm">student : 17</p>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/level.png"
-                  alt=""
-                  className="w-3 h-3 mr-1"
-                />
-                <p className="text-sm">Advanced</p>
-              </div>
-            </div>
-            <button className="bg-black  py-1 px-3 text-white rounded-xl mt-5 flex items-center">
-              Start Course
-              <span>
-                <img src="/assets/png/next.png" alt="" className="w-4 ml-2" />
-              </span>
-            </button>
-          </div>
-          <div className="bg-pure-white text-start rounded-sm p-4">
-            <img
-              src="/assets/images/signup.png"
-              width="70%"
-              height="30%"
-              className="mx-auto"
-              alt=""
-            />
-            <h1 className="font-semibold text-md">Title</h1>
-            <div className="flex justify-between mt-3">
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/lesson.png"
-                  width=""
-                  className="w-3 h-3 mr-1"
-                  alt=""
-                />
-                <p className="text-sm">Lesson : 17</p>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/student.png"
-                  alt=""
-                  className="w-3 h-3 mr-1"
-                />
-                <p className="text-sm">student : 17</p>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/assets/png/level.png"
-                  alt=""
-                  className="w-3 h-3 mr-1"
-                />
-                <p className="text-sm">Advanced</p>
-              </div>
-            </div>
-            <button className="bg-black py-1 px-3 text-white rounded-xl mt-5 flex items-center">
-              Start Course
-              <span>
-                <img src="/assets/png/next.png" alt="" className="w-4 ml-2" />
-              </span>
-            </button>
-          </div>
-        </div>
+
         <section className="relative">
           <div className="grid grid-cols-6 gap-4 mt-12">
             <div className="col-span-2 py-20">
@@ -392,64 +278,96 @@ const Home = () => {
             </h6>
           </div>
           <div className="grid grid-cols-2 mt-10 gap-8">
-    <div>
-        <img src="/assets/images/feature.png" alt="" />
-    </div>
-    <div className=" p-4">
-        <h1 className="poppins-semibold font-bold mb-6">
-            A <span className="text-medium-rose">user interface</span> designed <br /> for the classroom
-        </h1>
-        <div className="flex justify-start items-center mb-4 p-3 rounded-lg">
-            <div className="bg-rose-50 rounded-full shadow-2xl p-3 mr-4">
-                <img src="/assets/images/point2.png" className="mx-auto" alt="" />
+            <div>
+              <img src="/assets/images/feature.png" alt="" />
             </div>
-            <h5 className="text-black text-xl">
-            Teachers don’t get lost in the grid view and have a dedicated Podium space.
-            </h5>
-        </div>
-        <div className="flex justify-start items-center mb-4 p-3 rounded-lg">
-            <div className="bg-rose-50 rounded-full shadow-2xl p-3 mr-4">
-                <img src="/assets/images/point3.png" className="mx-auto" alt="" />
+            <div className=" p-4">
+              <h1 className="poppins-semibold font-bold mb-6">
+                A <span className="text-medium-rose">user interface</span>{" "}
+                designed <br /> for the classroom
+              </h1>
+              <div className="flex justify-start items-center mb-4 p-3 rounded-lg">
+                <div className="bg-rose-50 rounded-full shadow-2xl p-3 mr-4">
+                  <img
+                    src="/assets/images/point2.png"
+                    className="mx-auto"
+                    alt=""
+                  />
+                </div>
+                <h5 className="text-black text-xl">
+                  Teachers don’t get lost in the grid view and have a dedicated
+                  Podium space.
+                </h5>
+              </div>
+              <div className="flex justify-start items-center mb-4 p-3 rounded-lg">
+                <div className="bg-rose-50 rounded-full shadow-2xl p-3 mr-4">
+                  <img
+                    src="/assets/images/point3.png"
+                    className="mx-auto"
+                    alt=""
+                  />
+                </div>
+                <h5 className="text-black text-xl">
+                  Teacher’s and presenters can be moved to the front of the
+                  class.
+                </h5>
+              </div>
+              <div className="flex justify-start items-center p-3 rounded-lg">
+                <div className="bg-rose-50 rounded-full shadow-2xl p-3 mr-4">
+                  <img
+                    src="/assets/images/point1.png"
+                    className="mx-auto"
+                    alt=""
+                  />
+                </div>
+                <h5 className="text-black text-xl">
+                  Teachers can easily see all students and class data at one
+                  time.
+                </h5>
+              </div>
             </div>
-            <h5 className="text-black text-xl">
-                Teacher’s and presenters can be moved to the front of the class.
-            </h5>
-        </div>
-        <div className="flex justify-start items-center p-3 rounded-lg">
-            <div className="bg-rose-50 rounded-full shadow-2xl p-3 mr-4">
-                <img src="/assets/images/point1.png" className="mx-auto" alt="" />
-            </div>
-            <h5 className="text-black text-xl">
-                Teachers can easily see all students and class data at one time.
-            </h5>
-        </div>
-    </div>
-</div>
-
+          </div>
         </section>
         <section>
-            <div className="grid grid-cols-2 gap-4 mt-12">
-                <div className="py-20">
-                    <h1 className="text-2xl"> <span className="text-medium-rose poppins-normal font-bold">Tools</span> for Teachers <br /> And Learners</h1>
-                    <h4 className="text-2xl mt-5 ">Class has a dynamic set of teaching tools built to <br />be deployed and used during class.
-                    Teachers can <br />handout assignments in real-time for students to <br /> complete and submit.</h4>
-                </div>
-                <div className="poppins-normal">
-                    <img src="/assets/images/feature2.png" width='80%' alt="" />
-                </div>
+          <div className="grid grid-cols-2 gap-4 mt-12">
+            <div className="py-20">
+              <h1 className="text-2xl">
+                {" "}
+                <span className="text-medium-rose poppins-normal font-bold">
+                  Tools
+                </span>{" "}
+                for Teachers <br /> And Learners
+              </h1>
+              <h4 className="text-2xl mt-5 ">
+                Class has a dynamic set of teaching tools built to <br />
+                be deployed and used during class. Teachers can <br />
+                handout assignments in real-time for students to <br /> complete
+                and submit.
+              </h4>
             </div>
+            <div className="poppins-normal">
+              <img src="/assets/images/feature2.png" width="80%" alt="" />
+            </div>
+          </div>
         </section>
         <section>
-            <div className="grid grid-cols-2 gap-4">
-                <div className="">
-                    <img src="/assets/images/feature3.png" alt="" />
-                </div>
-                <div className="">
-                    <h1 className="poppins-semibold"><span className="text-medium-rose">Assessments</span>, <br /><span className="text-black">Quizzes</span>,<span className="text-medium-rose">Tests</span></h1>
-                    <h4 className="text-2xl  mt-8">Easily launch live assignments, quizzes, and tests. <br />
-                    Student results are automatically entered in the <br />online gradebook.</h4>
-                </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="">
+              <img src="/assets/images/feature3.png" alt="" />
             </div>
+            <div className="">
+              <h1 className="poppins-semibold">
+                <span className="text-medium-rose">Assessments</span>, <br />
+                <span className="text-black">Quizzes</span>,
+                <span className="text-medium-rose">Tests</span>
+              </h1>
+              <h4 className="text-2xl  mt-8">
+                Easily launch live assignments, quizzes, and tests. <br />
+                Student results are automatically entered in the <br />
+                online gradebook.
+              </h4>
+            </div>
+          </div>
         </section>
       </div>
     </>

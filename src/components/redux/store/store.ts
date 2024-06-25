@@ -3,6 +3,7 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authReducer, { AuthState } from "../slices/authSlice";
 import userReducer, { StudentState } from "../slices/studentSlice";
+import courseReducer,{CourseState} from '../slices/courseSlice'
 import otpReducer, { otpState } from "../slices/otpSlice";
 import instructorReducer,{InstructorState} from '../slices/instructorSlice'
 import CategoryReducer,{CategoryState} from '../slices/adminSlice'
@@ -14,6 +15,7 @@ export interface RootState {
   user: StudentState;
   instructor:InstructorState;
   category:CategoryState;
+  course:CourseState;
 }
 const persistConfig = {
   key: "root",
@@ -25,7 +27,8 @@ const rootReducer = combineReducers({
   otp: otpReducer,
   user: userReducer,
   instructor:instructorReducer,
-  category:CategoryReducer
+  category:CategoryReducer,
+  course:courseReducer
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

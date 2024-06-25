@@ -19,8 +19,13 @@ import InstructorRegistration from "./pages/UserPages/InstructorRegistration";
 import Requests from "./pages/Admin/Requests";
 import Categories from "./pages/Admin/Categories";
 import NotVerified from "./pages/UserPages/NotVerified";
-import DetailedInstructor from "./pages/Admin/DetailedInstructor";
+// import DetailedInstructor from "./pages/Admin/DetailedInstructor";
 import Users from "./pages/Admin/Users";
+import Instructor from "./layouts/Instructor";
+import AddCourse from "./pages/Instructor/AddCourse";
+import MyCourses from "./pages/Instructor/MyCourses";
+import AddLesson from "./pages/Instructor/AddLesson";
+import CourseDetails from "./pages/Instructor/CourseDetails";
 
 function App() {
   return (
@@ -33,37 +38,41 @@ function App() {
           <Route path="/verify-otp" element={<OtpVerify />} />
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/forgot-pass-verify-otp" element={<OtpVerifyForResetPass />}/>
+          <Route
+            path="/forgot-pass-verify-otp"
+            element={<OtpVerifyForResetPass />}
+          />
 
-          
           <Route path="/reset-pass" element={<ResetPassword />} />
           <Route path="/enrollment" element={<Enrollment />} />
 
           <Route path="/register" element={<Registration />}>
             <Route path="student" element={<StudentRegistration />} />
-            <Route path="instructor" element={<InstructorRegistration/>} />
+            <Route path="instructor" element={<InstructorRegistration />} />
           </Route>
-          <Route path="/notVerified" element={<NotVerified/>}/>
+          <Route path="/notVerified" element={<NotVerified />} />
 
-            <Route path="/admin" element={<Admin />}>
-              <Route path="overview" element={<Overview />} />
-              <Route path="courses" element={<Courses />} />
-              <Route path="assessments" element={<Assessments />} />
-              <Route path="categories" element={<Categories />} />
-              <Route path="requests" element={<Requests/>}/>
-              <Route path="users" element={<Users/>}/>
-            </Route>
+          <Route path="/admin" element={<Admin />}>
+            <Route path="overview" element={<Overview />} />
+            <Route path="courses" element={<Courses />} />
+            <Route path="assessments" element={<Assessments />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="requests" element={<Requests />} />
+            <Route path="users" element={<Users />} />
+          </Route>
 
-            <Route path="/instructor" element={<Admin />}>
-              <Route path="overview" element={<Overview />} />
-              <Route path="courses" element={<Courses />} />
-              <Route path="assessments" element={<Assessments />} />
-              <Route path="analytics" element={<Categories />} />
-              <Route path="assessments" element={<Requests/>}/>
-              <Route path="messages" element={<Users/>}/>
-              <Route path="settings" element={<Users/>}/>
-            </Route>
-
+          <Route path="/instructor" element={<Instructor />}>
+            <Route path="overview" element={<Overview />} />
+            <Route path="courses" element={<MyCourses />}/>   
+            <Route path="add-course" element={<AddCourse />} />
+            <Route path="add-lesson" element={<AddLesson />} />
+            <Route path="assessments" element={<Assessments />} />
+            <Route path="analytics" element={<Categories />} />
+            <Route path="requests" element={<Requests />} />
+            <Route path="messages" element={<Users />} />
+            <Route path="settings" element={<Users />} />
+            <Route path="course-details/:id" element={<CourseDetails />} />
+          </Route>
         </Routes>
       </Router>
     </>
@@ -71,4 +80,3 @@ function App() {
 }
 
 export default App;
-  

@@ -14,8 +14,9 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
   const { user } = useSelector((state: RootState) => state.user);
-  console.log('user in navbar',user)
   const authData = useSelector((state: RootState) => state.auth);
+
+
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -45,7 +46,13 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
   };
 
   const handleProfile = () => {
-    console.log("viewing profile");
+    if(user?.role == 'student'){
+      navigate('/home')
+    }else if(user?.role == 'instructor'){
+      navigate('/instructor/overview')
+    }else{
+      navigate('/admin/overview')
+    }
   };
 
   return (
