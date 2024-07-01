@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
 import Navbar from "../../components/authentication/Navbar";
-import { BeatLoader } from "react-spinners";
 
 interface DetailsProps {
   hasAccess: boolean;
@@ -105,14 +104,15 @@ const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
   if (!courseData) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <BeatLoader/>
+        Loading...
       </div>
     );
   }
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ml-52">
+      <Navbar isAuthenticated={true} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-2/3">
             <div className="bg-white rounded-lg shadow-lg p-6 mb-8">

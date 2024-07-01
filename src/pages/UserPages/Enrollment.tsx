@@ -14,7 +14,7 @@ const Enrollment = () => {
       <div className=" grid grid-cols-2 gap-4 py-4 px-10 bg-pure-white">
         <div className=" text-center">
           <div className=" flex items-center justify-center">
-            <img src="/assets/svg/student.svg" width="50%" alt="" />
+            <img src="/assets/svg/student.svg" width="44%" alt="" />
           </div>
           <Link to='/register/student'><button className="bg-medium-rose py-2 px-3  rounded-full  text-white poppins-normal mt-2 border-2 border-medium-rose hover:bg-strong-rose hover:text-white" onClick={()=>setRole('student')}>
             Enroll as a Student
@@ -22,7 +22,7 @@ const Enrollment = () => {
         </div>
         <div className="text-center">
           <div className=" flex items-center justify-center">
-            <img src="/assets/svg/teacher.svg" width="50%" alt="" />
+            <img src="/assets/svg/teacher.svg" width="44%" alt="" />
           </div>
           <Link to='/register/instructor'><button className="bg-hash-black py-2 px-3  rounded-full  text-white poppins-normal text-md mt-2 border-2 border-medium-rose hover:bg-lite-black" onClick={()=>setRole('instructor')}>
             Enroll as a Teacher

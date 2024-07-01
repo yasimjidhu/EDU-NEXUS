@@ -26,6 +26,8 @@ import AddCourse from "./pages/Instructor/AddCourse";
 import MyCourses from "./pages/Instructor/MyCourses";
 import AddLesson from "./pages/Instructor/AddLesson";
 import CourseDetails from "./pages/Instructor/CourseDetails";
+import Student from "./layouts/Student";
+import CourseDetail from "./pages/UserPages/CourseDetail";
 
 function App() {
   return (
@@ -72,6 +74,10 @@ function App() {
             <Route path="messages" element={<Users />} />
             <Route path="settings" element={<Users />} />
             <Route path="course-details/:id" element={<CourseDetails />} />
+          </Route>
+
+          <Route path="/student/course-detail/:id" element={<CourseDetail />} />
+          <Route path="/student" element={<Student />}>
           </Route>
         </Routes>
       </Router>

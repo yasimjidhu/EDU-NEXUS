@@ -9,8 +9,17 @@ export interface Lesson {
   description: string;
   video: string;
   duration:string |undefined;
-  attachmentsTitle: string;
-  attachments: string[];
+  attachments: Attachments[];
+}
+
+interface Attachments {
+  title?: string;
+  url?: string;
+}
+
+export interface Pricing {
+  type:"free" | "paid"
+  amount:number
 }
 
 export interface CourseState {
@@ -22,7 +31,8 @@ export interface CourseState {
   categoryRef:string;
   instructorRef:string;
   certificationAvailable: boolean;
-  pricing: 'free' | 'paid';
+  pricing: Pricing
+  level:'beginner' | 'intermediate'|'expert';
   courseAmount:number|null;
   lessons: Lesson[];
   loading: boolean;
@@ -44,19 +54,40 @@ const initialState: CourseState = {
   categoryRef:'',
   instructorRef:'',
   certificationAvailable: false,
-  pricing: 'free',
+  pricing: {
+    type: "free",
+    amount: 0,
+  },
+  level:'beginner',
   courseAmount:null,
   lessons: [],
   loading: false,
   error: null,
 };
 
+
+interface UpdateData{
+  courseId?:string;
+  thumbnail: string | null;
+  trial: string | null;
+  title: string;
+  description: string;
+  category: string;
+  categoryRef:string;
+  instructorRef:string;
+  certificationAvailable: boolean;
+  pricing: Pricing
+  level:'beginner' | 'intermediate'|'expert';
+  courseAmount:number|null;
+  lessons: Lesson[];
+}
+
 export const submitCourse = createAsyncThunk(
   'course/submitCourse',
   async (courseData: CourseState, { rejectWithValue }) => {
     console.log('course data in slice',courseData)
     try {
-      const response = await axiosInstance.post('/course/course/add-course', courseData);
+      const response = await axiosInstance.post('/course/add-course', courseData);
       return response.data;
     } catch (error:any) {
       return rejectWithValue(error.response.data);
@@ -64,15 +95,12 @@ export const submitCourse = createAsyncThunk(
   }
 );
 
-export const getAllCourses = createAsyncThunk(
-  'course/getAllCourses',
+export const  getAllCoursesOfInstructor= createAsyncThunk(
+  'course/getAllCoursesOfInstructor',
   async (instructorId: string, { rejectWithValue }) => {
-    console.log('instructor data in slice', instructorId);
     try {
-      
-      const response = await axiosInstance.get(`/course/course/get-all-courses`, {
-        params: { instructorRef: instructorId },
-      });
+      console.log('get request reached of instructors mycourse',instructorId)
+      const response = await axiosInstance.get(`/course/get-courses/${instructorId}`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -83,12 +111,9 @@ export const getAllCourses = createAsyncThunk(
 export const getCourse= createAsyncThunk(
   'course/getCourse',
   async (courseId: string, { rejectWithValue }) => {
-    console.log('course  id in slice', courseId);
     try {
-      
-      const response = await axiosInstance.get(`/course/course/get-course`, {
-        params: { courseId: courseId},
-      });
+      console.log('course id for getcourse',courseId)
+      const response = await axiosInstance.get(`/course/get-course/${courseId}`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -96,11 +121,57 @@ export const getCourse= createAsyncThunk(
   }
 );
 
+export const getAllCourses= createAsyncThunk(
+  'course/getAllCourses',
+  async (_, { rejectWithValue }) => {
+    console.log('get request reached  in slice');
+    try {
+      const response = await axiosInstance.get(`/course/get-all-courses`);
+      console.log('response of allcourses',response.data)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const fetchCourseRequests= createAsyncThunk(
+  'course/fetchCourseRequests',
+  async (_, { rejectWithValue }) => {
+    console.log('fetchCourseRequests request reached  in slice');
+    try {
+      const response = await axiosInstance.get(`/course/courseRequsts`);
+      console.log('response of all unpublished courses',response.data)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
+export const updateCourse= createAsyncThunk(
+  'course/updateCourse',
+  async (data:UpdateData, { rejectWithValue }) => {
+    try {
+      console.log(' id for update course',data.courseId)
+      const response = await axiosInstance.put(`/course/update-course`,data);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
+
+
 const courseSlice = createSlice({
   name: 'course',
   initialState,
   reducers: {
     setCourseInfo(state, action: PayloadAction<Partial<CourseState>>) {
+      console.log('updated data',action.payload)  
       return { ...state, ...action.payload };
     },
     addLesson(state, action: PayloadAction<Lesson>) {

@@ -94,12 +94,14 @@ const OtpVerify: React.FC = () => {
       const response: any = await (dispatch as AppDispatch)(
         verifyOTP({ email: userEmail, otp: otpValue, token: token })
       );
+      console.log('this is the respones of verfifyotp dispatch',response)
       if (response.error) {
         throw new Error(response.payload.error);
       }
       localStorage.setItem('email',userEmail)
       navigate("/home");
     } catch (error: any) {
+      console.log('error inverifyotp fronteend',error)
       const errorMessage = error?.message || "otp verification failed";
       toast.error(errorMessage);
     }
@@ -144,7 +146,7 @@ const OtpVerify: React.FC = () => {
       <Navbar isAuthenticated={false} />
       <div className="container mx-auto p-10">
         <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="">
+          <div className="w-[80%]">
             <img src="/public/assets/images/verify.png" alt="" />
           </div>
           <div className="h-full flex flex-col justify-center p-6 ">
@@ -178,7 +180,7 @@ const OtpVerify: React.FC = () => {
                     type="submit"
                     className="bg-medium-rose px-8 py-3 hover:bg-strong-rose text-white mt-5 rounded-xl font-semibold secondary-font"
                   >
-                    Verify
+                    {loading ? <BeatLoader color="white" className="text-center" /> : 'Verify'}
                   </button>
                   <button
                     onClick={handleResendOtp}
@@ -186,7 +188,7 @@ const OtpVerify: React.FC = () => {
                     type="button"
                     className={`bg-lite-black px-8 py-3 hover:bg-hash-black border border-black text-white mt-5 rounded-xl font-semibold secondary-font ${otpExpired ? '' : 'opacity-50 cursor-not-allowed'}`}
                   >
-                    {loading ? <BeatLoader color="white" className="text-center" /> : 'Resend'}
+                    Resend
                   </button>
                 </div>
               </div>

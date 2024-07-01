@@ -1,9 +1,9 @@
 import { ThunkDispatch } from "@reduxjs/toolkit";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { logoutUser } from "../redux/slices/authSlice";
+import { logoutAdmin, logoutUser } from "../redux/slices/authSlice";
 import { RootState } from "../redux/store/store";
 
 const Navbar: React.FC = () => {
@@ -14,6 +14,7 @@ const Navbar: React.FC = () => {
   type AppDispatch = ThunkDispatch<any, any, any>;
 
   const {user} = useSelector((state:RootState)=>state.user)
+  console.log('user blocked',user)
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -29,6 +30,14 @@ const Navbar: React.FC = () => {
       console.error("Logout failed:", error);
     }
   };
+
+  // useEffect(()=>{
+  //   if(user?.isBlocked){
+  //     (dispatch as AppDispatch)(logoutAdmin());
+  //     navigate('/login')
+  //     toast.error('Access Denied')
+  //   }
+  // },[user])
 
   const handleProfile = () => {
     console.log("viewing profile");

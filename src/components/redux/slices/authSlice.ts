@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../../constants/axiosInstance";
+import axios from "axios";
 
 export interface AuthState {
     user: any;
@@ -45,8 +46,7 @@ export const signupUser = createAsyncThunk<
     'auth/signup',
     async (data: SignupData, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/auth/auth/signup', data);
-            console.log('response of signup',response)
+            const response = await axiosInstance.post('/auth/signup', data);
             const token:any = response.data.access_token
 
             localStorage.setItem('access_token',token)
@@ -68,8 +68,7 @@ OTPData,
     'auth/verifyotp',
     async (data: OTPData, { rejectWithValue }) => {
         try {
-            console.log('data in verifyotp slice',data)
-            const response = await axiosInstance.post('/auth/auth/verify-otp', data);
+            const response = await axiosInstance.post('/auth/verify-otp', data);
             console.log('response of verifyotp thunk',response)
             return response.data;
             
@@ -88,7 +87,7 @@ ForgotPasswordData,
     'auth/resendotp',
     async (data:ForgotPasswordData, { rejectWithValue }) => {
       try {
-        const response = await axiosInstance.post('/auth/auth/resendOtp',data);
+        const response = await axiosInstance.post('/auth/resendOtp',data);
         console.log('response in authslice of resend otp',response)
         return response.data;
       } catch (error) {
@@ -108,7 +107,8 @@ export const userLogin = createAsyncThunk<
   'auth/login',
   async (data: LoginData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/auth/auth/login', data,{
+        console.log('login request sent')
+      const response = await axiosInstance.post('/auth/login', data,{
         headers:{
             'Content-Type': 'application/json',
         }
@@ -136,7 +136,7 @@ ForgotPasswordData,
     async (data:ForgotPasswordData,{rejectWithValue})=>{
         try {
             
-            const response = await axiosInstance.post('/auth/auth/forgot-password',data)
+            const response = await axiosInstance.post('/auth/forgot-password',data)
             return response.data
         } catch (error) {
             console.log('error in slice bro',error)
@@ -153,7 +153,7 @@ ResetPassword,
     'auth/reset-password',
     async (data:ResetPassword,{rejectWithValue})=>{
         try {
-            const response = await axiosInstance.post('/auth/auth/reset-password',data)
+            const response = await axiosInstance.post('/auth/reset-password',data)
             return response.data
         } catch (error) {
             console.log(error)
@@ -166,7 +166,7 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
     'auth/logout-user',
     async (_, { rejectWithValue }) => {
       try {
-        const response = await axiosInstance.post('/auth/auth/logout');
+        const response = await axiosInstance.post('/auth/logout');
         return response.data;
       } catch (error) {
         console.log(error);
@@ -181,7 +181,7 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
     'auth/logout-admin',
     async (_, { rejectWithValue }) => {
       try {
-        const response = await axiosInstance.post('/auth/auth/logout');
+        const response = await axiosInstance.post('/auth/logout');
         return response.data;
       } catch (error) {
         console.log(error);
@@ -190,6 +190,7 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
     }
   );
 
+  
 
 
 const userDetails: AuthState = {

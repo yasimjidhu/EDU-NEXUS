@@ -47,7 +47,7 @@ export const fetchAllInstructors = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     console.log('fetch allcalled in slice')
     try {
-      const response = await axiosInstance.get(`/user/user/getInstructors`);
+      const response = await axiosInstance.get(`/user/getInstructors`);
       console.log("getInstructors  in userslice", response);
       return response.data;
     } catch (error: any) {
@@ -62,7 +62,7 @@ export const ApproveInstructor = createAsyncThunk(
     async (email:string, { rejectWithValue }) => {
       try {
         console.log('request reached in register slice',email);
-        const response = await axiosInstance.post('/user/user/approve',email);
+        const response = await axiosInstance.post('/user/approve',email);
         console.log('response of approveduser',response)
         return response.data;
       } catch (error: any) {
@@ -76,7 +76,7 @@ export const ApproveInstructor = createAsyncThunk(
     async (email:string, { rejectWithValue }) => {
       try {
         console.log('request reached in rejection slice',email);
-        const response = await axiosInstance.post('/user/user/reject',email);
+        const response = await axiosInstance.post('/user/reject',email);
         console.log('response of rejected user',response)
         return response.data;
       } catch (error: any) {
@@ -120,47 +120,6 @@ const InstructorSlice = createSlice({
           state.error = action.payload;
         }
       )
-      .addCase(ApproveInstructor.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(
-        ApproveInstructor.fulfilled,
-        (state, action: PayloadAction<any>) => {
-          state.loading = false;
-          console.log("actionpaylod of approved user", action.payload);
-          state.data = action.payload.user
-          state.error = null;
-        }
-      )
-      .addCase(
-        ApproveInstructor.rejected,
-        (state, action: PayloadAction<any>) => {
-          state.loading = false;
-          state.error = action.payload;
-        }
-      )
-      .addCase(RejectInstructor.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(
-        RejectInstructor.fulfilled,
-        (state, action: PayloadAction<any>) => {
-          state.loading = false;
-          console.log("actionpaylod of approved user", action.payload);
-          state.data = action.payload.user
-          state.error = null;
-        }
-      )
-      .addCase(
-        RejectInstructor.rejected,
-        (state, action: PayloadAction<any>) => {
-          state.loading = false;
-          state.error = action.payload;
-        }
-      )
-
   },
 });
 

@@ -5,11 +5,13 @@ import { RootState } from "../../components/redux/store/store";
 import { axiosInstance } from "../../constants/axiosInstance";
 import {
   addLesson,
+  getCourse,
   submitCourse,
 } from "../../components/redux/slices/courseSlice";
 import { BeatLoader } from "react-spinners";
 import axios from "axios";
 import { Image, Video } from "cloudinary-react";
+import { toast } from "react-toastify";
 
 const AddLesson: React.FC = () => {
 
@@ -28,12 +30,48 @@ const AddLesson: React.FC = () => {
   const [thumbnailLoading, setThumbnailLoading] = useState<boolean>(false);
   const [videoLoading, setVideoLoading] = useState<boolean>(false);
   const [attachmentLoading, setAttachmentLoading] = useState<boolean>(false);
+  const [mode,setMode]=useState<"add"|"edit">("add")
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const course = useSelector((state: RootState) => state.course);
   const {user} = useSelector((state:RootState)=>state.auth)
+
+  useEffect(()=>{
+    if(course.courseId){
+      setMode("edit")
+    }
+  },[])
+
+  useEffect(() => {
+    if (mode=="edit") {
+      dispatch(getCourse(course.courseId)).then((res) => {
+        const lesson = res.payload.course;
+        console.log('editmode',lesson)
+        // setThumbnail(course.thumbnail);
+        // setTrial(course.trial.video);
+        // setTitle(course.title);
+        // setDescription(course.description);
+        // setCategory(course.category);
+        // setCategoryRef(course.categoryRef);
+        // setLevel(course.level);
+        // setInstructorRef(course.instructorRef);
+        // setCertificationAvailable(course.certificationAvailable);
+        // setPricing(course.pricing);
+        // setCourseAmount(course?.pricing?.amount);
+      });
+    } else {
+
+      // setTitle("");
+      // setDescription("");
+      // setCategoryRef(categories.length > 0 ? categories[0].id : "");
+      // setLevel("beginner");
+      // setCertificationAvailable(false);
+      // setPricing({ type: "free", amount: 0 });
+      // setCourseAmount(null);
+    }
+  }, [dispatch, mode]);
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
@@ -119,12 +157,14 @@ const AddLesson: React.FC = () => {
       description,
       video: videoUrl,
       duration: duration?.toString(), 
-      attachmentsTitle,
-      attachments: attachmentUrl ? [attachmentUrl] : [],
+      attachments:{
+        title:attachmentsTitle,
+        url:attachmentUrl
+      }
     };
   
 
-
+    console.log('added lesson',lesson)
     await dispatch(addLesson(lesson));
 
     const updatedCourse = {
@@ -133,6 +173,7 @@ const AddLesson: React.FC = () => {
     };
 
     await dispatch(submitCourse(updatedCourse) as any);
+    toast.success('course added successfully')
     navigate("/home"); 
   };
 
@@ -281,9 +322,9 @@ const AddLesson: React.FC = () => {
                     src="/assets/icon/file.png"
                     className="w-10 h-10 object-contain"
                   />
-                  <p className="text-md text-gray-600 ml-2">
-                    Download Attachment
-                  </p>
+                  <button className="text-md py-1 px-3 rounded-full text-white bg-black ml-2">
+                    view Attachment
+                  </button>
                 </a>
               ) : (
                 <a

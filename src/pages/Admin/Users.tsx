@@ -15,13 +15,11 @@ const Users: React.FC = () => {
   const [currentRole, setCurrentRole] = useState<"student" | "instructor">(
     "student"
   );
-  const { allUsers = [] } = useSelector(
-    (state: RootState) => state.user
-  );
+  const [allUsers,setAllUsers] = useState([])
 
   useEffect(() => {
-    dispatch(getAllUsers());
-  }, [dispatch]);
+    dispatch(getAllUsers()).then((res)=>setAllUsers(res.payload))
+  }, []);
 
 
   const handleBlock = async (email: string, isBlocked: boolean) => {
@@ -71,7 +69,7 @@ const Users: React.FC = () => {
             }`}
             onClick={switchRole}
           >
-            {currentRole === "student" ? "Students" : "Instructors" }
+            {currentRole === "student" ? "Switch to Instructors" : "Switch to Students" }
           </button>
         </div>
 

@@ -1,7 +1,11 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setCourseInfo } from "../../components/redux/slices/courseSlice";
+import {
+  Pricing,
+  getCourse,
+  setCourseInfo,
+} from "../../components/redux/slices/courseSlice";
 import axios from "axios";
 import { Image, Video } from "cloudinary-react";
 import { RootState } from "../../components/redux/store/store";
@@ -9,7 +13,6 @@ import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 
 const AddCourse: React.FC = () => {
-  
   const { categories } = useSelector((state: RootState) => state.category);
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
@@ -17,100 +20,143 @@ const AddCourse: React.FC = () => {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("");
-  const [categoryRef, setCategoryRef] = useState<string>(categories.length > 0 ? categories[0].id : '');
+  const [categoryRef, setCategoryRef] = useState<string>(
+    categories.length > 0 ? categories[0].id : ""
+  );
+  const [level, setLevel] = useState<"beginner" | "intermediate" | "expert">(
+    "beginner"
+  );
   const [instructorRef, setInstructorRef] = useState<string>("");
   const [certificationAvailable, setCertificationAvailable] =
     useState<boolean>(false);
-  const [pricing, setPricing] = useState<"free" | "paid">("free");
+  const [pricing, setPricing] = useState<Pricing>({ type: "free", amount: 0 });
   const [courseAmount, setCourseAmount] = useState<number | null>(null);
-  const [imageLoading, setimageLoading] = useState<boolean>(false);
-  const [videoLoading, setvideoLoading] = useState<boolean>(false);
-
-  const { loading } = useSelector((state: RootState) => state.course);
-
-  const { user } = useSelector((state: RootState) => state.auth);
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
+  const [videoLoading, setVideoLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false); 
+  const [mode,setMode]=useState<"add"|"edit">("add")
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const thumbnailPreset = import.meta.env.VITE_CLOUDINARY_THUMBNAILS_PRESET;
-  const videosPreset = import.meta.env.VITE_CLOUDINARY_VIDEO_PRESET;
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  useEffect(()=>{
+    if(location.state){
+      setMode("edit")
+    }
+  },[])
+
+  useEffect(() => {
+    if (location.state ) {
+      dispatch(getCourse(location.state)).then((res) => {
+        const course = res.payload.course;
+        setThumbnail(course.thumbnail);
+        setTrial(course.trial.video);
+        setTitle(course.title);
+        setDescription(course.description);
+        setCategory(course.category);
+        setCategoryRef(course.categoryRef);
+        setLevel(course.level);
+        setInstructorRef(course.instructorRef);
+        setCertificationAvailable(course.certificationAvailable);
+        setPricing(course.pricing);
+        setCourseAmount(course?.pricing?.amount);
+      });
+    } else {
+
+      setTitle("");
+      setDescription("");
+      setCategoryRef(categories.length > 0 ? categories[0].id : "");
+      setLevel("beginner");
+      setCertificationAvailable(false);
+      setPricing({ type: "free", amount: 0 });
+      setCourseAmount(null);
+    }
+  }, [dispatch, location.state, categories]);
 
   const handleThumbnailChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    setimageLoading(true);
-    setInstructorRef(user._id);
+    setImageLoading(true);
     const file = e.target.files?.[0];
     if (!file) {
-      
-      setimageLoading(false);
+      setImageLoading(false);
       return;
     }
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", thumbnailPreset);
+    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_THUMBNAILS_PRESET);
 
     try {
       const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
         formData
       );
 
       setThumbnail(response.data.secure_url);
-    } catch (error:any) {
-      toast.error(error.response.data.error.message)
+    } catch (error: any) {
+      toast.error(error.response.data.error.message);
       console.error("Error uploading thumbnail:", error);
     } finally {
-      setimageLoading(false);
+      setImageLoading(false);
     }
   };
 
   const handleVideoChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    setvideoLoading(true);
+    setVideoLoading(true);
 
     const file = e.target.files?.[0];
     if (!file) {
-      setvideoLoading(false);
+      setVideoLoading(false);
       return;
     }
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", videosPreset);
+    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_VIDEO_PRESET);
 
     try {
       const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`,
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/video/upload`,
         formData
       );
-      console.log("response of video upload", response);
+
       setTrial(response.data.secure_url);
     } catch (error: any) {
       toast.error(error.message);
       console.error("Error uploading video:", error);
     } finally {
-      setvideoLoading(false);
+      setVideoLoading(false);
     }
   };
 
-  const handleNext = () => {
-    dispatch(
-      setCourseInfo({
-        thumbnail,
-        trial,
-        title,
-        description,
-        category,
-        categoryRef,
-        instructorRef,
-        certificationAvailable,
-        pricing,
-        courseAmount,
-      })
-    );
-    console.log("instructor ref", instructorRef);
-    navigate("/instructor/add-lesson");
+  const handleNext = async () => {
+    setLoading(true);
+
+    const courseInfo = {
+      courseId: location.state? location.state : null,
+      thumbnail,
+      trial,
+      title,
+      description,
+      category,
+      categoryRef,
+      instructorRef,
+      certificationAvailable,
+      pricing,
+      level,
+      courseAmount,
+    };
+
+    try {
+        // Editing existing course
+        await dispatch(setCourseInfo( courseInfo ));
+      navigate("/instructor/add-lesson");
+    } catch (error: any) {
+      toast.error(error.message);
+      console.error("Error saving course:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputClick = (id: string) => {
@@ -121,19 +167,28 @@ const AddCourse: React.FC = () => {
     const selectedCategoryId = e.target.value;
     const selectedCategory =
       categories.find((cat) => cat.id === selectedCategoryId)?.name || "";
-    console.log("selected category", selectedCategory);
-    console.log("selected categoryid", selectedCategoryId);
     setCategoryRef(selectedCategoryId);
     setCategory(selectedCategory);
+  };
+
+  const handleLevelChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedLevel = e.target.value;
+    setLevel(selectedLevel as "beginner" | "intermediate" | "expert");
   };
 
   const handleCertificationAvailableChange = () => {
     setCertificationAvailable(!certificationAvailable);
   };
 
-  const handlePricingChange = (price: "free" | "paid") => {
-    setPricing(price);
+  const handlePricingChange = (type: "free" | "paid") => {
+    setPricing({ type, amount: type === "free" ? 0 : courseAmount || 0 });
   };
+
+  useEffect(() => {
+    if (pricing.type === "paid" && courseAmount !== null) {
+      setPricing((prevPricing) => ({ ...prevPricing, amount: courseAmount }));
+    }
+  }, [courseAmount]);
 
   return (
     <div className="ml-52">
@@ -143,7 +198,7 @@ const AddCourse: React.FC = () => {
             <h6 className="inter-sm text-blue-700">Course Thumbnail</h6>
             <div
               className="cursor-pointer w-full max-w-md bg-pure-white border-2 border-dashed border-gray-400 h-64 text-center overflow-hidden mt-1 flex justify-center items-center"
-              onClick={() => handleInputClick("thubmnail-input")}
+              onClick={() => handleInputClick("thumbnail-input")}
             >
               {imageLoading ? (
                 <div className="w-full h-full flex justify-center items-center">
@@ -153,7 +208,7 @@ const AddCourse: React.FC = () => {
                 <>
                   {thumbnail ? (
                     <Image
-                      cloudName={cloudName}
+                      cloudName={import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}
                       publicId={thumbnail}
                       width="100%"
                       crop="scale"
@@ -170,10 +225,17 @@ const AddCourse: React.FC = () => {
               <input
                 type="file"
                 onChange={handleThumbnailChange}
-                className="hidden input-file "
-                id="thubmnail-input"
+                className="hidden input-file"
+                id="thumbnail-input"
               />
+          
             </div>
+            {mode == "edit" && (
+                <button className="w-full mt-4 sm:w-auto bg-black hover:bg-strong-rose text-white font-bold py-1 px-4 rounded-full" onClick={()=>handleInputClick('thumbnail-input')} type="button">
+                Change Thumbnail
+              </button>
+            )}
+          
           </section>
           <section>
             <h6 className="inter-sm text-blue-700">Course Trial</h6>
@@ -189,7 +251,7 @@ const AddCourse: React.FC = () => {
                 <>
                   {trial ? (
                     <Video
-                      cloudName={cloudName}
+                      cloudName={import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}
                       publicId={trial}
                       controls
                       width="100%"
@@ -210,6 +272,11 @@ const AddCourse: React.FC = () => {
                 id="video-input"
               />
             </div>
+            {mode == "edit" && (
+                <button className="w-full mt-4 sm:w-auto bg-black hover:bg-strong-rose text-white font-bold py-1 px-4 rounded-full" onClick={()=>handleInputClick('video-input')} type="button">
+                Change Trial
+              </button>
+            )}
           </section>
         </div>
         <div className="col-span-5 p-4">
@@ -222,7 +289,7 @@ const AddCourse: React.FC = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="mt-2 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
-              placeholder="Data structured and algorithms"
+              placeholder="Data structures and algorithms"
             />
           </div>
           <div>
@@ -251,6 +318,16 @@ const AddCourse: React.FC = () => {
                 </option>
               ))}
             </select>
+            <select
+              id="course-level"
+              className="mt-4 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
+              value={level}
+              onChange={handleLevelChange}
+            >
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="expert">Expert</option>
+            </select>
           </div>
           <div className="flex justify-start items-center space-x-4 mt-10">
             <input
@@ -267,8 +344,8 @@ const AddCourse: React.FC = () => {
               <div className="mt-1 w-1/2">
                 <button
                   className={`py-1 w-full px-10 border-gray-300 border-2 rounded-md inter-sm ${
-                    pricing === "free"
-                      ? "bg-blue-500 text-white"
+                    pricing?.type === "free"
+                      ? "bg-black text-white"
                       : "bg-pure-white"
                   }`}
                   onClick={() => handlePricingChange("free")}
@@ -279,7 +356,7 @@ const AddCourse: React.FC = () => {
               <div className="mt-1 w-1/2">
                 <button
                   className={`py-1 w-full px-10 border-gray-300 border-2 rounded-md inter-sm ${
-                    pricing === "paid"
+                    pricing?.type === "paid"
                       ? "bg-blue-500 text-white"
                       : "bg-pure-white"
                   }`}
@@ -289,7 +366,7 @@ const AddCourse: React.FC = () => {
                 </button>
               </div>
             </div>
-            {pricing == "paid" && (
+            {pricing.type === "paid" && (
               <div className="w-full mt-4">
                 <label htmlFor="amount" className="text-sm">
                   Amount

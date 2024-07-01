@@ -18,10 +18,10 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
 
 
   const [isOpen, setIsOpen] = useState(false);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   type AppDispatch = ThunkDispatch<any, any, any>;
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -33,10 +33,18 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
     setIsOpen(!isOpen);
   };
 
+  // useEffect(()=>{
+  //   if(user?.isBlocked){
+  //     (dispatch as AppDispatch)(logoutAdmin());
+  //     navigate('/login')
+  //     toast.error('Access Denied')
+  //   }
+  // },[user])
+
   const handleLogout = async () => {
     try {
       await (dispatch as AppDispatch)(logoutAdmin());
-      dispatch(clearUserState()); // Clear user state on logout
+      dispatch(clearUserState()); 
       navigate("/login");
       toast.success("Logout Successful");
     } catch (error: any) {
@@ -46,11 +54,13 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
   };
 
   const handleProfile = () => {
+    console.log('user in profile',user)
     if(user?.role == 'student'){
       navigate('/home')
     }else if(user?.role == 'instructor'){
       navigate('/instructor/overview')
-    }else{
+    }
+    else{
       navigate('/admin/overview')
     }
   };
@@ -63,19 +73,19 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
         </div>
         <div className="w-2/5">
           <ul className="flex justify-around items-center space-x-4">
-            <li className="text-lg font-medium inter bg-purple-500 text-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-purple-500 text-white p-2 rounded-xl">
               Home
             </li>
-            <li className="text-lg font-medium inter bg-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-white p-2 rounded-xl">
               Courses
             </li>
-            <li className="text-lg font-medium inter bg-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-white p-2 rounded-xl">
               Teach
             </li>
-            <li className="text-lg font-medium inter bg-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-white p-2 rounded-xl">
               Contact Us
             </li>
-            <li className="text-lg font-medium inter bg-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-white p-2 rounded-xl">
               About Us
             </li>
           </ul>
@@ -164,7 +174,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
               <div className="cursor-pointer p-2 bg-purple-500 rounded-xl">
                 <img
                   src="/assets/png/bell.png"
-                  className="w-9"
+                  className="w-16"
                   alt="Notifications"
                 />
               </div>

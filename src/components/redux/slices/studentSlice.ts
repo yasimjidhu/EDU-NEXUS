@@ -60,7 +60,7 @@ export const Register = createAsyncThunk(
   'student/register',
   async (payload: StudentRegistrationPayload, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/user/user/register', payload.formData);
+      const response = await axiosInstance.post('/user/register', payload.formData);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -72,19 +72,19 @@ export const fetchUserData = createAsyncThunk(
   'student/fetchUserData',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get('/user/user/getUser');
+      const response = await axiosInstance.get('/user/getUser');
       return response.data.user;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
     }
   }
 );
-
+  
 export const getAllUsers = createAsyncThunk(
   'student/getAllUsers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get('/user/user/getAllUsers');
+      const response = await axiosInstance.get('/user/getAllUsers');
       return response.data.allUsers;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -96,7 +96,7 @@ export const blockUser = createAsyncThunk(
   'student/blockUser',
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/user/user/block', { email });
+      const response = await axiosInstance.post('/user/block', { email });
       return {email,isBlocked:true}
 
     } catch (error: any) {
@@ -109,7 +109,7 @@ export const unblockUser = createAsyncThunk(
   'student/unblockUser',
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/user/user/unblock', { email });
+      const response = await axiosInstance.post('/user/unblock', { email });
       return {email,isBlocked:false}
 
     } catch (error: any) {
@@ -117,6 +117,36 @@ export const unblockUser = createAsyncThunk(
     }
   }
 );
+
+export const ApproveInstructor = createAsyncThunk(
+  'student/approve',
+  async (email:string, { rejectWithValue }) => {
+    try {
+      console.log('request reached in register slice',email);
+      const response = await axiosInstance.post('/user/approve',email);
+      console.log('response of approveduser',response)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const RejectInstructor = createAsyncThunk(
+  'student/reject',
+  async (email:string, { rejectWithValue }) => {
+    try {
+      console.log('request reached in rejection slice',email);
+      const response = await axiosInstance.post('/user/reject',email);
+      console.log('response of rejected user',response)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+
 
 const studentSlice = createSlice({
   name: 'student',
@@ -169,20 +199,70 @@ const studentSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(blockUser.fulfilled, (state, action: PayloadAction<{ email: string, isBlocked: boolean }>) => {
-        console.log('action payload in block',action.payload)
+      .addCase(blockUser.fulfilled, (state, action: PayloadAction<{ email: string; isBlocked: boolean }>) => {
+        const user = state.user;
         const index = state.allUsers?.findIndex(user => user.email === action.payload.email);
+
         if (index !== undefined && index !== -1) {
           state.allUsers[index].isBlocked = action.payload.isBlocked;
+        }
+
+        if (user && user.email === action.payload.email) {
+          state.user.isBlocked = action.payload.isBlocked;
         }
       })
-      .addCase(unblockUser.fulfilled, (state, action: PayloadAction<{ email: string, isBlocked: boolean }>) => {
-        console.log('action payload in unblock',action.payload)
+      .addCase(unblockUser.fulfilled, (state, action: PayloadAction<{ email: string; isBlocked: boolean }>) => {
+        const user = state.user;
         const index = state.allUsers?.findIndex(user => user.email === action.payload.email);
+
         if (index !== undefined && index !== -1) {
           state.allUsers[index].isBlocked = action.payload.isBlocked;
         }
-      });
+
+        if (user && user.email === action.payload.email) {
+          state.user.isBlocked = action.payload.isBlocked;
+        }
+      })
+      .addCase(ApproveInstructor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        ApproveInstructor.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          console.log("actionpaylod of approved user", action.payload);
+          state.user = action.payload.user
+          state.error = null;
+        }
+      )
+      .addCase(
+        ApproveInstructor.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      )
+      .addCase(RejectInstructor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        RejectInstructor.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          console.log("actionpaylod of approved user", action.payload);
+          state.user = action.payload.user
+          state.error = null;
+        }
+      )
+      .addCase(
+        RejectInstructor.rejected,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.error = action.payload;
+        }
+      )
   },
 });
 

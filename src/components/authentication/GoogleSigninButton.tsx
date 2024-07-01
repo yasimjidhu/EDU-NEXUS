@@ -9,7 +9,7 @@ const GoogleSignInButton = ({message}:any) => {
   return (
     <button onClick={handleSignup} className='w-full bg-hash-black py-2 rounded-md text-black flex justify-center items-center font-semibold'>
     <span className='flex items-center text-white'> 
-      <img src="/assets/images/google.png" alt="" width='30px' height='auto' className='mr-3'/>
+      <img src="/assets/images/google.png" alt="" width='25px' height='auto' className='mr-3'/>
       {message} With Google
     </span>
   </button>

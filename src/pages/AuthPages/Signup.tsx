@@ -60,7 +60,7 @@ const SignupPage: React.FC = () => {
       <Navbar isAuthenticated={false} />
       <div className="flex justify-around">
         <div className="container mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-4 justify-center items-center w-[90%] mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-4 justify-center items-center w-[90%] mt-4 ">
             <div className="bg-gray-200 px-12 rounded-3xl">
               <h2 className="text-2xl font-sans mt-3">Signup</h2>
               <Formik
@@ -179,6 +179,7 @@ const SignupPage: React.FC = () => {
               <img
                 src="/public/assets/images/signup.png"
                 alt="Signup illustration"
+                width='90%'
               />
             </div>
           </div>

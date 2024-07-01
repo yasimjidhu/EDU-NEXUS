@@ -13,9 +13,10 @@ interface CategoryModalProps {
 }
 
 export interface Category {
+  _id:string;
   name: string;
   description: string;
-  image: File | string;
+  image: File | string|null;
 }
 
 const MAX_DESCRIPTION_WORDS = 150; // Adjust as needed
@@ -43,7 +44,6 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
-    // Split text by whitespace and filter out empty strings to count words
     const words = text.trim().split(/\s+/).filter(Boolean);
     if (words.length <= MAX_DESCRIPTION_WORDS) {
       setDescription(text);
@@ -84,6 +84,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
       onAddCategory(payload);
     } catch (error) {
       console.log("Error in frontend:", error);
+      
       toast.error("Failed to add category");
     }
 
@@ -103,7 +104,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
           aria-hidden="false"
           className="fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-gray-700 bg-opacity-50"
         >
-          <div className="relative p-4 w-full max-w-md bg-white rounded-lg shadow">
+          <div className="relative p-4 h-[90%] w-full  max-w-md bg-white rounded-lg shadow">
             <div className="flex items-center justify-between p-4 border-b rounded-t">
               <h3 className="text-lg font-semibold text-gray-900">
                 Create New Category
@@ -166,14 +167,16 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                       id="image"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     />
-                    <div className="flex justify-center">
+                    <div className="flex justify-center w-full ">
+                      <div className="w-24 h-24">
                       {imagePreview && (
                         <img
                           src={imagePreview}
                           alt="Preview"
-                          className="mt-4 w-36 h-36 rounded-lg"
+                          className="mt-2  w-full h-full object-cover "
                         />
                       )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -10,10 +10,11 @@ const NotVerified: React.FC = () => {
   const {data} = useSelector((state:RootState)=>state.instructor)
 
   useEffect(() => {
+    console.log('data in ntverified',data)
     if (user?.isVerified) {
       navigate("/home");
     }
-  }, [data]);
+  }, [data]); 
 
   return (
     <div>

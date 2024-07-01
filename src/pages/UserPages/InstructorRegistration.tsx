@@ -325,8 +325,40 @@ const InstructorRegistration: React.FC = () => {
                     name="qualification"
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
-                    <option value="btech">Btech</option>
-                    <option value="mca">MCA</option>
+                    <option value="btech">B.Tech</option>
+                      <option value="mca">MCA</option>
+                      <option value="bba">BBA</option>
+                      <option value="bsc">B.Sc</option>
+                      <option value="mba">MBA</option>
+                      <option value="bcom">B.Com</option>
+                      <option value="bs">Bachelor of Science (BS)</option>
+                      <option value="ba">Bachelor of Arts (BA)</option>
+                      <option value="bpharma">
+                        Bachelor of Pharmacy (B.Pharm)
+                      </option>
+                      <option value="bds">
+                        Bachelor of Dental Surgery (BDS)
+                      </option>
+                      <option value="bhm">
+                        Bachelor of Hotel Management (BHM)
+                      </option>
+                      <option value="bfa">Bachelor of Fine Arts (BFA)</option>
+                      <option value="llb">Bachelor of Laws (LLB)</option>
+                      <option value="ca">Chartered Accountancy (CA)</option>
+                      <option value="icwa">
+                        Cost and Works Accountancy (ICWA)
+                      </option>
+                      <option value="diploma">Diploma</option>
+                      <option value="iti">
+                        Industrial Training Institute (ITI)
+                      </option>
+                      <option value="secondary">
+                        Secondary School (10th Grade)
+                      </option>
+                      <option value="higher_secondary">
+                        Higher Secondary (12th Grade)
+                      </option>
+                      <option value="other">Other</option>
                   </Field>
                   <ErrorMessage
                     name="qualification"

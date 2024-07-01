@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/authentication/Navbar";
 import "../../index.css";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../../components/redux/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../components/redux/store/store";
+import { getAllCourses } from "../../components/redux/slices/courseSlice";
 
 const Home = () => {
   const { user } = useSelector((state: RootState) => state.user);
   const { categories } = useSelector((state: RootState) => state.category);
-  const { allCourses } = useSelector((state: RootState) => state.course);
+  const [allCourses,setAllCourses] = useState([])
+  const dispatch: AppDispatch = useDispatch();
+
+  useEffect(()=>{
+    dispatch(getAllCourses()).then((res)=>setAllCourses(res.payload.courses))
+  },[])
 
   return (
     <>
@@ -25,13 +31,15 @@ const Home = () => {
               a more interactive way
             </p>
             <div className="flex mt-6 justify-between items-center w-[55%]">
-              <div className="bg-purple-500">
-                <Link to="/enrollment">
-                  <button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
-                    Join Now
-                  </button>
-                </Link>
-              </div>
+              {user == null && (
+                 <div className="bg-purple-500">
+                 <Link to="/enrollment">
+                   <button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
+                     Join Now
+                   </button>
+                 </Link>
+               </div>
+              )}  
               <div>
                 <button className="p-4 bg-lite-rose rounded-3xl font-semibold text-black">
                   View Demo
@@ -92,7 +100,7 @@ const Home = () => {
           All Categories
         </button>
       </div>
-      <div className="container mx-auto p-5">
+      <div className="container ">
         <h2 className="text-lg font-semibold mb-5">Top Categories</h2>
         <div>
           {categories && categories.length > 0 && (
@@ -124,9 +132,9 @@ const Home = () => {
         </div>
         <div className="grid grid-cols-4 gap-4 mt-5">
           {allCourses.slice(0, 4).map((course) => (
-            <div
+           <Link to={`/student/course-detail/${course._id}`}><div
               key={course._id}
-              className="bg-pure-white text-start rounded-lg p-2 hover:shadow-lg transition-shadow duration-300"
+              className="bg-gray-200 text-start rounded-lg p-2 shadow-lg transition-shadow duration-300"
             >
               <div className="w-full h-44 overflow-hidden rounded-md p-1">
                 <img
@@ -172,11 +180,12 @@ const Home = () => {
                 </span>
               </button>
             </div>
+            </Link> 
           ))}
         </div>
 
-        <section className="relative">
-          <div className="grid grid-cols-6 gap-4 mt-12">
+        <section className="relative ">
+          <div className="grid grid-cols-6 gap-4 mt-20">
             <div className="col-span-2 py-20">
               <h1 className="thick-font">Best Instructors</h1>
               <p>

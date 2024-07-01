@@ -2,13 +2,20 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../../constants/axiosInstance";
 
 interface Category {
+    _id?:string | null;
     name: string;
     description: string;
-    image: string;
+    image: File| string|null;
 }
 
 interface RejectValue {
     error: string;
+}
+
+interface BlockCategoryResponse {
+    success: boolean;
+    message?: string;
+    categories:Category[]
 }
 
 export interface CategoryState {
@@ -31,9 +38,8 @@ export const addCategory = createAsyncThunk<
     'categories/add-category',
     async (data: Category, { rejectWithValue }) => {
         try {
-            console.log('data in slice', data)
-            const response = await axiosInstance.post('/course/course/add-category', data);
-            console.log('response of addcategory', response);
+         
+            const response = await axiosInstance.post('/course/add-category', data);
             return response.data; 
         } catch (error: any) {
             console.log('this is the add category error>>>', error);
@@ -50,8 +56,7 @@ export const getAllCategories = createAsyncThunk<
     'categories/get-all-categories',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.get('/course/course/get-all-categories');
-            console.log('response data in slice', response)
+            const response = await axiosInstance.get('/course/get-all-categories');
             return response.data; 
         } catch (error: any) {
             console.error('Failed to fetch categories:', error);
@@ -59,6 +64,46 @@ export const getAllCategories = createAsyncThunk<
         }
     }
 );
+
+
+export const  updateCategories = createAsyncThunk<
+    Category,
+    Category,
+    { rejectValue: RejectValue }
+>(
+    'categories/update-category',
+    async (data:Category, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put('/course/update-category',data);
+            return response.data; 
+        } catch (error: any) {
+            console.error('Failed to edit categories:', error);
+            return rejectWithValue({ error: error.message || 'Failed to update categories' });
+        }
+    }
+);
+
+export const blockCategory = createAsyncThunk<
+    BlockCategoryResponse,
+    string, 
+    { rejectValue: RejectValue }
+>(
+    'categories/block-category',
+    async (categoryId: string, { rejectWithValue }) => {
+        try {
+            console.log('block slice called',categoryId)
+            const response = await axiosInstance.post(`/course/block-category/${categoryId}`);
+            return response.data; 
+        } catch (error: any) {
+            console.error('Failed to block category:', error);
+            return rejectWithValue({ error: error.message || 'Failed to block category' });
+        }
+    }
+);
+
+
+
+
 
 const categorySlice = createSlice({
     name: 'categories',
@@ -71,9 +116,8 @@ const categorySlice = createSlice({
                 state.error = null;
             })
             .addCase(addCategory.fulfilled, (state, action: PayloadAction<Category>) => {
-                console.log('new category payload', action.payload)
                 state.loading = false;
-                state.categories = [...state.categories, action.payload]; // immutably add new category
+                state.categories = [...state.categories, action.payload];
                 state.error = null;
             })
             .addCase(addCategory.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
@@ -86,15 +130,15 @@ const categorySlice = createSlice({
             })
             .addCase(getAllCategories.fulfilled, (state, action: PayloadAction<Category[]>) => {
                 state.loading = false;
-                console.log('payload of all categories', action.payload)
-                state.categories = action.payload; // Replace the entire categories array with fetched data
+                state.categories = action.payload; 
                 state.error = null;
             })
             .addCase(getAllCategories.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
                 state.loading = false;
                 state.error = action.payload?.error || 'Failed to fetch categories';
-            });
-    },
+            })
+
+        },
 });
 
 export default categorySlice.reducer;
