@@ -10,7 +10,7 @@ const Instructor = () => {
       <Sidebar/>
       <div className='flex flex-col flex-grow'>
         <Navbar/>
-        <main className="flex-grow p-4 overflow-auto bg-gray-100">
+        <main className="flex-grow p-4 overflow-auto bg-gray-100 ">
         {/* <BreadCrumbs/> */}
             <Outlet/>
         </main>

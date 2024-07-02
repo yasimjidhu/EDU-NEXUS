@@ -100,7 +100,7 @@ const Home = () => {
           All Categories
         </button>
       </div>
-      <div className="container ">
+      <div className="container mt-4">
         <h2 className="text-lg font-semibold mb-5">Top Categories</h2>
         <div>
           {categories && categories.length > 0 && (
@@ -126,63 +126,46 @@ const Home = () => {
         </div>
         <div className="mt-12 flex justify-between p-4">
           <h1 className="text-xl font-semibold">New Courses</h1>
-          <button className=" rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">
+          <Link to='/allcourses'><button className=" rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">
             AllCourses
-          </button>
+          </button></Link>
         </div>
-        <div className="grid grid-cols-4 gap-4 mt-5">
-          {allCourses.slice(0, 4).map((course) => (
-           <Link to={`/student/course-detail/${course._id}`}><div
-              key={course._id}
-              className="bg-gray-200 text-start rounded-lg p-2 shadow-lg transition-shadow duration-300"
-            >
-              <div className="w-full h-44 overflow-hidden rounded-md p-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-5 px-4">
+        {allCourses.slice(0, 4).map((course) => (
+          <Link key={course._id} to={`/student/course-detail/${course._id}`}>
+            <div className="bg-white text-start rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="h-44 overflow-hidden rounded-md">
                 <img
                   src={course.thumbnail}
                   alt={course.title}
-                  className="w-full h-full object-cover object-center transform hover:scale-110 transition-transform duration-300 cursor-pointer"
+                  className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-300 cursor-pointer"
                 />
               </div>
-              <h1 className="font-semibold text-md mt-3 truncate">
-                {course.title}
-              </h1>
-              <div className="flex justify-between mt-3">
+              <h1 className="font-semibold text-md mt-3 truncate">{course.title}</h1>
+              <div className="flex justify-between mt-2 text-sm text-gray-600">
                 <div className="flex items-center">
-                  <img
-                    src="/assets/png/lesson.png"
-                    width=""
-                    className="w-3 h-3 mr-1"
-                    alt=""
-                  />
-                  <p className="text-sm">Lesson : {course.lessons.length}</p>
+                  <img src="/assets/png/lesson.png" className="w-3 h-3 mr-1" alt="" />
+                  <p>Lessons: {course.lessons.length}</p>
                 </div>
                 <div className="flex items-center">
-                  <img
-                    src="/assets/png/student.png"
-                    alt=""
-                    className="w-3 h-3 mr-1"
-                  />
-                  <p className="text-sm">student : 17</p>
+                  <img src="/assets/png/student.png" className="w-3 h-3 mr-1" alt="" />
+                  <p>Students: 17</p>
                 </div>
                 <div className="flex items-center">
-                  <img
-                    src="/assets/png/level.png"
-                    alt=""
-                    className="w-3 h-3 mr-1"
-                  />
-                  <p className="text-sm">{course.level}</p>
+                  <img src="/assets/png/level.png" className="w-3 h-3 mr-1" alt="" />
+                  <p>{course.level}</p>
                 </div>
               </div>
-              <button className="bg-black py-1 px-3 text-white rounded-xl mt-5 flex items-center hover:bg-gray-800 transition-colors duration-300">
+              <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300">
                 Start Course
-                <span>
-                  <img src="/assets/png/next.png" alt="" className="w-4 ml-2" />
+                <span className="ml-2">
+                  <img src="/assets/png/next.png" alt="" className="w-4" />
                 </span>
               </button>
             </div>
-            </Link> 
-          ))}
-        </div>
+          </Link>
+        ))}
+      </div>
 
         <section className="relative ">
           <div className="grid grid-cols-6 gap-4 mt-20">

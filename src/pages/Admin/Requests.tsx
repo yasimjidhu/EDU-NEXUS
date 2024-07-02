@@ -264,7 +264,7 @@ const Requests: React.FC = () => {
           <div className="col-span-3 flex justify-end items-center space-x-2">
             <button
               className="text-center bg-black text-white inter py-1 px-3 rounded-lg cursor-pointer"
-              onClick={() => navigate(`/student/course-detail/${course._id}`)}
+              onClick={() => navigate(`/admin/course-detail/${course._id}`)}
             >
               View
             </button>

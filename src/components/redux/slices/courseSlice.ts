@@ -2,6 +2,7 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosInstance } from '../../../constants/axiosInstance';
+import { CheckEnrollment } from '@/types/enrollment';
 
 
 export interface Lesson {
@@ -66,6 +67,8 @@ const initialState: CourseState = {
 };
 
 
+
+
 interface UpdateData{
   courseId?:string;
   thumbnail: string | null;
@@ -82,10 +85,31 @@ interface UpdateData{
   lessons: Lesson[];
 }
 
+
+
+
+export enum CompleationStatus {
+    enrolled = 'enrolled',
+    inProgress = 'in-progress',
+    Completed = 'completed',
+}
+
+export interface EnrollmentEntity {
+    _id?: string;
+    userId: string;
+    courseId: string;
+    enrolledAt?: Date | string;
+    completionStatus?: CompleationStatus;
+    progress?: {
+        completedLessons?:  string[] | [] | null;
+        completedAssessments?: string[] | [] | null;
+        overallCompletionPercentage?: number
+    };
+};
+
 export const submitCourse = createAsyncThunk(
   'course/submitCourse',
   async (courseData: CourseState, { rejectWithValue }) => {
-    console.log('course data in slice',courseData)
     try {
       const response = await axiosInstance.post('/course/add-course', courseData);
       return response.data;
@@ -99,7 +123,6 @@ export const  getAllCoursesOfInstructor= createAsyncThunk(
   'course/getAllCoursesOfInstructor',
   async (instructorId: string, { rejectWithValue }) => {
     try {
-      console.log('get request reached of instructors mycourse',instructorId)
       const response = await axiosInstance.get(`/course/get-courses/${instructorId}`);
       return response.data;
     } catch (error: any) {
@@ -124,10 +147,8 @@ export const getCourse= createAsyncThunk(
 export const getAllCourses= createAsyncThunk(
   'course/getAllCourses',
   async (_, { rejectWithValue }) => {
-    console.log('get request reached  in slice');
     try {
       const response = await axiosInstance.get(`/course/get-all-courses`);
-      console.log('response of allcourses',response.data)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -138,10 +159,8 @@ export const getAllCourses= createAsyncThunk(
 export const fetchCourseRequests= createAsyncThunk(
   'course/fetchCourseRequests',
   async (_, { rejectWithValue }) => {
-    console.log('fetchCourseRequests request reached  in slice');
     try {
       const response = await axiosInstance.get(`/course/courseRequsts`);
-      console.log('response of all unpublished courses',response.data)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -154,7 +173,7 @@ export const updateCourse= createAsyncThunk(
   'course/updateCourse',
   async (data:UpdateData, { rejectWithValue }) => {
     try {
-      console.log(' id for update course',data.courseId)
+      console.log('updated date',data)
       const response = await axiosInstance.put(`/course/update-course`,data);
       return response.data;
     } catch (error: any) {
@@ -163,8 +182,36 @@ export const updateCourse= createAsyncThunk(
   }
 );
 
+export const enrollToCourse= createAsyncThunk(
+  'course/enrollment',
+  async (data:EnrollmentEntity, { rejectWithValue }) => {
+    try {
+      console.log(' data for enrollment course',data)
+      const response = await axiosInstance.post(`/course/enrollment`,data);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
-
+export const checkEnrollment= createAsyncThunk(
+  'course/check-enrollment',
+  async (data:CheckEnrollment, { rejectWithValue }) => {
+    try {
+      console.log(' data for check enrollment course',data)
+      const response = await axiosInstance.get(`/course//enrollment/check`,{
+        params:{
+          courseId:data.courseId,
+          userId:data.userId
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
 const courseSlice = createSlice({
   name: 'course',

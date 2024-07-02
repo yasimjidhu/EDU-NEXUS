@@ -118,7 +118,7 @@ const Sidebar = () => {
                 </li>
                 <li>
                   <Link
-                    to="/instructor/settings"
+                    to="/instructor/profile"
                     className={
                       "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
                     }

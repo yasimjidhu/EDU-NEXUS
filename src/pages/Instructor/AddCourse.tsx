@@ -14,6 +14,8 @@ import { toast } from "react-toastify";
 
 const AddCourse: React.FC = () => {
   const { categories } = useSelector((state: RootState) => state.category);
+  const { user } = useSelector((state: RootState) => state.user);
+
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [trial, setTrial] = useState<string | null>(null);
@@ -41,6 +43,7 @@ const AddCourse: React.FC = () => {
   const location = useLocation();
 
   useEffect(()=>{
+    console.log('user now',user)
     if(location.state){
       setMode("edit")
     }
@@ -67,6 +70,7 @@ const AddCourse: React.FC = () => {
       setTitle("");
       setDescription("");
       setCategoryRef(categories.length > 0 ? categories[0].id : "");
+      setInstructorRef(user?._id)
       setLevel("beginner");
       setCertificationAvailable(false);
       setPricing({ type: "free", amount: 0 });
@@ -194,10 +198,11 @@ const AddCourse: React.FC = () => {
     <div className="ml-52">
       <div className="grid grid-cols-12 space-x-4">
         <div className="col-span-7 space-y-2 p-4">
+          <h6 className="inter text-xl text-black">Add Course</h6>
           <section>
             <h6 className="inter-sm text-blue-700">Course Thumbnail</h6>
             <div
-              className="cursor-pointer w-full max-w-md bg-pure-white border-2 border-dashed border-gray-400 h-64 text-center overflow-hidden mt-1 flex justify-center items-center"
+              className="cursor-pointer w-full max-w-md bg-pure-white border-2 border-dashed border-gray-400 h-48  text-center overflow-hidden mt-1 flex justify-center items-center"
               onClick={() => handleInputClick("thumbnail-input")}
             >
               {imageLoading ? (
@@ -240,7 +245,7 @@ const AddCourse: React.FC = () => {
           <section>
             <h6 className="inter-sm text-blue-700">Course Trial</h6>
             <div
-              className="cursor-pointer w-full max-w-md bg-pure-white border-2 border-dashed border-gray-400 h-64 text-center overflow-hidden mt-1 flex justify-center items-center"
+              className="cursor-pointer w-full max-w-md bg-pure-white border-2 border-dashed border-gray-400 h-48 text-center overflow-hidden mt-1 flex justify-center items-center"
               onClick={() => handleInputClick("video-input")}
             >
               {videoLoading ? (

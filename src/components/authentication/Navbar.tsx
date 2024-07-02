@@ -56,9 +56,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
   const handleProfile = () => {
     console.log('user in profile',user)
     if(user?.role == 'student'){
-      navigate('/home')
+      navigate('/student/profile')
     }else if(user?.role == 'instructor'){
-      navigate('/instructor/overview')
+      navigate('/instructor/profile')
     }
     else{
       navigate('/admin/overview')
@@ -132,7 +132,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
               </div>
             </form>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 z-50">
               <div className="relative">
                 <div
                   className="cursor-pointer w-11 h-11 shadow-sm border-2 border-gray-300 rounded-full overflow-hidden"

@@ -4,6 +4,8 @@ import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { useParams } from "react-router-dom";
 import {
   CourseState,
+  checkEnrollment,
+  enrollToCourse,
   getCourse,
 } from "../../components/redux/slices/courseSlice";
 import {
@@ -23,13 +25,10 @@ import {
 } from "lucide-react";
 import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
 import Navbar from "../../components/authentication/Navbar";
-import { BeatLoader } from "react-spinners";
+import { CompletionStatus } from "../../types/enrollment";
+import { toast } from "react-toastify";
 
-interface DetailsProps {
-  hasAccess: boolean;
-}
-
-const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
+const CourseDetails: React.FC<CourseDetailsProps> = () => {
   const { id } = useParams();
   const dispatch: AppDispatch = useDispatch();
   const [courseData, setCourseData] = useState<CourseState | null>(null);
@@ -38,6 +37,10 @@ const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
   const [reviewText, setReviewText] = useState<string>("");
   const [rating, setRating] = useState<number>(0);
   const [openLesson, setOpenLesson] = useState(null);
+  const [enrolled, setEnrolled] = useState<boolean>(false);
+
+  const { user } = useSelector((state: RootState) => state.user);
+  const userData = useSelector((state: RootState) => state.auth);
 
   const toggleLesson = (index) => {
     setOpenLesson(openLesson === index ? null : index);
@@ -56,9 +59,25 @@ const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
     dispatch(fetchAllInstructors()).then((res: any) => {
       setAllInstructors(res.payload.instructors);
     });
-
     fetchCourse();
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (courseData?._id && user?._id) {
+      const checkUserEnrollment = async () => {
+        try {
+          const res = await dispatch(
+            checkEnrollment({ courseId: courseData._id, userId: user._id })
+          ).unwrap();
+          setEnrolled(res.studentEnrolled);
+        } catch (error) {
+          console.error("Error checking enrollment:", error);
+        }
+      };
+
+      checkUserEnrollment();
+    }
+  }, [dispatch, courseData, user, enrolled]);
 
   const handleSubmitReview = () => {
     console.log("Submitting review:", { text: reviewText, rating });
@@ -66,7 +85,26 @@ const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
     setRating(0);
   };
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const handleEnrollment = async (courseId: string) => {
+    const enrollmentInfo = {
+      userId: user?._id,
+      courseId: courseId,
+      enrolledAt: new Date().toISOString(),
+      completionStatus: CompletionStatus.Enrolled,
+      progress: {
+        completedLessons: [],
+        completedAssessments: [],
+        overallCompletionPercentage: 0,
+      },
+    };
+    try {
+      const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
+      setEnrolled(true);
+      toast.success(enrolledStudent.payload.message);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   enum Need {
     NAME = "name",
@@ -87,7 +125,6 @@ const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
     const instructor = allInstructors.find(
       (inst: Instructor) => inst._id === instructorId
     );
-    console.log("Found instructor:", instructor);
 
     if (!instructor) {
       return null;
@@ -98,14 +135,13 @@ const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
     } else if (need === Need.PROFILE) {
       return instructor.profile.avatar;
     }
-
     return null;
   };
 
   if (!courseData) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <BeatLoader/>
+        Loading...
       </div>
     );
   }
@@ -165,9 +201,6 @@ const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
                   </span>
                 </div>
               </div>
-              <button className="w-full sm:w-auto bg-black hover:bg-strong-rose text-white font-bold py-1 px-4 rounded-full">
-                Enroll Now
-              </button>
             </div>
 
             <div className="bg-white rounded-lg shadow-lg p-6">
@@ -281,25 +314,31 @@ const CourseDetails: React.FC<DetailsProps> = ({ hasAccess }) => {
                           <h3 className="text-lg font-semibold mb-2">
                             Attachments
                           </h3>
-                          {lesson.attachments ? (
+                          {lesson.attachments &&
+                          lesson.attachments.length > 0 ? (
                             <ul className="space-y-2">
-                              <li className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                  <Paperclip className="w-4 h-4 mr-2 text-blue-500" />
-                                  <span className="text-sm">
-                                    {lesson.attachments.title}
-                                  </span>
-                                </div>
-                                <a
-                                  href={lesson.attachments.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center text-blue-500 hover:text-blue-700"
+                              {lesson.attachments.map((item, attachIndex) => (
+                                <li
+                                  key={attachIndex}
+                                  className="flex items-center justify-between"
                                 >
-                                  <span className="text-sm mr-1">View</span>
-                                  <ExternalLink className="w-4 h-4" />
-                                </a>
-                              </li>
+                                  <div className="flex items-center">
+                                    <Paperclip className="w-4 h-4 mr-2 text-blue-500" />
+                                    <span className="text-sm">
+                                      {item.title}
+                                    </span>
+                                  </div>
+                                  <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center text-blue-500 hover:text-blue-700"
+                                  >
+                                    <span className="text-sm mr-1">View</span>
+                                    <ExternalLink className="w-4 h-4" />
+                                  </a>
+                                </li>
+                              ))}
                             </ul>
                           ) : (
                             <p className="text-sm text-gray-500">

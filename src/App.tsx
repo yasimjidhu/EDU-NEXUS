@@ -10,7 +10,6 @@ import ResetPassword from "./pages/AuthPages/ResetPassword";
 import Home from "./pages/UserPages/Home";
 import Admin from "./layouts/Admin";
 import Courses from "./pages/Admin/Courses";
-import Assessments from "./pages/Admin/Assessments";
 import Overview from "./pages/Admin/Overview";
 import Enrollment from "./pages/UserPages/Enrollment";
 import StudentRegistration from "./pages/UserPages/StudentRegistration";
@@ -28,8 +27,14 @@ import AddLesson from "./pages/Instructor/AddLesson";
 import CourseDetails from "./pages/Instructor/CourseDetails";
 import Student from "./layouts/Student";
 import CourseDetail from "./pages/UserPages/CourseDetail";
+import UserProfile from "./pages/UserPages/UserProfile";
+import InstructorProfile from "./pages/Instructor/InstructorProfile";
+import Assessments from "./pages/Instructor/Assessments";
+import AddAssessments from "./pages/Instructor/AddAssessments";
+import AllCourses from "./pages/UserPages/AllCourses";
 
 function App() {
+
   return (
     <>
       <Router>
@@ -57,6 +62,7 @@ function App() {
           <Route path="/admin" element={<Admin />}>
             <Route path="overview" element={<Overview />} />
             <Route path="courses" element={<Courses />} />
+            <Route path="course-detail/:id" element={<CourseDetails />} />
             <Route path="assessments" element={<Assessments />} />
             <Route path="categories" element={<Categories />} />
             <Route path="requests" element={<Requests />} />
@@ -65,19 +71,25 @@ function App() {
 
           <Route path="/instructor" element={<Instructor />}>
             <Route path="overview" element={<Overview />} />
+            <Route path="profile" element={<InstructorProfile />} />
             <Route path="courses" element={<MyCourses />}/>   
             <Route path="add-course" element={<AddCourse />} />
             <Route path="add-lesson" element={<AddLesson />} />
             <Route path="assessments" element={<Assessments />} />
+            <Route path="add-assessments" element={<AddAssessments />} />
             <Route path="analytics" element={<Categories />} />
             <Route path="requests" element={<Requests />} />
+            <Route path="course-detail/:id" element={<CourseDetails />} />
             <Route path="messages" element={<Users />} />
             <Route path="settings" element={<Users />} />
-            <Route path="course-details/:id" element={<CourseDetails />} />
+            <Route path="course-details/:id" element={<CourseDetails  />} />
           </Route>
 
-          <Route path="/student/course-detail/:id" element={<CourseDetail />} />
+          <Route path="/allcourses" element={<AllCourses />} />
+
           <Route path="/student" element={<Student />}>
+            <Route path="profile" element={<UserProfile/>}/>
+            <Route path="course-detail/:id" element={<CourseDetail />} />
           </Route>
         </Routes>
       </Router>
