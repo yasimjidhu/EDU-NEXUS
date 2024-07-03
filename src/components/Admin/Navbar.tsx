@@ -54,7 +54,7 @@ const Navbar: React.FC = () => {
               </button>
           </form>
             </div>
-        <div className="flex items-center space-x-4 ">
+        <div className="flex items-center space-x-4 z-50">
           <div className="relative">
             <div className="cursor-pointer p-2" onClick={toggleDropdown}>
               <img

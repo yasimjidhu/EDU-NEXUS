@@ -16,11 +16,7 @@ const AllCourses: React.FC = () => {
     <div className="mt-12">
       <div className="flex justify-between items-center px-4">
         <h1 className="text-xl font-semibold">All Courses</h1>
-        <Link to="/all-courses">
-          <button className="rounded-3xl font-sans bg-medium-rose px-3 py-2 text-white hover:bg-medium-rose-dark transition-colors duration-300">
-            View All Courses
-          </button>
-        </Link>
+      
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-5 px-4">
         {allCourses.map((course) => (

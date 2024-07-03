@@ -1,7 +1,8 @@
 import React from 'react'
-import Sidebar from '../components/Instructor/Sidebar'
+
 import Navbar from '../components/Instructor/Navbar'
 import { Outlet } from 'react-router-dom'
+import Sidebar from '../components/student/Sidebar'
 
 const Student = () => {
   return (

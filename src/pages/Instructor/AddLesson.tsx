@@ -11,7 +11,7 @@ import { BeatLoader } from "react-spinners";
 import axios from "axios";
 import { Video } from "cloudinary-react";
 import { toast } from "react-toastify";
-import { PlusCircle, Save, File, X } from "lucide-react";
+import { PlusCircle, Save, File, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Lesson } from "../../types/course";
 
 const AddLesson: React.FC = () => {
@@ -29,6 +29,8 @@ const AddLesson: React.FC = () => {
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [courseIdToUpdate, setCourseIdToUpdate] = useState<string>("");
 
+  const [expandedLessonIndex, setExpandedLessonIndex] = useState<number>(-1);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -43,8 +45,6 @@ const AddLesson: React.FC = () => {
       });
     }
   }, [course.courseId, dispatch]);
-
-    console.log('fetched lessons',lessons)
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
@@ -155,6 +155,10 @@ const AddLesson: React.FC = () => {
 
   const handleInputClick = (id: string) => {
     document.getElementById(id)?.click();
+  };
+
+  const toggleLessonDetails = (index: number) => {
+    setExpandedLessonIndex((prevIndex) => (prevIndex === index ? -1 : index));
   };
 
   return (
@@ -297,17 +301,31 @@ const AddLesson: React.FC = () => {
           <ul className="space-y-4">
             {lessons.map((lesson, index) => (
               <li key={index} className="border-b pb-4">
-                <h3 className="text-lg font-semibold">Lesson {index + 1}: {lesson.title}</h3>
-                <p className="text-gray-600">{lesson.description}</p>
-                {lesson.attachments.length > 0 && (
-                  <div className="mt-2">
-                    <p className="font-medium">Attachments:</p>
-                    <ul className="list-disc list-inside">
-                      {lesson.attachments.map((attachment, i) => (
-                        <li key={i}>{attachment.title}</li>
-                      ))}
-                    </ul>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">
+                    Lesson {index + 1}: {lesson.title}
+                  </h3>
+                  <button
+                    className="text-blue-500 hover:text-blue-700"
+                    onClick={() => toggleLessonDetails(index)}
+                  >
+                    {expandedLessonIndex === index ? <ChevronUp /> : <ChevronDown />}
+                  </button>
+                </div>
+                {expandedLessonIndex === index && (
+                  <>
+                    <p className="text-gray-600">{lesson.description}</p>
+                    {lesson.attachments.length > 0 && (
+                      <div className="mt-2">
+                        <p className="font-medium">Attachments:</p>
+                        <ul className="list-disc list-inside">
+                          {lesson.attachments.map((attachment, i) => (
+                            <li key={i}>{attachment.title}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
                 )}
               </li>
             ))}

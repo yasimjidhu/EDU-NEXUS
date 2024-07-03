@@ -44,9 +44,7 @@ const Assessments: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl inter font-bold mb-8 text-gray-800">Assessments</h1>
-      
+    <div className=" mx-auto px-4 py-8 bg-gray-50 min-h-screen ml-52">      
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
         <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
           <Plus size={20} className="inline mr-2" />

@@ -2,8 +2,8 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosInstance } from '../../../constants/axiosInstance';
-import { CheckEnrollment } from '@/types/enrollment';
-
+import { CheckEnrollment } from '../../../types/enrollment';
+import { Review } from '../../../types/review'
 
 export interface Lesson {
   title: string;
@@ -39,6 +39,7 @@ export interface CourseState {
   loading: boolean;
   error: string | null;
   allCourses?:CourseState[]
+  reviews?:Review[]
 }
 
 export interface UserData{
@@ -64,6 +65,7 @@ const initialState: CourseState = {
   lessons: [],
   loading: false,
   error: null,
+  reviews:[]
 };
 
 
@@ -86,6 +88,9 @@ interface UpdateData{
 }
 
 
+interface ReviewRequestData{
+  courseId:string;
+}
 
 
 export enum CompleationStatus {
@@ -131,11 +136,24 @@ export const  getAllCoursesOfInstructor= createAsyncThunk(
   }
 );
 
+export const getUserEnrolledCourses= createAsyncThunk(
+  'course/getUserEnrolledCourses',
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      console.log('enrolled courses request reached',userId)
+      const response = await axiosInstance.get(`/course/my-course/${userId}`);
+      console.log('response of userenrolled data',response)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 export const getCourse= createAsyncThunk(
   'course/getCourse',
   async (courseId: string, { rejectWithValue }) => {
     try {
-      console.log('course id for getcourse',courseId)
       const response = await axiosInstance.get(`/course/get-course/${courseId}`);
       return response.data;
     } catch (error: any) {
@@ -173,7 +191,6 @@ export const updateCourse= createAsyncThunk(
   'course/updateCourse',
   async (data:UpdateData, { rejectWithValue }) => {
     try {
-      console.log('updated date',data)
       const response = await axiosInstance.put(`/course/update-course`,data);
       return response.data;
     } catch (error: any) {
@@ -182,11 +199,26 @@ export const updateCourse= createAsyncThunk(
   }
 );
 
+export const updateLessonProgress = createAsyncThunk(
+  'course/updateLessonProgress',
+  async ({ courseId,userId, lessonId, progress,totalLesson }: { courseId: string,userId:string, lessonId: string, progress: number,totalLesson:number }, { rejectWithValue }) => {
+    try {
+      console.log('update progress reached in slice',courseId)
+      const response = await axiosInstance.put(`/course/enrollment/progress`,{
+        courseId,userId,lessonId,progress,totalLesson
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating lesson progress:', error);
+      throw error;
+    }
+  }
+);
+
 export const enrollToCourse= createAsyncThunk(
   'course/enrollment',
   async (data:EnrollmentEntity, { rejectWithValue }) => {
     try {
-      console.log(' data for enrollment course',data)
       const response = await axiosInstance.post(`/course/enrollment`,data);
       return response.data;
     } catch (error: any) {
@@ -199,14 +231,38 @@ export const checkEnrollment= createAsyncThunk(
   'course/check-enrollment',
   async (data:CheckEnrollment, { rejectWithValue }) => {
     try {
-      console.log(' data for check enrollment course',data)
-      const response = await axiosInstance.get(`/course//enrollment/check`,{
+      const response = await axiosInstance.get(`/course/enrollment/check`,{
         params:{
           courseId:data.courseId,
           userId:data.userId
         }
-      });
+      }); 
       return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const addReview= createAsyncThunk(
+  'course/add-review',
+  async (data:Review, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(`/course/review`,data);
+      return response.data.addedReview
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const getReviews= createAsyncThunk(
+  'course/get-reviews',
+  async (data:ReviewRequestData, { rejectWithValue }) => {
+    try {
+      const {courseId} = data
+      const response = await axiosInstance.get(`/course/review/${courseId}`);
+      return Array.isArray(response.data.reviews) ? response.data.reviews : [];
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -218,11 +274,9 @@ const courseSlice = createSlice({
   initialState,
   reducers: {
     setCourseInfo(state, action: PayloadAction<Partial<CourseState>>) {
-      console.log('updated data',action.payload)  
       return { ...state, ...action.payload };
     },
     addLesson(state, action: PayloadAction<Lesson>) {
-      console.log('add lesson reached in slice',action.payload)
       state.lessons.push(action.payload);
     },
     clearCourseInfo(state) {
@@ -256,7 +310,33 @@ const courseSlice = createSlice({
       .addCase(getAllCourses.rejected, (state, action : PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload.error || 'Failed to submit course';
-      });
+      })
+      .addCase(addReview.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addReview.fulfilled, (state, action: PayloadAction<Review>) => {
+        state.loading = false;
+        console.log('action payload of add reviews', action.payload);
+        state.reviews = state.reviews ? [action.payload, ...state.reviews] : [action.payload];
+      })
+      .addCase(addReview.rejected, (state, action : PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload.error || 'Failed to add  review';
+      })
+      .addCase(getReviews.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getReviews.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        console.log('action payload of getreviews', action.payload);
+        state.reviews = Array.isArray(action.payload) ? action.payload : [];
+      })
+      .addCase(getReviews.rejected, (state, action : PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload.error || 'Failed to get  reviews';
+      })
   },
 });
 

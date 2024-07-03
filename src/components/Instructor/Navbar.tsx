@@ -84,7 +84,7 @@ const Navbar: React.FC = () => {
                   )}
             </div>
             {isOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                 <ul className="divide-y divide-gray-200">
                   <li
                     className="px-4 py-2 text-sm text-gray-900 hover:bg-medium-rose hover:text-white cursor-pointer"

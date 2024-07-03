@@ -32,6 +32,9 @@ import InstructorProfile from "./pages/Instructor/InstructorProfile";
 import Assessments from "./pages/Instructor/Assessments";
 import AddAssessments from "./pages/Instructor/AddAssessments";
 import AllCourses from "./pages/UserPages/AllCourses";
+import MyCourse from "./pages/UserPages/Mycourses";
+import ViewCourse from "./pages/UserPages/ViewCourse";
+// import ViewCourse from "./pages/UserPages/ViewCourse";
 
 function App() {
 
@@ -86,10 +89,12 @@ function App() {
           </Route>
 
           <Route path="/allcourses" element={<AllCourses />} />
+          <Route path="/view-course/:courseId" element={<ViewCourse />} />
 
           <Route path="/student" element={<Student />}>
             <Route path="profile" element={<UserProfile/>}/>
             <Route path="course-detail/:id" element={<CourseDetail />} />
+            <Route path="mycourses" element={<MyCourse />} />
           </Route>
         </Routes>
       </Router>
