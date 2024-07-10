@@ -8,3 +8,7 @@ export interface CheckEnrollment{
     userId:string;
     courseId:string
 }
+export interface UpdateAssessmentPayload {
+    userId: string;
+    courseId: string;
+}

@@ -15,19 +15,20 @@ const Users: React.FC = () => {
   const [currentRole, setCurrentRole] = useState<"student" | "instructor">(
     "student"
   );
-  const [allUsers,setAllUsers] = useState([])
+  // const [allUsers,setAllUsers] = useState([])
+  const {allUsers} = useSelector((state:RootState)=>state.user)
 
   useEffect(() => {
-    dispatch(getAllUsers()).then((res)=>setAllUsers(res.payload))
+    dispatch(getAllUsers())
   }, []);
 
 
   const handleBlock = async (email: string, isBlocked: boolean) => {
     try {
       if (isBlocked) {
-        await dispatch(unblockUser(email));
+        await dispatch(unblockUser(email))
       } else {
-        await dispatch(blockUser(email));
+        await dispatch(blockUser(email))
       }
     } catch (error) {
       console.error("Error blocking user:", error);

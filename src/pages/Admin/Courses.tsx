@@ -157,9 +157,9 @@ const Courses: React.FC = () => {
                       <h6 className="text-green-700 font-semibold">
                         ${course.pricing.amount} 
                       </h6>
-                      <button className="bg-black py-2 px-4 hover:bg-gray-800 rounded-md text-white text-sm">
+                      {/* <button className="bg-black py-2 px-4 hover:bg-gray-800 rounded-md text-white text-sm">
                         Manage Course
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </div>

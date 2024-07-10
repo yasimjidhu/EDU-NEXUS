@@ -47,12 +47,13 @@ export const signupUser = createAsyncThunk<
     async (data: SignupData, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.post('/auth/signup', data);
-            const token:any = response.data.access_token
-
-            localStorage.setItem('access_token',token)
-            return { user: response.data.user, error: null };       
+            const {user,token} = response.data
+            
+            localStorage.setItem('email',user.email)
+            localStorage.setItem('signupToken',token)
+            return response.data      
         } catch (error:any) {
-            console.log('this is the signup eror bro>>>',error.response.data.message);
+            console.log('this is the signup eror',error.response.data.message);
             return rejectWithValue({error:error.response.data.message})
         }
     }
@@ -69,11 +70,9 @@ OTPData,
     async (data: OTPData, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.post('/auth/verify-otp', data);
-            console.log('response of verifyotp thunk',response)
             return response.data;
             
         } catch (error:any) {
-            console.log('error in thunk',error.response.data.message)
             return rejectWithValue({ error: error.response.data.message });
         }
     }
@@ -92,7 +91,7 @@ ForgotPasswordData,
         return response.data;
       } catch (error) {
         console.log(error);
-        return rejectWithValue({ error: 'Error occurred in logout slice' });
+        return rejectWithValue({ error: 'Error occurred in resend slice' });
       }
     }
   );
@@ -107,13 +106,15 @@ export const userLogin = createAsyncThunk<
   'auth/login',
   async (data: LoginData, { rejectWithValue }) => {
     try {
-        console.log('login request sent')
       const response = await axiosInstance.post('/auth/login', data,{
         headers:{
             'Content-Type': 'application/json',
         }
       }
     );
+      const {access_token,refresh_token,user} = response.data
+      localStorage.setItem('access_token',access_token)
+      localStorage.setItem('refresh_token',refresh_token)
       return response.data;
     } catch (error: any) {
       if (error.response && error.response.data) {
@@ -167,6 +168,8 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
     async (_, { rejectWithValue }) => {
       try {
         const response = await axiosInstance.post('/auth/logout');
+        document.cookie = 'access_token=; Max-Age=0; Secure; SameSite=Strict';
+        document.cookie = 'refresh_token=; Max-Age=0; Secure; SameSite=Strict';
         return response.data;
       } catch (error) {
         console.log(error);
@@ -212,7 +215,6 @@ const authSlice = createSlice({
             })
             .addCase(signupUser.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                console.log('user in signup authslice',action.payload)
                 state.user = action.payload.user;
                 if (action.payload.error) {
                     state.error = action.payload.error;
@@ -230,7 +232,6 @@ const authSlice = createSlice({
             })
             .addCase(verifyOTP.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false
-                console.log('payload in verifyotp fulfil',action.payload)
                 state.user = action.payload.user
             })
             .addCase(verifyOTP.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
@@ -243,7 +244,6 @@ const authSlice = createSlice({
             })
             .addCase(userLogin.fulfilled,(state,action:PayloadAction<any>)=>{
                 state.loading = false
-                console.log('user in loginslice',action.payload)
                 state.user = action.payload.user
             })
             .addCase(userLogin.rejected,(state,action:PayloadAction<RejectValue | undefined>)=>{

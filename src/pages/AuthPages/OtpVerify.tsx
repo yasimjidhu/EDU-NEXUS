@@ -81,7 +81,7 @@ const OtpVerify: React.FC = () => {
 
     const otpValue: string = otps.join("");
 
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("signupToken");
     if (!token) {
       throw new Error("Token not found in local storage.");
     }

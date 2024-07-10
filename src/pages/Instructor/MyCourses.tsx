@@ -42,7 +42,7 @@ const MyCourses = () => {
           {myCourses.length > 0 ? (
         <div className="grid grid-cols-3 gap-8">
             {myCourses.map((course) => (
-              <Link to={`/instructor/course-details/${course._id}`} key={course._id}>
+              <Link to={`/instructor/course-detail/${course._id}`} key={course._id}>
                 <div className="rounded-lg shadow-lg transform hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 cursor-pointer">
                   <div className="w-full bg-gray-300 h-52 text-center flex justify-center p-3 overflow-hidden">
                     <img

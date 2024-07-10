@@ -3,40 +3,86 @@ import {
   PlusCircle,
   MinusCircle,
   CheckCircle2,
-  Book,
+  Pen,
   Trophy,
-  Pencil,
   ArrowLeft,
 } from "lucide-react";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllCoursesOfInstructor } from "../../components/redux/slices/courseSlice";
+import { addAssessment, getAllCoursesOfInstructor, getAssessment, editAssessment } from "../../components/redux/slices/courseSlice";
+import { toast } from "react-toastify";
+import { useLocation, useNavigate } from "react-router-dom";
 
+interface Question {
+  answer: string;
+  mark: number;
+  options: string[];
+  question: string;
+}
 
-const AddAssessments = ({ onSave, onCancel }) => {
+interface IAssessment {
+  _id?: string;
+  title: string;
+  total_score: number;
+  passing_score: number;
+  course_id: string;
+  instructor_id: string;
+  assessment_type: string;
+  questions: Question[];
+}
 
-  const [assessment, setAssessment] = useState({
-    totalScore: 0,
-    passingScore: 0,
-    courseId: "",
-    lessonId: "",
-    assessmentType: "quiz",
+const AddAssessments = () => {
+  const [assessment, setAssessment] = useState<IAssessment>({
+    title: "",
+    total_score: 0,
+    passing_score: 0,
+    course_id: "",
+    instructor_id: "",
+    assessment_type: "quiz",
     questions: [],
   });
-  const [instructorCourses,setInstructorCourses] = useState([])
+  const [instructorCourses, setInstructorCourses] = useState([]);
+  const [mode, setMode] = useState<"add" | "edit">("add");
 
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const { user } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     if (user._id) {
       dispatch(getAllCoursesOfInstructor(user._id)).then((res) => {
         setInstructorCourses(res.payload.courses);
+        setAssessment(prev => ({ ...prev, instructor_id: user._id }));
       });
     }
-  }, [dispatch]);
+  }, [dispatch, user._id]);
 
-  const handleInputChange = (e) => {
+  useEffect(() => {
+    if (location.state) {
+      console.log('location state is here',location.state)
+      setMode("edit");
+      dispatch(getAssessment(location.state))
+        .then((res) => {
+          console.log('response of getassessmennt>>',res)
+          const fetchedAssessment = res.payload.assessment;
+          setAssessment({
+            _id: fetchedAssessment._id,
+            title: fetchedAssessment.title,
+            total_score: fetchedAssessment.total_score,
+            passing_score: fetchedAssessment.passing_score,
+            course_id: fetchedAssessment.course_id,
+            instructor_id: fetchedAssessment.instructor_id,
+            assessment_type: fetchedAssessment.assessment_type,
+            questions: fetchedAssessment.questions,
+          });
+        }).catch(err=> console.log(err))
+    }
+  }, []);
+
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setAssessment((prev) => ({ ...prev, [name]: value }));
   };
@@ -51,14 +97,14 @@ const AddAssessments = ({ onSave, onCancel }) => {
     }));
   };
 
-  const removeQuestion = (index) => {
+  const removeQuestion = (index: number) => {
     setAssessment((prev) => ({
       ...prev,
       questions: prev.questions.filter((_, i) => i !== index),
     }));
   };
 
-  const updateQuestion = (index, field, value) => {
+  const updateQuestion = (index: number, field: keyof Question, value: string | number) => {
     setAssessment((prev) => ({
       ...prev,
       questions: prev.questions.map((q, i) =>
@@ -67,7 +113,7 @@ const AddAssessments = ({ onSave, onCancel }) => {
     }));
   };
 
-  const addOption = (questionIndex) => {
+  const addOption = (questionIndex: number) => {
     setAssessment((prev) => ({
       ...prev,
       questions: prev.questions.map((q, i) =>
@@ -76,7 +122,7 @@ const AddAssessments = ({ onSave, onCancel }) => {
     }));
   };
 
-  const updateOption = (questionIndex, optionIndex, value) => {
+  const updateOption = (questionIndex: number, optionIndex: number, value: string) => {
     setAssessment((prev) => ({
       ...prev,
       questions: prev.questions.map((q, i) =>
@@ -92,16 +138,31 @@ const AddAssessments = ({ onSave, onCancel }) => {
     }));
   };
 
+  const submitAssessment = async () => {
+    try {
+      if (mode === "add") {
+        await dispatch(addAssessment(assessment));
+        toast.success('Assessment created successfully');
+      } else {
+        await dispatch(editAssessment(assessment));
+        toast.success('Assessment updated successfully');
+      }
+      navigate('/instructor/assessments');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to save assessment');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-500 to-indigo-600 py-12 px-6 sm:px-10 lg:px-12">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Pencil className="w-8 h-8" />
-            Add New Assessment
+          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            {mode === "add" ? "Add New Assessment" : "Edit Assessment"}
           </h1>
           <button
-            onClick={onCancel}
+            onClick={() => navigate(-1)}
             className="flex items-center text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="w-6 h-6 mr-1" /> Back
@@ -112,7 +173,24 @@ const AddAssessments = ({ onSave, onCancel }) => {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
               <label
-                htmlFor="totalScore"
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700 flex items-center gap-2"
+              >
+                <Pen className="w-5 h-5" />
+                Exam Title
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={assessment.title}
+                onChange={handleInputChange}
+                className="mt-2 block w-full p-2 bg-gray-200 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="total_score"
                 className="block text-sm font-medium text-gray-700 flex items-center gap-2"
               >
                 <Trophy className="w-5 h-5" />
@@ -120,16 +198,16 @@ const AddAssessments = ({ onSave, onCancel }) => {
               </label>
               <input
                 type="number"
-                id="totalScore"
-                name="totalScore"
-                value={assessment.totalScore}
+                id="total_score"
+                name="total_score"
+                value={assessment.total_score}
                 onChange={handleInputChange}
                 className="mt-2 block w-full p-2 bg-gray-200 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
             </div>
             <div>
               <label
-                htmlFor="passingScore"
+                htmlFor="passing_score"
                 className="block text-sm font-medium text-gray-700 flex items-center gap-2"
               >
                 <CheckCircle2 className="w-5 h-5" />
@@ -137,9 +215,9 @@ const AddAssessments = ({ onSave, onCancel }) => {
               </label>
               <input
                 type="number"
-                id="passingScore"
-                name="passingScore"
-                value={assessment.passingScore}
+                id="passing_score"
+                name="passing_score"
+                value={assessment.passing_score}
                 onChange={handleInputChange}
                 className="mt-2 block w-full p-2 bg-gray-200 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
@@ -148,34 +226,38 @@ const AddAssessments = ({ onSave, onCancel }) => {
 
           <div>
             <label
-              htmlFor="course"
+              htmlFor="course_id"
               className="block text-sm font-medium text-gray-700"
             >
               Choose Course
             </label>
             <select
-              id="course"
-              name="course"
-              value={instructorCourses[0].title}
+              id="course_id"
+              name="course_id"
+              value={assessment.course_id}
               onChange={handleInputChange}
               className="mt-2 block w-full p-2 bg-gray-200 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             >
-              <option value="quiz">Quiz</option>
-              <option value="exam">Exam</option>
+              <option value="">Select a course</option>
+              {instructorCourses.map((course) => (
+                <option key={course._id} value={course._id}>
+                  {course.title}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
             <label
-              htmlFor="assessmentType"
+              htmlFor="assessment_type"
               className="block text-sm font-medium text-gray-700"
             >
               Assessment Type
             </label>
             <select
-              id="assessmentType"
-              name="assessmentType"
-              value={assessment.assessmentType}
+              id="assessment_type"
+              name="assessment_type"
+              value={assessment.assessment_type}
               onChange={handleInputChange}
               className="mt-2 block w-full p-2 bg-gray-200 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             >
@@ -222,7 +304,7 @@ const AddAssessments = ({ onSave, onCancel }) => {
                   placeholder="Mark"
                   value={q.mark}
                   onChange={(e) =>
-                    updateQuestion(index, "mark", e.target.value)
+                    updateQuestion(index, "mark", parseInt(e.target.value))
                   }
                   className="mb-2 w-full p-2 bg-gray-200 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
@@ -257,16 +339,16 @@ const AddAssessments = ({ onSave, onCancel }) => {
         </div>
         <div className="mt-8 flex justify-end space-x-3">
           <button
-            onClick={onCancel}
+            onClick={() => navigate(-1)}
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Cancel
           </button>
           <button
-            onClick={() => onSave(assessment)}
+            onClick={submitAssessment}
             className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            Save Assessment
+            {mode === "add" ? "Save Assessment" : "Update Assessment"}
           </button>
         </div>
       </div>

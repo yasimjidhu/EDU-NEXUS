@@ -40,12 +40,9 @@ const LoginPage: React.FC = () => {
         userLogin({ email, password })
       );
 
-      console.log('respons of login',response);
       if (response.payload && response.payload.error) {
         throw new Error(response.payload.error);
       }
-
-      localStorage.setItem('email',response.payload.user.email)
       
       if (response.payload?.user?.role == "admin") {
         navigate("/admin/overview");

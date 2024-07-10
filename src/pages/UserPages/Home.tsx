@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/authentication/Navbar";
 import "../../index.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { getAllCourses } from "../../components/redux/slices/courseSlice";
@@ -11,10 +11,34 @@ const Home = () => {
   const { categories } = useSelector((state: RootState) => state.category);
   const [allCourses,setAllCourses] = useState([])
   const dispatch: AppDispatch = useDispatch();
+  
+  const navigate = useNavigate()
+  const page = 1
 
-  useEffect(()=>{
-    dispatch(getAllCourses()).then((res)=>setAllCourses(res.payload.courses))
-  },[])
+
+  useEffect(() => {
+    fetchCourses(page);
+  }, [dispatch, page]);
+
+  const fetchCourses = async (page: number) => {
+    try {
+      const response = await dispatch(getAllCourses(page)).unwrap();
+      if (response.courses.length > 0) {
+        setAllCourses(response.courses);
+      }
+    } catch (error: any) {
+      console.error("Error fetching courses:", error);
+    }
+  };
+
+  const handleViewClick = (categoryId:string)=>{
+    navigate(`/viewcategory/${categoryId}`)
+  }
+
+
+  const handleStartClick = (courseId:string)=>{
+    navigate(`/course-detail/${courseId}`)
+  }
 
   return (
     <>
@@ -96,25 +120,25 @@ const Home = () => {
         </div>
       </div>
       <div className="container mx-auto p-3">
-        <button className="float-end mr-10 mt-5 rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">
+        <Link to='/allcategories'><button className="float-end mr-10 mt-5 rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">
           All Categories
-        </button>
+        </button></Link>
       </div>
       <div className="container mt-4">
         <h2 className="text-lg font-semibold mb-5">Top Categories</h2>
         <div>
           {categories && categories.length > 0 && (
-            <div className="grid grid-cols-4 gap-8">
-              {categories.map((category, index) => (
-                <div
+            <div className="grid md:grid-cols-4  gap-8 sm:grid-cols-2" >
+              {categories.slice(0,4).map((category, index) => (
+             <div
                   key={index}
-                  className="border border-gray-300 shadow-xl rounded-md text-center p-6"
-                >
-                  <div className="rounded-full mx-auto w-24 h-24 shadow-sm border-2 border-gray-100 overflow-hidden">
+                  className="border transform hover:scale-105 transition-transform duration-300 cursor-pointer border-gray-200 shadow-xl rounded-md text-center p-6"
+                  onClick={()=>handleViewClick(category.id)}>
+                  <div className="rounded-full mx-auto w-36 h-36 shadow-sm border-2 border-gray-100 overflow-hidden">
                     <img
                       src={`${category.image}`}
                       alt={category.name}
-                      className="w-full h-full object-cover rounded-full"
+                      className="w-full  h-full object-cover rounded-full"
                     />
                   </div>
                   <h1 className="mt-3 text-md inter ">{category.name}</h1>
@@ -132,8 +156,7 @@ const Home = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-5 px-4">
         {allCourses.slice(0, 4).map((course) => (
-          <Link key={course._id} to={`/student/course-detail/${course._id}`}>
-            <div className="bg-white text-start rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div key={course._id} className="bg-white text-start rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="h-44 overflow-hidden rounded-md">
                 <img
                   src={course.thumbnail}
@@ -156,14 +179,13 @@ const Home = () => {
                   <p>{course.level}</p>
                 </div>
               </div>
-              <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300">
+              <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300" onClick={()=>handleStartClick(course._id)}>
                 Start Course
                 <span className="ml-2">
                   <img src="/assets/png/next.png" alt="" className="w-4" />
                 </span>
               </button>
             </div>
-          </Link>
         ))}
       </div>
 

@@ -193,11 +193,9 @@ const getUserData = (id: string): any | undefined => {
   };
 
   if (!courseData) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
+    return <div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+    </div>;
   }
 
 
@@ -256,7 +254,7 @@ const getUserData = (id: string): any | undefined => {
                   </span>
                 </div>
               </div>
-              {enrolled ? (
+              {/* {enrolled ? (
                 <h1 className="text-green-800  font-bold mr-2">
                   Already enrolled
                 </h1>
@@ -267,7 +265,7 @@ const getUserData = (id: string): any | undefined => {
                 >
                   Enroll Now
                 </button>
-              )}
+              )} */}
             </div>
 
             <div className="bg-white rounded-lg shadow-lg p-6">

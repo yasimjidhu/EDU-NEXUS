@@ -84,7 +84,7 @@ export const ApproveInstructor = createAsyncThunk(
       }
     }
   );
-  
+
 
 
 const InstructorSlice = createSlice({

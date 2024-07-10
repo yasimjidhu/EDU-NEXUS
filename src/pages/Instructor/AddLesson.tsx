@@ -146,7 +146,8 @@ const AddLesson: React.FC = () => {
         await dispatch(updateCourse({ courseId: courseIdToUpdate, ...course, lessons: updatedLessons }) as any);
         toast.success("Course updated successfully");
       }
-      navigate("/home");
+      navigate("/instructor/courses");
+      
     } catch (error) {
       console.error("Error submitting/updating course:", error);
       toast.error("Failed to submit/update course. Please try again.");

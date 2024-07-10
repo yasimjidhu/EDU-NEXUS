@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store/store";
@@ -78,14 +78,23 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
         image: imageUrl,
       };
 
-      await dispatch(addCategory(payload));
+      const data = await dispatch(addCategory(payload))
+      console.log('response of add cateogory in modal',data)
+      if(data.payload.error){
+        toast.error(data.payload.error)
+        return
+      }
       await dispatch(getAllCategories())
       toast.success("Category added successfully");
       onAddCategory(payload);
     } catch (error) {
       console.log("Error in frontend:", error);
-      
-      toast.error("Failed to add category");
+      if(error instanceof AxiosError){
+        const err = error.response.data.error.message
+        toast.error(err)
+        return
+      }
+      toast.error(error);
     }
 
     setName("");

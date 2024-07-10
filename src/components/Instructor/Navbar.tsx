@@ -14,7 +14,6 @@ const Navbar: React.FC = () => {
   type AppDispatch = ThunkDispatch<any, any, any>;
 
   const {user} = useSelector((state:RootState)=>state.user)
-  console.log('user blocked',user)
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -44,7 +43,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 ml-52 shadow-lg">
+    <div className="bg-white border-b border-gray-200  shadow-lg">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         {/* Left section */}
         <div className="flex items-center space-x-4 ">

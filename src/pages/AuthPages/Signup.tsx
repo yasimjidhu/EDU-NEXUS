@@ -39,7 +39,6 @@ const SignupPage: React.FC = () => {
       const response: any = await (dispatch as AppDispatch)(
         signupUser({ username, email, password })
       );
-      console.log("response in frontend", response);
 
       if (response.error) {
         throw new Error(response.payload.error);

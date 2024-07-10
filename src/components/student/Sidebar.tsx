@@ -78,30 +78,10 @@ const Sidebar = () => {
                     </span>
                   </Link>
                 </li>
+               
                 <li>
                   <Link
-                    to="/student/assessments"
-                    className={
-                      "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
-                    }
-                  >
-                    <svg
-                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M10 0a5 5 0 0 0 0 10A5 5 0 0 0 10 0Zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6Zm7-6h-4v2h4V2ZM7 16H2v2h5v-2Zm11 2h-4v2h4v-2Zm-8 0H9v2h1v-2Zm-2 0H5v2h1v-2ZM3 16H0v2h3v-2Zm13-4h-2v2h2v-2Zm0 4h-2v2h2v-2Zm-2 4h-1v2h1v-2ZM9 12H2v2h7v-2Zm9 0h-7v2h7v-2Z" />
-                    </svg>
-                    <span className="flex-1 ml-3 whitespace-nowrap">
-                      Assessments
-                    </span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/student/messages"
+                    to="/chat"
                     className={
                       "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
                     }

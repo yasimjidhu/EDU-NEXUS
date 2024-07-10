@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { getAllCourses } from '../../components/redux/slices/courseSlice';
+import { Link, useParams } from 'react-router-dom';
+import {  getCategoryWiseCourses } from '../../components/redux/slices/courseSlice';
 import { AppDispatch } from '../../components/redux/store/store';
 import Pagination from '../../components/common/Pagination';
 
-const AllCourses: React.FC = () => {
+const ViewCategory: React.FC = () => {
   const [allCourses, setAllCourses] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const dispatch: AppDispatch = useDispatch();
+  const { categoryId } = useParams();
 
+  
   useEffect(() => {
-    fetchCourses(currentPage);
-  }, [currentPage]);
+    fetchCourses(currentPage,categoryId);
+  }, [currentPage,categoryId]);
 
-  const fetchCourses = async (page: number) => {
-    const response = await dispatch(getAllCourses(page));
-    const { courses, totalPages } = response.payload;
-    setAllCourses(courses);
-    setTotalPages(totalPages);
+  const fetchCourses = async (page: number,categoryId:string) => {
+    if(categoryId){
+        const response = await dispatch(getCategoryWiseCourses({categoryId,page}));
+        const { courses, totalPages } = response.payload;
+        setAllCourses(courses);
+        setTotalPages(totalPages);
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -74,4 +78,4 @@ const AllCourses: React.FC = () => {
   );
 };
 
-export default AllCourses;
+export default ViewCategory;

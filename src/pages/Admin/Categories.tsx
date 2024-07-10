@@ -16,13 +16,10 @@ import { toast } from "react-toastify";
 const Categories: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  );
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
   const { categories } = useSelector((state: RootState) => state.category);
 
-  console.log("categories", categories);
   const dispatch: AppDispatch = useDispatch();
 
   const handleBlockSuccess = () => {

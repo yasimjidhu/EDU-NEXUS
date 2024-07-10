@@ -60,6 +60,7 @@ export const Register = createAsyncThunk(
   'student/register',
   async (payload: StudentRegistrationPayload, { rejectWithValue }) => {
     try {
+      console.log('register reached in frontend')
       const response = await axiosInstance.post('/user/register', payload.formData);
       return response.data;
     } catch (error: any) {

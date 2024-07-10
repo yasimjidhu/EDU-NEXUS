@@ -83,16 +83,16 @@ const UserProfile: React.FC = () => {
             value={user.isBlocked ? 'Blocked' : user.isRejected ? 'Rejected' : 'Active'}
             statusIcon={getStatusIcon()}
           />
-          <StatusCard
+          {/* <StatusCard
             icon={<Key size={20} />}
             title="Authentication"
             value={user.isGAuth ? 'Google Auth' : 'Standard'}
-          />
-          <StatusCard
+          /> */}
+          {/* <StatusCard
             icon={<DollarSign size={20} />}
             title="Profit"
             value={user.profit ? `$${user.profit.toFixed(2)}` : 'N/A'}
-          />
+          /> */}
           <StatusCard
             icon={<Globe size={20} />}
             title="Social"

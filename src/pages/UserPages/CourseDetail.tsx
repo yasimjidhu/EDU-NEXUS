@@ -1,7 +1,7 @@
 import React, { SetStateAction, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import {
   CourseState,
   addReview,
@@ -25,13 +25,15 @@ import {
   ExternalLink,
   Paperclip,
   Star,
+  IndianRupee,
 } from "lucide-react";
 import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
-import Navbar from "../../components/authentication/Navbar";
+import Navbar from "../../components/Instructor/Navbar";
 import { CompletionStatus } from "../../types/enrollment";
 import { toast } from "react-toastify";
 import { Dispatch } from "redux";
 import { getAllUsers } from "../../components/redux/slices/studentSlice";
+import StripePaymentForm from "../../components/payment/paymentForm";
 
 const CourseDetails: React.FC = () => {
   const { id } = useParams();
@@ -48,7 +50,8 @@ const CourseDetails: React.FC = () => {
   const [reviews, setReviews] = useState([]);
   const [courseId, setCourseId] = useState("");
   const [userReviews, setUserReviews] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const { user } = useSelector((state: RootState) => state.user);
   const userData = useSelector((state: RootState) => state.auth);
@@ -57,6 +60,8 @@ const CourseDetails: React.FC = () => {
   const toggleLesson = (index) => {
     setOpenLesson(openLesson === index ? null : index);
   };
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -93,114 +98,125 @@ const CourseDetails: React.FC = () => {
   }, [dispatch, courseData, user, enrolled]);
 
   useEffect(() => {
-    if ( courseId) {
-      dispatch(getReviews({ courseId})).then((action) => {
-        if (getReviews.fulfilled.match(action)) {
-          console.log("Reviews fetched:", action.payload);
-        } else {
-          console.error("Failed to fetch reviews:", action.error);
-        }
+    if (courseId) {
+      dispatch(getReviews({ courseId })).then((action) => {
+        setUserReviews(action.payload)
       });
     }
   }, [dispatch, courseId]);
 
+  
+
   useEffect(() => {
-    dispatch(getAllUsers()).then((res)=>setAllUsers(res.payload))
+    dispatch(getAllUsers()).then((res) => setAllUsers(res.payload));
   }, []);
 
   const handleEnrollment = async (courseId: string) => {
-    const enrollmentInfo = {
-      userId: user?._id,
-      courseId: courseId,
-      enrolledAt: new Date().toISOString(),
-      completionStatus: CompletionStatus.Enrolled,
-      progress: {
-        completedLessons: [],
-        completedAssessments: [],
-        overallCompletionPercentage: 0,
-      },
-    };
-    try {
-      const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
-      setEnrolled(true);
-      toast.success(enrolledStudent.payload.message);
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  const handleReviewChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setNewReview(event.target.value);
-  };
-
-  const handleRatingChange = (rating: number) => {
-    setNewRating(rating);
-  };
-
-  const handlePostReview = async () => {
-    if (newReview.trim() !== "" && newRating > 0) {
-      const newReviewItem = {
-        courseId: courseId,
+    if (courseData?.pricing.type == "free") {
+      const enrollmentInfo = {
         userId: user?._id,
-        rating: newRating,
-        content: newReview,
+        courseId: courseId,
+        enrolledAt: new Date().toISOString(),
+        completionStatus: CompletionStatus.Enrolled,
+        progress: {
+          completedLessons: [],
+          completedAssessments: [],
+          overallCompletionPercentage: 0,
+        },
       };
-      await dispatch(addReview(newReviewItem));
-      toast.success("review added successfully");
-      setReviews([...reviews, newReviewItem]);
-      setNewReview("");
-      setNewRating(0);
-    }
+      try {
+        const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
+        setEnrolled(true);
+        toast.success(enrolledStudent.payload.message);
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    } else {
+       // Redirect to the payment page
+      navigate(`/payment/${courseId}`, {
+        state: {
+          courseTitle: courseData.title,
+          amount: courseData.pricing.amount,
+          currency: 'INR', // Assuming USD, adjust if needed
+          userId: user?._id,
+        }
+    });
   };
+    }
 
+    const handleReviewChange = (event: ChangeEvent<HTMLInputElement>) => {
+      setNewReview(event.target.value);
+    };
+  
+    const handleRatingChange = (rating: number) => {
+      setNewRating(rating);
+    };
+  
+    const handlePostReview = async () => {
+      if (newReview.trim() !== "" && newRating > 0) {
+        const newReviewItem = {
+          courseId: courseId,
+          userId: user?._id,
+          rating: newRating,
+          content: newReview,
+        };
+        await dispatch(addReview(newReviewItem));
+        toast.success("review added successfully");
+        setReviews([...reviews, newReviewItem]);
+        setNewReview("");
+        setNewRating(0);
+      }
+    };
+  
+  
+    const userMap = new Map(allUsers.map((user) => [user._id, user]));
+    
+    const getUserData = (id: string): any | undefined => {
 
+      return userMap.get(id)
+    };
+    enum Need {
+      NAME = "name",
+      PROFILE = "profile",
+    }
 
-const userMap = new Map(allUsers.map(user => [user._id, user]));
-
-const getUserData = (id: string): any | undefined => {
-  return userMap.get(id);
-};
-  enum Need {
-    NAME = "name",
-    PROFILE = "profile",
-  }
-
-  interface Instructor {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    profile: string;
-  }
-
-  const getInstructorData = (
-    instructorId: string,
-    need: Need
-  ): string | Instructor | null => {
-    const instructor = allInstructors.find(
-      (inst: Instructor) => inst._id === instructorId
-    );
-
-    if (!instructor) {
+    interface Instructor {
+      _id: string;
+      firstName: string;
+      lastName: string;
+      profile: string;
+    }
+  
+    const getInstructorData = (
+    
+      instructorId: string,
+      need: Need
+    ): string | Instructor | null => {
+      const instructor = allInstructors.find(
+        (inst: Instructor) => inst._id === instructorId
+      );
+      
+  
+      if (!instructor) {
+        return null;
+      }
+  
+      if (need === Need.NAME) {
+        return `${instructor.firstName} ${instructor.lastName}`;
+      } else if (need === Need.PROFILE) {
+        return instructor.profile.avatar;
+      }
       return null;
+    };
+  
+    if (!courseData) {
+      return (
+        <div className="flex justify-center items-center h-screen">
+          Loading...
+        </div>
+      );
     }
-
-    if (need === Need.NAME) {
-      return `${instructor.firstName} ${instructor.lastName}`;
-    } else if (need === Need.PROFILE) {
-      return instructor.profile.avatar;
-    }
-    return null;
-  };
-
-  if (!courseData) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
-  }
-
-
+  
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
@@ -226,8 +242,8 @@ const getUserData = (id: string): any | undefined => {
                   </div>
                 ) : (
                   <div className="flex ">
-                    <DollarSign className="w-6 h-6 mr-2 text-green-700" />
-                    <span className="inter text-xl text-green-700">
+                    <IndianRupee className="w-6 h-6 mt-2 text-green-700" />
+                    <span className="inter text-xl text-green-700 ml-1 mt-1">
                       {courseData.pricing.amount}
                     </span>
                   </div>
@@ -257,15 +273,17 @@ const getUserData = (id: string): any | undefined => {
                 </div>
               </div>
               {enrolled ? (
-                <h1 className="text-green-800  font-bold mr-2">
+                <h1 className="text-green-800 font-bold mr-2">
                   Already enrolled
                 </h1>
-              ) : (
+              ):(
                 <button
-                  className="w-full sm:w-auto bg-black hover:bg-strong-rose text-white font-bold py-1 px-4 rounded-full"
+                  className="w-full  sm:w-auto bg-black hover:bg-strong-rose text-white font-bold py-1 px-6 rounded-full"
                   onClick={() => handleEnrollment(courseData._id)}
                 >
-                  Enroll Now
+                  {courseData.pricing.type === "free"
+                    ? "Enroll Now"
+                    : `Enroll for ₹${courseData.pricing.amount}`}
                 </button>
               )}
             </div>
@@ -330,44 +348,56 @@ const getUserData = (id: string): any | undefined => {
 
               {/* Existing Reviews */}
               <div>
-  <h3 className="inter text-lg mt-6">Student Reviews</h3>
-  {Array.isArray(courseStoredData.reviews) && courseStoredData.reviews.length > 0 ? (
-    courseStoredData.reviews.map((review) => {
-      const reviewUser = getUserData(review.userId);
-      return (
-        <div key={review._id} className="border-t pt-4">
-          <div className="flex items-center mb-4">
-            <div className="w-12 h-12 rounded-full border-2 border-gray-200 overflow-hidden mr-4">
-              <img
-                src={reviewUser?.profile.avatar || '/default-profile-picture.jpg'}
-                alt={`${reviewUser ? `${reviewUser.firstName} ${reviewUser.lastName}` : 'User'}'s profile`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div>
-              <p className="font-semibold">
-                {reviewUser ? `${reviewUser.firstName} ${reviewUser.lastName}` : 'Anonymous User'}
-              </p>
-              <div className="flex items-center">
-                {[1, 2, 3, 4, 5].map((rating) => (
-                  <Star
-                    key={rating}
-                    className={`w-5 h-5 ${
-                      rating <= review.rating ? "text-yellow-500" : "text-gray-300"
-                    }`}
-                  />
-                ))}
+                <h3 className="inter text-lg mt-6">Student Reviews</h3>
+                {Array.isArray(courseStoredData.reviews) &&
+                courseStoredData.reviews.length > 0 ? (
+                  courseStoredData.reviews.map((review) => {
+                    const reviewUser = getUserData(review.userId);
+                    return (
+                      <div key={review._id} className="border-t pt-4">
+                        <div className="flex items-center mb-4">
+                          <div className="w-12 h-12 rounded-full border-2 border-gray-200 overflow-hidden mr-4">
+                            <img
+                              src={
+                                reviewUser?.profile.avatar ||
+                                "/default-profile-picture.jpg"
+                              }
+                              alt={`${
+                                reviewUser
+                                  ? `${reviewUser.firstName} ${reviewUser.lastName}`
+                                  : "User"
+                              }'s profile`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold">
+                              {reviewUser
+                                ? `${reviewUser.firstName} ${reviewUser.lastName}`
+                                : "Anonymous User"}
+                            </p>
+                            <div className="flex items-center">
+                              {[1, 2, 3, 4, 5].map((rating) => (
+                                <Star
+                                  key={rating}
+                                  className={`w-5 h-5 ${
+                                    rating <= review.rating
+                                      ? "text-yellow-500"
+                                      : "text-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-gray-600 ml-16">{review.content}</p>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p>No reviews available.</p>
+                )}
               </div>
-            </div>
-          </div>
-          <p className="text-gray-600 ml-16">{review.content}</p>
-        </div>
-      );
-    })
-  ) : (
-    <p>No reviews available.</p>
-  )}
-</div>
             </div>
           </div>
 

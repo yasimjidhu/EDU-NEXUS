@@ -11,7 +11,6 @@ interface IAssessment extends Document {
   total_score: number;
   passing_score: number;
   course_id: Types.ObjectId;
-  lesson_id: Types.ObjectId;
   assessment_type: string;
   questions: Question[];
 }
