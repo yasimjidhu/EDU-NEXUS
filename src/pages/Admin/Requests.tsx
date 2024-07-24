@@ -2,81 +2,87 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useNavigate } from 'react-router-dom';
-import { fetchAllInstructors } from '../../components/redux/slices/instructorSlice';
+import { fetchUnVerifiedInstructors, fetchVerifiedInstructors } from '../../components/redux/slices/instructorSlice';
 import { toast } from 'react-toastify';
 import Pagination from '../../components/common/Pagination';
 import { formatDate } from '../../utils/dateFormater';
 import { ApproveInstructor, RejectInstructor } from '../../components/redux/slices/studentSlice';
-import { fetchCourseRequests } from '../../components/redux/slices/courseSlice';
+import { fetchCourseRequests,approveCourse,rejectCourse } from '../../components/redux/slices/courseSlice';
 import { getAllCategories } from '../../components/redux/slices/adminSlice';
-import { string } from 'yup';
+
 
 const Requests: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
 
   const [instructorEmail, setInstructorEmail] = useState<string>('');
-  const [approvedInstructors, setApprovedInstructors] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [show, setShow] = useState<"users" | "courses">("users");
   const [unpublishedCourses,setUnpublishedCourses] = useState([])
   const [allCategories,setAllCategories] = useState([])
+  const [verifiedInstructors,setVerifiedInstructors]=useState([])
+  const [unVerifiedInstructors,setUnVerifiedInstructors]=useState([])
+  const [currentPage, setCurrentPage] = useState(1);
+  const [approvedInstructors, setApprovedInstructors] = useState([]);
+  const [rejectedInstructors, setRejectedInstructors] = useState([]);
+  const [approvedCourses, setApprovedCourses] = useState([]);
+  const [rejectedCourses, setRejectedCourses] = useState([]);
 
-  const { loading, allInstructors, data, error } = useSelector((state: RootState) => state.instructor);
+
   const { user } = useSelector((state: RootState) => state.user);
   const { courseRequests } = useSelector((state: RootState) => state.course);
 
   useEffect(() => {
-    dispatch(fetchAllInstructors());
-    dispatch(fetchCourseRequests()).then((res)=>setUnpublishedCourses(res.payload.courses))
-    dispatch(getAllCategories()).then((res)=>setAllCategories(res.payload))
-  }, [dispatch]);
-  console.log('all categories',allCategories)
-  // useEffect(() => {
-  //   dispatch(fetchAllInstructors());
-  //   dispatch(fetchCourseRequests()).then((res)=>console.log('res of second',res))
-  // }, [user]);
+    dispatch(fetchCourseRequests(currentPage)).then((res) => {
+      setUnpublishedCourses(res.payload.courses);
+    });
+    dispatch(getAllCategories(currentPage)).then((res) => setAllCategories(res.payload.categories));
+    dispatch(fetchVerifiedInstructors()).then((res) => setVerifiedInstructors(res.payload.instructors));
+    dispatch(fetchUnVerifiedInstructors()).then((res) => setUnVerifiedInstructors(res.payload.instructors));
+  }, [dispatch, currentPage, approvedInstructors, rejectedInstructors, approvedCourses, rejectedCourses]);
 
-  const handleApproval = async (email: string) => {
+  const handleApproval = async (email) => {
     try {
       await dispatch(ApproveInstructor({ email }));
       toast.success('Instructor approved successfully');
-      setApprovedInstructors([...approvedInstructors, email]);
+      setApprovedInstructors((prev) => [...prev, email]);
     } catch (error) {
       toast.error('Error occurred');
       console.log(error);
     }
   };
 
-  const handleRejection = async (email: string) => {
+  const handleRejection = async (email) => {
     try {
       await dispatch(RejectInstructor({ email }));
       toast.success('Instructor rejected successfully');
+      setRejectedInstructors((prev) => [...prev, email]);
     } catch (error) {
       toast.error('Error occurred');
       console.log(error);
     }
   };
 
-  // const handleCourseApproval = async (courseId: string) => {
-  //   try {
-  //     await dispatch(ApproveCourse({ courseId }));
-  //     toast.success('Course approved successfully');
-  //   } catch (error) {
-  //     toast.error('Error occurred');
-  //     console.log(error);
-  //   }
-  // };
+  const handleCourseApproval = async (courseId, email) => {
+    try {
+      await dispatch(approveCourse({ courseId, email }));
+      toast.success('Course approved successfully');
+      setApprovedCourses((prev) => [...prev, courseId]);
+    } catch (error) {
+      toast.error('Error occurred');
+      console.log(error);
+    }
+  };
 
-  // const handleCourseRejection = async (courseId: string) => {
-  //   try {
-  //     await dispatch(RejectCourse({ courseId }));
-  //     toast.success('Course rejected successfully');
-  //   } catch (error) {
-  //     toast.error('Error occurred');
-  //     console.log(error);
-  //   }
-  // };
+  const handleCourseRejection = async (courseId, email) => {
+    try {
+      await dispatch(rejectCourse({ courseId, email }));
+      toast.success('Course rejected successfully');
+      setRejectedCourses((prev) => [...prev, courseId]);
+    } catch (error) {
+      toast.error('Error occurred');
+      console.log(error);
+    }
+  };
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -86,11 +92,11 @@ const Requests: React.FC = () => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = show === "users"
-    ? (allInstructors ? allInstructors.instructors.slice(indexOfFirstItem, indexOfLastItem) : [])
+    ? (unVerifiedInstructors ? unVerifiedInstructors.slice(indexOfFirstItem, indexOfLastItem) : [])
     : (unpublishedCourses ? unpublishedCourses.slice(indexOfFirstItem, indexOfLastItem) : []);
 
   const totalPages = show === "users"
-    ? (allInstructors ? Math.ceil(allInstructors.instructors.length / itemsPerPage) : 1)
+    ? (unVerifiedInstructors ? Math.ceil(unVerifiedInstructors.length / itemsPerPage) : 1)
     : (unpublishedCourses ? Math.ceil(unpublishedCourses.length / itemsPerPage) : 1);
 
   const switchShow = () => {
@@ -101,6 +107,7 @@ const Requests: React.FC = () => {
   enum Need {
     NAME = "name",
     PROFILE = "profile",
+    EMAIL = "email"
   }
 
   interface Instructor {
@@ -108,16 +115,16 @@ const Requests: React.FC = () => {
     firstName: string;
     lastName: string;
     profile: string;
+    email:string;
   }
 
   const getInstructorData = (
     instructorId: string,
     need: Need
   ): string | Instructor | null => {
-    const instructor = allInstructors.instructors.find(
+    const instructor = verifiedInstructors.find(
       (inst: Instructor) => inst._id === instructorId
     );
-    console.log("Found instructor:", instructor);
 
     if (!instructor) {
       return null;
@@ -127,13 +134,14 @@ const Requests: React.FC = () => {
       return `${instructor.firstName} ${instructor.lastName}`;
     } else if (need === Need.PROFILE) {
       return instructor.profile.avatar;
+    }else if(need == Need.EMAIL){
+      return instructor.email
     }
 
-    return null;
+    return instructor;
   };
 
   const getCategoryName = (categoryId: string): string | undefined => {
-    // alert(categoryId)
     const category = allCategories.find((cat) => cat.id === categoryId);
     return category ? category.name : "Unknown Category";
   };
@@ -195,7 +203,13 @@ const Requests: React.FC = () => {
                   <h3 className="inter">{formatDate(item.profile.dateOfBirth)}</h3>
                 </div>
                 <div className="col-span-3 flex justify-end items-center space-x-2">
-                  {!approvedInstructors.includes(item.email) && !item.isVerified && (
+                {!approvedInstructors.includes(item.email) && !item.isVerified ? (
+                  <>
+                    <a href={`${item.cv}`}
+                      className="text-center bg-black text-white inter py-1 px-3 rounded-lg cursor-pointer"
+                    >
+                      View CV
+                    </a>
                     <button
                       className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
                       onClick={() => {
@@ -205,16 +219,17 @@ const Requests: React.FC = () => {
                     >
                       Approve
                     </button>
-                  )}
-                  <button
-                    className="text-center bg-strong-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-                    onClick={() => {
-                      handleRejection(item.email);
-                    }}
-                  >
-                    Reject
-                  </button>
-                </div>
+                  </>
+                ) : null}
+                <button
+                  className="text-center bg-strong-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
+                  onClick={() => {
+                    handleRejection(item.email);
+                  }}
+                >
+                  Reject
+                </button>
+              </div>
               </div>
             ))}
           </>
@@ -270,13 +285,13 @@ const Requests: React.FC = () => {
             </button>
             <button
               className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-              // onClick={() => handleCourseApproval(course._id)}
+              onClick={() => handleCourseApproval(course._id,getInstructorData(course.instructorRef,"email"))}
             >
               Approve
             </button>
             <button
               className="text-center bg-strong-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-              // onClick={() => handleCourseRejection(course._id)}
+              onClick={() => handleCourseRejection(course._id,getInstructorData(course.instructorRef,"email"))}
             >
               Reject
             </button>
@@ -286,11 +301,13 @@ const Requests: React.FC = () => {
           </>
         )}
       </div>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {unVerifiedInstructors.length >10 || verifiedInstructors.length>10 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   );
 };

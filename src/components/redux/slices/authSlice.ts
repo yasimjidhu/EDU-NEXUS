@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../../constants/axiosInstance";
-import axios from "axios";
+import axios from 'axios'
+
 
 export interface AuthState {
     user: any;
@@ -106,22 +107,23 @@ export const userLogin = createAsyncThunk<
   'auth/login',
   async (data: LoginData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/auth/login', data,{
+      const response = await axios.post('http://localhost:4000/auth/login', 
+        data,{
         headers:{
             'Content-Type': 'application/json',
         }
       }
     );
       const {access_token,refresh_token,user} = response.data
-      localStorage.setItem('access_token',access_token)
-      localStorage.setItem('refresh_token',refresh_token)
+      console.log('user in login',user)
+      if(user.role !== 'admin'){
+          localStorage.setItem('access_token',access_token)
+          localStorage.setItem('refresh_token',refresh_token)
+      }
       return response.data;
     } catch (error: any) {
-      if (error.response && error.response.data) {
-        return rejectWithValue({ error: error.response.data.error });
-      } else {
-        return rejectWithValue({ error: error.message });
-      }
+        console.log('login error in slice',error)
+        return rejectWithValue({error:error.response.data.message})
     }
   }
 )
@@ -170,6 +172,8 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
         const response = await axiosInstance.post('/auth/logout');
         document.cookie = 'access_token=; Max-Age=0; Secure; SameSite=Strict';
         document.cookie = 'refresh_token=; Max-Age=0; Secure; SameSite=Strict';
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         return response.data;
       } catch (error) {
         console.log(error);
@@ -206,7 +210,12 @@ const userDetails: AuthState = {
 const authSlice = createSlice({
     name: 'auth',
     initialState: userDetails,
-    reducers: {},
+    reducers: {
+        logout(state) {
+            state.user = null;
+            state.token = null;
+          },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(signupUser.pending, (state) => {

@@ -99,7 +99,7 @@ const OtpVerify: React.FC = () => {
         throw new Error(response.payload.error);
       }
       localStorage.setItem('email',userEmail)
-      navigate("/home");
+      navigate("/login");
     } catch (error: any) {
       console.log('error inverifyotp fronteend',error)
       const errorMessage = error?.message || "otp verification failed";

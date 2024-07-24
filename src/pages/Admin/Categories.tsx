@@ -3,20 +3,18 @@ import { useDispatch, useSelector } from "react-redux";
 import CategoryModal from "../../components/Admin/CategoryModal";
 import EditCategoryModal from "../../components/Admin/EditCategoryModal";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
-import {
-  addCategory,
-  getAllCategories,
-  updateCategories,
-  deleteCategory,
-} from "../../components/redux/slices/adminSlice";
+import {addCategory,getAllCategories,updateCategories,deleteCategory} from "../../components/redux/slices/adminSlice";
 import { Category } from "../../types/category";
 import CategoryBlockConfirmation from "../../components/ui/categoryBlockConfirmation";
 import { toast } from "react-toastify";
+import Pagination from "../../components/common/Pagination";
 
 const Categories: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { categories } = useSelector((state: RootState) => state.category);
 
@@ -24,12 +22,25 @@ const Categories: React.FC = () => {
 
   const handleBlockSuccess = () => {
     toast.success("Category deleted Successfully");
-    dispatch(getAllCategories());
+    dispatch(getAllCategories(currentPage));
   };
 
   useEffect(() => {
-    dispatch(getAllCategories());
-  }, [dispatch]);
+    console.log('Fetching categories for page:', currentPage);
+    fetchCategories(currentPage);
+}, [currentPage]);
+
+  const fetchCategories = async (page: number) => {
+    const response = await dispatch(getAllCategories(page));
+    console.log('response of get allcoures infrontend',response)
+    const { categories, totalPages } = response.payload;
+    setTotalPages(totalPages);
+};
+
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+};
 
   const handleEditClick = (category: Category) => {
     setSelectedCategory(category);
@@ -53,7 +64,7 @@ const Categories: React.FC = () => {
     if (selectedCategory) {
       dispatch(updateCategories(updatedCategory));
     }
-    dispatch(getAllCategories())
+    dispatch(getAllCategories(currentPage))
     closeEditModal();
   };
 
@@ -88,8 +99,8 @@ const Categories: React.FC = () => {
           initialData={selectedCategory}
         />
       )}
-      {categories.length > 0 ? (
-        <div className="grid grid-cols-2 gap-8 md:ml-64 py-4 mt-4">
+      {categories && categories.length > 0 ? (
+        <div className="grid grid-cols-2 gap-8 md:ml-64 py-4 ">
           {categories.map((category) => (
             <div
               key={category._id}
@@ -136,6 +147,9 @@ const Categories: React.FC = () => {
           <p className="mt-4 text-gray-600">No categories available</p>
         </div>
       )}
+       <div className='mt-10 ml-52'>
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+      </div>
     </>
   );
 };

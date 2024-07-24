@@ -2,7 +2,7 @@
 import React from 'react';
 
 const GoogleSignInButton = ({message}:any) => {
-  const handleSignup = ()=>{
+  const  handleSignup = ()=>{
     window.location.href = 'http://localhost:3001/auth/google'
   }
 

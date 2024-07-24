@@ -152,8 +152,7 @@ const AddCourse: React.FC = () => {
     };
 
     try {
-        // Editing existing course
-        await dispatch(setCourseInfo( courseInfo ));
+      await dispatch(setCourseInfo( courseInfo ));
       navigate("/instructor/add-lesson");
     } catch (error: any) {
       toast.error(error.message);

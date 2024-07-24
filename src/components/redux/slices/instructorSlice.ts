@@ -45,10 +45,37 @@ const initialState: InstructorState = {
 export const fetchAllInstructors = createAsyncThunk(
   "instructor/fetchAllInstructors",
   async (_, { rejectWithValue }) => {
-    console.log('fetch allcalled in slice')
     try {
       const response = await axiosInstance.get(`/user/getInstructors`);
       console.log("getInstructors  in userslice", response);
+      return response.data;
+    } catch (error: any) {
+        console.log(error)
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const fetchVerifiedInstructors = createAsyncThunk(
+  "instructor/verifiedInstructors",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/user/verifiedInstructors`);
+      console.log('verifiedinstructors data',response)
+      return response.data;
+    } catch (error: any) {
+        console.log(error)
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const fetchUnVerifiedInstructors = createAsyncThunk(
+  "instructor/unVerifiedInstructors",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/user/unVerifiedInstructors`);
+      console.log('unverifiedinstructors data',response)
       return response.data;
     } catch (error: any) {
         console.log(error)
@@ -91,7 +118,7 @@ const InstructorSlice = createSlice({
   name: "instructor",
   initialState,
   reducers: {
-    clearUserState: (state) => {
+    clearInstructorState: (state) => {
       state.loading = false;
       state.error = null;
       state.data = null;
@@ -123,6 +150,6 @@ const InstructorSlice = createSlice({
   },
 });
 
-export const { clearUserState } = InstructorSlice.actions;
+export const { clearInstructorState } = InstructorSlice.actions;
 
 export default InstructorSlice.reducer;

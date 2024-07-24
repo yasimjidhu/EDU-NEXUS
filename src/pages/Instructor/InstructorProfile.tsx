@@ -24,7 +24,8 @@ const InstructorProfile: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchUserData()).then((res) => setUser(res.payload));
+    dispatch(fetchUserData()).then((res) => setUser(res.payload))
+    .catch((err)=>console.log('user notfound',err))
   }, [dispatch]);
 
   if (!user) {

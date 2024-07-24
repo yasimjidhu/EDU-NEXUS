@@ -27,7 +27,7 @@ const MyCourse: React.FC = () => {
 
   return (
     <div className="space-y-4 p-6">
-      <h1 className="text-2xl font-bold mb-6">My Courses</h1>
+      <h1 className="text-xl font-bold mb-6">My Courses</h1>
       {myCourses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {myCourses.map((course) => (  
@@ -67,8 +67,8 @@ const MyCourse: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-10">
-          <img src="/assets/images/no-data.jpg" className="mx-auto w-1/2 max-w-md" alt="No courses" />
+        <div className="text-center ">
+          <img src="/assets/images/no-data.jpg" className="mx-auto w-1/3 max-w-md" alt="No courses" />
           <h2 className="mt-4 text-xl font-semibold text-gray-600">You haven't enrolled in any courses yet!</h2>
           <p className="mt-2 text-gray-500">Explore our course catalog and start learning today.</p>
         </div>

@@ -1,10 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllCourses, CourseState } from "../../components/redux/slices/courseSlice";
+import {
+  getAllCourses,
+  CourseState
+} from "../../components/redux/slices/courseSlice";
 import { getAllCategories } from "../../components/redux/slices/adminSlice";
-import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
+import Pagination from "../../components/common/Pagination";
+import { useNavigate } from "react-router-dom";
+import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
 
+// Interfaces for types
 interface Instructor {
   _id: string;
   firstName: string;
@@ -16,11 +22,22 @@ interface FilterState {
   price: string[];
   review: number[];
   level: string[];
+  category: string[];
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  description:string;
+  image:string;
 }
 
 const Courses: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate()
+
   const { categories } = useSelector((state: RootState) => state.category);
+
   const [allCourses, setAllCourses] = useState<CourseState[]>([]);
   const [allInstructors, setAllInstructors] = useState<Instructor[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<CourseState[]>([]);
@@ -29,24 +46,27 @@ const Courses: React.FC = () => {
     price: [],
     review: [],
     level: [],
+    category: []
   });
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  // Fetch categories, instructors, and courses on component mount and page change
   useEffect(() => {
-    dispatch(getAllCategories());
+    dispatch(getAllCategories(currentPage))
     dispatch(fetchAllInstructors()).then((res: any) => {
       setAllInstructors(res.payload.instructors);
     });
-    dispatch(getAllCourses()).then((res: any) => {
+    dispatch(getAllCourses(currentPage)).then((res: any) => {
       setAllCourses(res.payload.courses);
+      setTotalPages(res.payload.totalPages);
       setFilteredCourses(res.payload.courses);
     });
-  }, [dispatch]);
+  }, [dispatch, currentPage]);
 
-  useEffect(() => {
-    applyFilters();
-  }, [filters, allCourses]);
-
-  const applyFilters = () => {
+  // Memoized filtered courses
+  const memoizedFilteredCourses = useMemo(() => {
     let result = allCourses;
 
     if (filters.instructors.length > 0) {
@@ -57,7 +77,7 @@ const Courses: React.FC = () => {
       result = result.filter((course) => {
         if (filters.price.includes("Free")) {
           return course.pricing.amount === 0;
-        }
+        } 
         if (filters.price.includes("Paid")) {
           return course.pricing.amount > 0;
         }
@@ -67,7 +87,6 @@ const Courses: React.FC = () => {
 
     if (filters.review.length > 0) {
       result = result.filter((course) => {
-        // Assuming course has a rating property
         return filters.review.some((rating) => course.rating >= rating);
       });
     }
@@ -76,9 +95,33 @@ const Courses: React.FC = () => {
       result = result.filter((course) => filters.level.includes(course.level));
     }
 
-    setFilteredCourses(result);
-  };
+    if (filters.category.length > 0) {
+      result = result.filter((course) => filters.category.includes(course.categoryRef));
+    }
 
+    return result;
+  }, [allCourses, filters]);
+
+  // Update filteredCourses when memoizedFilteredCourses changes
+  useEffect(() => {
+    setFilteredCourses(memoizedFilteredCourses);
+  }, [memoizedFilteredCourses]);
+  
+    const handleCategoryClick = (categoryId: string) => {
+      if (selectedCategory === categoryId) {
+        // If the same category is clicked again, clear the filter
+        setSelectedCategory(null);
+        setFilters(prev => ({ ...prev, category: [] }));
+      } else {
+        // Set the new category
+        setSelectedCategory(categoryId);
+        setFilters(prev => ({ ...prev, category: [categoryId] }));
+      }
+      // Reset to the first page when changing categories
+      setCurrentPage(1);
+    };
+
+  // Function to handle filter changes
   const handleFilterChange = (filterType: keyof FilterState, value: string | number) => {
     setFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
@@ -92,162 +135,179 @@ const Courses: React.FC = () => {
     });
   };
 
+  // Function to handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleViewCourse = (courseId: string) => {
+    navigate(`/course-detail/${courseId}`);
+  };
+
+  // Function to get instructor name by ID
   const getInstructorName = (instructorId: string) => {
     const instructor = allInstructors.find((inst) => inst._id === instructorId);
     return instructor ? `${instructor.firstName} ${instructor.lastName}` : "Unknown Instructor";
   };
 
   return (
-    <div className="ml-52 px-8">
-      <ul className="flex justify-between mb-8">
-        {categories.length > 0 ? (
-          categories.map((category) => (
+    <div className="ml-52 px-8 bg-gray-50 min-h-screen">
+       <ul className="flex flex-wrap justify-start gap-4 mb-8 pt-6">
+        {categories && categories.length > 0 ? (
+          categories.map((category: Category) => (
             <li
-              key={category.id}
-              className="text-black inter hover:bg-medium-rose hover:text-white transition duration-300 p-2 rounded-md cursor-pointer"
+              key={category._id}
+              className={`text-gray-700 bg-white hover:bg-medium-rose hover:text-white transition duration-300 px-4 py-2 rounded-full cursor-pointer shadow-md ${
+                selectedCategory === category._id ? 'bg-medium-rose text-white' : ''
+              }`}
+              onClick={() => handleCategoryClick(category._id)}
             >
               {category.name}
             </li>
           ))
         ) : (
-          <li className="text-black inter">No categories found</li>
+          <li className="text-gray-700">No categories found</li>
         )}
       </ul>
       <div className="grid grid-cols-4 gap-8">
-        <div className="col-span-3 space-y-6">
+        <div className="col-span-3 space-y-6 cursor-pointer">
           {filteredCourses.length > 0 && allInstructors.length > 0 ? (
             filteredCourses.map((course) => (
               <div
                 key={course._id}
-                className="flex bg-white rounded-lg border border-gray-300 overflow-hidden"
+                className="flex bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105"
               >
-                <div className="w-1/3 bg-purple-700">
+                <div className="w-1/3">
                   <img
                     src={course.thumbnail || "/assets/images/person2.png"}
-                    className="object-cover w-full h-full"
+                    className="object-cover w-full h-full transition duration-300"
                     alt={course.title}
                   />
                 </div>
-                <div className="w-2/3 p-4 flex flex-col justify-between">
+                <div className="w-2/3 p-6 flex flex-col justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">by {getInstructorName(course.instructorRef)}</p>
-                    <h3 className="text-xl font-semibold mt-1">{course.title}</h3>
-                    <ul className="flex justify-between mt-3 text-sm">
+                    <p className="text-sm text-indigo-600 font-semibold">by {getInstructorName(course.instructorRef)}</p>
+                    <h3 className="text-2xl font-bold mt-2 text-gray-800">{course.title}</h3>
+                    <ul className="flex justify-between mt-4 text-sm text-gray-600">
                       <li className="flex items-center">
-                        <img src="/assets/icon/clock.png" alt="Clock icon" className="w-4 h-4 mr-1" />
+                        <img src="/assets/icon/clock.png" alt="Clock icon" className="w-5 h-5 mr-2" />
                         <span>2 Weeks</span>
                       </li>
                       <li className="flex items-center">
-                        <img src="/assets/icon/students.png" alt="Students icon" className="w-4 h-4 mr-1" />
+                        <img src="/assets/icon/students.png" alt="Students icon" className="w-5 h-5 mr-2" />
                         <span>156 students</span>
                       </li>
                       <li className="flex items-center">
-                        <img src="/assets/icon/levels.png" alt="Levels icon" className="w-4 h-4 mr-1" />
+                        <img src="/assets/icon/levels.png" alt="Levels icon" className="w-5 h-5 mr-2" />
                         <span>{course.level}</span>
                       </li>
                       <li className="flex items-center">
-                        <img src="/assets/icon/lesson.png" alt="Lesson icon" className="w-4 h-4 mr-1" />
+                        <img src="/assets/icon/lesson.png" alt="Lesson icon" className="w-5 h-5 mr-2" />
                         <span>{course.lessons.length} lessons</span>
                       </li>
                     </ul>
                   </div>
-                  <div className="mt-4">
-                    <div className="border-t border-gray-300 my-2"></div>
+                  <div className="mt-6">
+                    <div className="border-t border-gray-200 my-4"></div>
                     <div className="flex justify-between items-center">
-                      <h6 className="text-green-700 font-semibold">
-                        ${course.pricing.amount} 
+                      <h6 className="text-2xl font-bold text-green-600">
+                        ${course.pricing.amount}
                       </h6>
-                      {/* <button className="bg-black py-2 px-4 hover:bg-gray-800 rounded-md text-white text-sm">
-                        Manage Course
-                      </button> */}
+                      <button className="bg-medium-rose text-white px-4 py-2 rounded-full hover:bg-strong-rose transition duration-300" onClick={() => handleViewCourse(course._id)}>
+                        View Course
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <p>No courses available.</p>
+            <p className="text-center text-gray-700 text-lg">No courses available.</p>
           )}
         </div>
-        <div className="col-span-1 space-y-8">
-          <div>
-            <h1 className="text-lg font-semibold mb-2">Instructors</h1>
+        <div className="col-span-1 space-y-8 sticky top-0 right-6 w-64 h-screen bg-white shadow-lg rounded-lg overflow-y-auto p-6">
+          <div className="cursor-pointer">
+            <h1 className="text-xl font-bold mb-4 text-gray-800">Instructors</h1>
             {allInstructors.map((instructor) => (
-              <div key={instructor._id} className="flex items-center mb-1">
+              <div key={instructor._id} className="flex items-center mb-2">
                 <input
                   type="checkbox"
                   id={`instructor-${instructor._id}`}
                   checked={filters.instructors.includes(instructor._id)}
                   onChange={() => handleFilterChange('instructors', instructor._id)}
-                  className="mr-2"
+                  className="form-checkbox h-5 w-5 text-indigo-600 transition duration-150 ease-in-out"
                 />
-                <label htmlFor={`instructor-${instructor._id}`}>{getInstructorName(instructor._id)}</label>
+                <label htmlFor={`instructor-${instructor._id}`} className="ml-2 text-gray-700 hover:text-indigo-600 transition duration-150 ease-in-out">{getInstructorName(instructor._id)}</label>
               </div>
             ))}
           </div>
           <div>
-            <h1 className="text-lg font-semibold mb-2">Price</h1>
+            <h1 className="text-xl font-bold mb-4 text-gray-800">Price</h1>
             {["All", "Free", "Paid"].map((priceOption) => (
-              <div key={priceOption} className="flex items-center justify-between mb-1">
+              <div key={priceOption} className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     id={`price-${priceOption}`}
                     checked={filters.price.includes(priceOption)}
                     onChange={() => handleFilterChange('price', priceOption)}
-                    className="mr-2"
+                    className="form-checkbox h-5 w-5 text-indigo-600 transition duration-150 ease-in-out"
                   />
-                  <label htmlFor={`price-${priceOption}`}>{priceOption}</label>
+                  <label htmlFor={`price-${priceOption}`} className="ml-2 text-gray-700">{priceOption}</label>
                 </div>
-                <span className="text-sm text-gray-600">15</span>
+                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">15</span>
               </div>
             ))}
           </div>
           <div>
-            <h1 className="text-lg font-semibold mb-2">Review</h1>
+            <h1 className="text-xl font-bold mb-4 text-gray-800">Review</h1>
             {[5, 4, 3, 2, 1].map((rating) => (
-              <div key={rating} className="flex items-center justify-between mb-1">
+              <div key={rating} className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     id={`review-${rating}`}
                     checked={filters.review.includes(rating)}
                     onChange={() => handleFilterChange('review', rating)}
-                    className="mr-2"
+                    className="form-checkbox h-5 w-5 text-indigo-600 transition duration-150 ease-in-out"
                   />
-                  <label htmlFor={`review-${rating}`} className="flex">
+                  <label htmlFor={`review-${rating}`} className="flex ml-2">
                     {Array.from({ length: rating }, (_, index) => (
                       <img key={index} src="/assets/icon/star.png" alt="Star icon" className="w-4 h-4" />
                     ))}
                   </label>
                 </div>
-                <span className="text-sm text-gray-600">(1,234)</span>
+                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">(1,234)</span>
               </div>
             ))}
           </div>
           <div>
-            <h1 className="text-lg font-semibold mb-2">Level</h1>
-            {["All Levels", "Beginner", "Intermediate", "Advanced"].map((level) => (
-              <div key={level} className="flex items-center justify-between mb-1">
+            <h1 className="text-xl font-bold mb-4 text-gray-800">Level</h1>
+            {Array.from(new Set(allCourses.map(course => course.level))).map((level) => (
+              <div key={level} className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     id={`level-${level}`}
                     checked={filters.level.includes(level)}
                     onChange={() => handleFilterChange('level', level)}
-                    className="mr-2"
+                    className="form-checkbox h-5 w-5 text-indigo-600 transition duration-150 ease-in-out"
                   />
-                  <label htmlFor={`level-${level}`}>{level}</label>
+                  <label htmlFor={`level-${level}`} className="ml-2 text-gray-700">{level}</label>
                 </div>
-                <span className="text-sm text-gray-600">15</span>
+                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  {allCourses.filter(course => course.level === level).length}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </div>
+      <div className=' mt-8'>
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+      </div>
     </div>
   );
-};
+}
 
 export default Courses;
-

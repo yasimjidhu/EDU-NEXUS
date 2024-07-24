@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { RootState } from "../redux/store/store";
 import { fetchUserData, clearUserState } from "../redux/slices/studentSlice";
+import { clearInstructorState } from "../redux/slices/instructorSlice";
 
 interface NavbarProps {
   isAuthenticated: boolean;
@@ -15,7 +16,6 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
   const { user } = useSelector((state: RootState) => state.user);
   const authData = useSelector((state: RootState) => state.auth);
-
 
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -33,18 +33,11 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
     setIsOpen(!isOpen);
   };
 
-  // useEffect(()=>{
-  //   if(user?.isBlocked){
-  //     (dispatch as AppDispatch)(logoutAdmin());
-  //     navigate('/login')
-  //     toast.error('Access Denied')
-  //   }
-  // },[user])
-
   const handleLogout = async () => {
     try {
       await (dispatch as AppDispatch)(logoutAdmin());
-      dispatch(clearUserState()); 
+      dispatch(clearUserState());
+      dispatch(clearInstructorState())
       navigate("/login");
       toast.success("Logout Successful");
     } catch (error: any) {
@@ -54,14 +47,40 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
   };
 
   const handleProfile = () => {
-    console.log('user in profile',user)
-    if(user?.role == 'student'){
-      navigate('/student/profile')
-    }else if(user?.role == 'instructor'){
-      navigate('/instructor/profile')
+    if (user?.role === "student") {
+      navigate("/student/profile");
+    } else if (user?.role === "instructor") {
+      navigate("/instructor/profile");
+    } else {
+      navigate("/admin/overview");
     }
-    else{
-      navigate('/admin/overview')
+  };
+
+  const renderProfileImage = () => {
+    if (authData.user.profileImage) {
+      return (
+        <img
+          src={authData.user.profileImage}
+          alt="avatar"
+          className="w-full h-full object-cover rounded-full"
+        />
+      );
+    } else if (user && user.profile?.avatar) {
+      return (
+        <img
+          src={`${user.profile.avatar}?${new Date().getTime()}`}
+          alt="avatar"
+          className="w-full h-full object-cover rounded-full"
+        />
+      );
+    } else {
+      return (
+        <img
+          src="/assets/png/user.png"
+          alt="User Profile"
+          className="w-full h-full object-cover rounded-full"
+        />
+      );
     }
   };
 
@@ -138,19 +157,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
                   className="cursor-pointer w-11 h-11 shadow-sm border-2 border-gray-300 rounded-full overflow-hidden"
                   onClick={toggleDropdown}
                 >
-                  {user ? (
-                    <img
-                      src={`${user.profile.avatar}?${new Date().getTime()}`} // Append timestamp to force new image fetch
-                      alt="avatar"
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    <img
-                      src="/assets/png/user.png"
-                      className="w-full h-full object-cover rounded-full"
-                      alt="User Profile"
-                    />
-                  )}
+                  {renderProfileImage()}
                 </div>
                 {isOpen && (
                   <div className="absolute top-0 right-0 mt-10 w-40 bg-white border border-gray-200 rounded-lg shadow p-2">

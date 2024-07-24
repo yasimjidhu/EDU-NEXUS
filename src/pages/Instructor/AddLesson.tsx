@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../components/redux/store/store";
 import {
+  clearCourseInfo,
   getCourse,
   submitCourse,
   updateCourse,
@@ -82,7 +83,7 @@ const AddLesson: React.FC = () => {
           duration: response.data.duration?.toString(),
         }));
       } else {
-        const newAttachment: Attachment = {
+        const newAttachment: any = {
           title: attachmentTitle || file.name,
           url: response.data.secure_url
         };
@@ -146,6 +147,7 @@ const AddLesson: React.FC = () => {
         await dispatch(updateCourse({ courseId: courseIdToUpdate, ...course, lessons: updatedLessons }) as any);
         toast.success("Course updated successfully");
       }
+      await dispatch(clearCourseInfo())
       navigate("/instructor/courses");
       
     } catch (error) {
@@ -354,3 +356,4 @@ const AddLesson: React.FC = () => {
 };
 
 export default AddLesson;
+

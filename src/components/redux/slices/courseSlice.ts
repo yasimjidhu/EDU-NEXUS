@@ -6,6 +6,7 @@ import { CheckEnrollment } from '../../../types/enrollment';
 import { Review } from '../../../types/review'
 import { UpdateAssessmentPayload } from '../../../types/enrollment';
 import axios from 'axios';
+import { CourseRequest } from '../../../types/course';
 
 interface Question {
   answer: string;
@@ -148,14 +149,12 @@ interface IAssessment  {
   questions: Question[];
 }
 
-export default IAssessment;
-
-
 export const submitCourse = createAsyncThunk(
   'course/submitCourse',
   async (courseData: CourseState, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/course/add-course', courseData);
+      console.log('submit coursedata got',courseData)
+      const response = await axiosInstance.post('/course/courses/add-course', courseData);
       return response.data;
     } catch (error:any) {
       return rejectWithValue(error.response.data);
@@ -167,7 +166,7 @@ export const  getAllCoursesOfInstructor= createAsyncThunk(
   'course/getAllCoursesOfInstructor',
   async (instructorId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/get-courses/${instructorId}`);
+      const response = await axiosInstance.get(`/course/courses/get-courses/${instructorId}`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -179,7 +178,7 @@ export const getUserEnrolledCourses= createAsyncThunk(
   'course/getUserEnrolledCourses',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/my-course/${userId}`);
+      const response = await axiosInstance.get(`/course/enrollments/my-course/${userId}`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -191,7 +190,7 @@ export const getCourse= createAsyncThunk(
   'course/getCourse',
   async (courseId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/get-course/${courseId}`);
+      const response = await axiosInstance.get(`/course/courses/get-course/${courseId}`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -206,7 +205,7 @@ export const getAllCourses= createAsyncThunk(
       const response = await axiosInstance.get(`/course/courses?page=${page}`);
       return {
         courses:response.data.courses.allCourses,
-        totalPages: Math.ceil(response.data.courses.totalCourses / 8)
+        totalPages: Math.ceil(response.data.courses.totalCourses / 6)
       }
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -219,7 +218,7 @@ export const getCategoryWiseCourses = createAsyncThunk(
   async ( payload: { page: number; categoryId: string }, { rejectWithValue }) => {
     try {
       const { page, categoryId } = payload;
-      const response = await axiosInstance.get(`/course/categorywise/${categoryId}`, {
+      const response = await axiosInstance.get(`/course/courses/categorywise/${categoryId}`, {
         params: {
           page,
         },
@@ -234,26 +233,53 @@ export const getCategoryWiseCourses = createAsyncThunk(
   }
 );
 
-
-
 export const fetchCourseRequests= createAsyncThunk(
   'course/fetchCourseRequests', 
-  async (_, { rejectWithValue }) => {
+  async (page:number, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/courseRequsts`);
-      return response.data;
+      const response = await axiosInstance.get(`/course/courses/courseRequests?page=${page}`);
+      console.log('response of courserequests',response)
+      return {
+        courses: response.data.allCourses,
+        totalPages: Math.ceil(response.data.totalCourses / 10),
+      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
 
+export const approveCourse= createAsyncThunk(
+  'course/approve-course',
+  async (data:CourseRequest, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/course/courses/approve/${data.courseId}`,data);
+      console.log('response of approve couse',response)
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const rejectCourse= createAsyncThunk(
+  'course/reject-course',
+  async (data:CourseRequest, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(`/course/courses/reject/${data.courseId}`,data);
+      console.log('response of reject couse',response)
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
 export const updateCourse= createAsyncThunk(
   'course/updateCourse',
   async (data:UpdateData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.put(`/course/update-course`,data);
+      const response = await axiosInstance.put(`/course/courses/update-course`,data);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -266,7 +292,7 @@ export const updateLessonProgress = createAsyncThunk(
   async ({ courseId,userId, lessonId, progress,totalLesson }: { courseId: string,userId:string, lessonId: string, progress: number,totalLesson:number }, { rejectWithValue }) => {
     try {
       console.log('update progress reached in slice',courseId)
-      const response = await axiosInstance.put(`/course/enrollment/progress`,{
+      const response = await axiosInstance.put(`/course/enrollments/enrollment/progress`,{
         courseId,userId,lessonId,progress,totalLesson
       });
       return response.data;
@@ -281,7 +307,7 @@ export const enrollToCourse= createAsyncThunk(
   'course/enrollment',
   async (data:EnrollmentEntity, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/course/enrollment`,data);
+      const response = await axiosInstance.post(`/course/enrollments`,data);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -293,7 +319,7 @@ export const checkEnrollment= createAsyncThunk(
   'course/check-enrollment',
   async (data:CheckEnrollment, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/enrollment/check`,{
+      const response = await axiosInstance.get(`/course/enrollments/check`,{
         params:{
           courseId:data.courseId,
           userId:data.userId
@@ -310,7 +336,7 @@ export const addReview= createAsyncThunk(
   'course/add-review',
   async (data:Review, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/course/review`,data);
+      const response = await axiosInstance.post(`/course/reviews/review`,data);
       return response.data.addedReview
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -323,7 +349,7 @@ export const getReviews= createAsyncThunk(
   async (data:ReviewRequestData, { rejectWithValue }) => {
     try {
       const {courseId} = data
-      const response = await axiosInstance.get(`/course/review/${courseId}`);
+      const response = await axiosInstance.get(`/course/reviews/review/${courseId}`);
       return Array.isArray(response.data.reviews) ? response.data.reviews : [];
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -335,7 +361,7 @@ export const addAssessment= createAsyncThunk(
   'course/add-assessment',
   async (data:IAssessment, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/course/assessment`,data);
+      const response = await axiosInstance.post(`/course/assessments/assessment`,data);
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -347,7 +373,7 @@ export const getAssessments= createAsyncThunk(
   'course/get-assessments',
   async (instructorId:string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/assessment/${instructorId}`);
+      const response = await axiosInstance.get(`/course/assessments/assessment/${instructorId}`);
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -359,7 +385,7 @@ export const editAssessment = createAsyncThunk(
   'course/edit-assessments',
   async ({ updateData }: { updateData: Partial<IAssessment> }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.put(`/course/assessment`, updateData);
+      const response = await axiosInstance.put(`/course/assessments/assessment`, updateData);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -371,7 +397,7 @@ export const deleteAssessment= createAsyncThunk(
   'course/delete-assessments',
   async (assessmentId:string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.delete(`/course/assessment/${assessmentId}`);
+      const response = await axiosInstance.delete(`/course/assessments/assessment/${assessmentId}`);
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -384,7 +410,7 @@ export const getAssessment= createAsyncThunk(
   async (assessmentId:string, { rejectWithValue }) => {
     try {
       console.log('request reached in slice',assessmentId)
-      const response = await axiosInstance.get(`/course/assessment/${assessmentId}`);
+      const response = await axiosInstance.get(`/course/assessments/assessment/${assessmentId}`);
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -403,7 +429,7 @@ export const updateAssessmentCompletion = createAsyncThunk<
   async ({ userId, courseId }: UpdateAssessmentPayload, { rejectWithValue }) => {
     try {
       console.log('request updated assessment reached in slice', userId, courseId);
-      const response = await axiosInstance.post<EnrollmentEntity>(`/course/update-completion`, { userId, courseId });
+      const response = await axiosInstance.post<EnrollmentEntity>(`/course/enrollments/update-completion`, { userId, courseId });
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
@@ -418,7 +444,7 @@ export const getEnrolledStudentInstructors = createAsyncThunk(
   "instructor/getEnrolledStudentInstructors",
   async (userId:string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/enrolled-courses/${userId}`);
+      const response = await axiosInstance.get(`/course/enrollments/instructorRefs/${userId}`);
       console.log("get student enrolled courses instructors  in courseslice", response);
       return response.data;
     } catch (error: any) {
@@ -439,7 +465,7 @@ const courseSlice = createSlice({
       state.lessons.push(action.payload);
     },
     clearCourseInfo(state) {
-      return initialState;
+      return initialState
     },
 
   },
@@ -449,9 +475,11 @@ const courseSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(submitCourse.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(submitCourse.fulfilled, (state:any, action: PayloadAction<any>) => {
         state.loading = false;
+        // Reset course state after successful submission
         Object.assign(state, action.payload.course)
+        state = courseSlice.caseReducers.clearCourseInfo(state);
       })
       .addCase(submitCourse.rejected, (state, action : PayloadAction<any>) => {
         state.loading = false;
@@ -496,5 +524,5 @@ const courseSlice = createSlice({
   },
 });
 
-export const { setCourseInfo, addLesson } = courseSlice.actions;
+export const { setCourseInfo, addLesson,clearCourseInfo } = courseSlice.actions;
 export default courseSlice.reducer;

@@ -4,10 +4,15 @@ interface Attachments {
 }
 
 export interface Lesson {
-    lessonNumber: string;
+    lessonNumber?: string;
     title: string;
     description: string;
     video: string;
     duration?: string;
     attachments:Attachments[]
+}
+
+export interface CourseRequest{
+    courseId:string;
+    email:string;
 }

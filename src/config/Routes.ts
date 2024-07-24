@@ -39,6 +39,7 @@ const routes = {
       PROFILE: "/student/profile",
       COURSE_DETAIL: "/student/course-detail/:id",
       MY_COURSES: "/student/mycourses",
+      CHAT:"/student/chat"
     },
     PUBLIC: {
       ROOT: "/",
@@ -47,8 +48,9 @@ const routes = {
       VIEW_COURSE: "/view-course/:courseId",
       VIEW_CATEGORY: "/viewcategory/:categoryId",
       COURSE_DETAIL: "/course-detail/:id",
-      PAYMENT: "/payment/:courseId",
-      CHAT:"/chat"
+      SUCCESS:"/success",
+      CANCELLED:"/cancel",
+      FAILED:"/failure"
     },
     REGISTRATION: {
       ROOT: "/register",

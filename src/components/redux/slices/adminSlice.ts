@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../../constants/axiosInstance";
 
+
 interface Category {
     _id?:string | null;
     name: string;
@@ -40,10 +41,9 @@ export const addCategory = createAsyncThunk<
     async (data: Category, { rejectWithValue }) => {
         try {
          
-            const response = await axiosInstance.post('/course/add-category', data);
+            const response = await axiosInstance.post('/course/categories', data);
             return response.data; 
         } catch (error: any) {
-            console.log('this is the add category error>>>', error);
             return rejectWithValue({ error: error.response.data.message || 'Failed to add category' });
         }
     }
@@ -54,12 +54,12 @@ export const getAllCategories = createAsyncThunk(
     async (page:number, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.get(`/course/categories?page=${page}`);
+            console.log('response of allcategories in slice',response)
             return {
                 categories:response.data.categories,
-                totalPages:Math.ceil(response.data.totalCategories / 8)
+                totalPages:Math.ceil(response.data.totalCategories / 6)
             }
         } catch (error: any) {
-            console.error('Failed to fetch categories:', error);
             return rejectWithValue({ error: error.message || 'Failed to fetch categories' });
         }
     }
@@ -74,7 +74,7 @@ export const  updateCategories = createAsyncThunk<
     'categories/update-category',
     async (data:Category, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/course/update-category',data);
+            const response = await axiosInstance.put('/course/categories',data);
             return response.data; 
         } catch (error: any) {
             console.error('Failed to edit categories:', error);
@@ -82,6 +82,7 @@ export const  updateCategories = createAsyncThunk<
         }
     }
 );
+
 
 export const blockCategory = createAsyncThunk<
     BlockCategoryResponse,
@@ -91,8 +92,7 @@ export const blockCategory = createAsyncThunk<
     'categories/block-category',
     async (categoryId: string, { rejectWithValue }) => {
         try {
-            console.log('block slice called',categoryId)
-            const response = await axiosInstance.post(`/course/block/${categoryId}`);
+            const response = await axiosInstance.post(`/course/categories/block/${categoryId}`);
             return response.data; 
         } catch (error: any) {
             console.error('Failed to block category:', error);
@@ -100,9 +100,6 @@ export const blockCategory = createAsyncThunk<
         }
     }
 );
-
-
-
 
 
 const categorySlice = createSlice({
@@ -130,14 +127,14 @@ const categorySlice = createSlice({
             })
             .addCase(getAllCategories.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                console.log('payload in addcase',action.payload)
-                state.categories = action.payload.categories;
+                console.log('action payload of getallcategories',action.payload)
+                state.categories = action.payload.categories
                 state.error = null;
             })
             .addCase(getAllCategories.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
                 state.loading = false;
                 state.error = action.payload?.error || 'Failed to fetch categories';
-            })
+            });
 
         },
 });

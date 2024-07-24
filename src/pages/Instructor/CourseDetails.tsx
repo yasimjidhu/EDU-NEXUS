@@ -26,7 +26,7 @@ import {
   Paperclip,
   Star,
 } from "lucide-react";
-import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
+import {  fetchVerifiedInstructors } from "../../components/redux/slices/instructorSlice";
 import Navbar from "../../components/authentication/Navbar";
 import { CompletionStatus } from "../../types/enrollment";
 import { toast } from "react-toastify";
@@ -61,18 +61,27 @@ const CourseDetails: React.FC = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const course = await dispatch(getCourse(id as string));
-        setCourseId(course.payload.course._id);
-        setCourseData(course.payload.course);
-        setTrial(course.payload.course.trial.video);
+        const courseResponse = await dispatch(getCourse(id));
+        const course = courseResponse.payload.course;
+        setCourseId(course._id);
+        setCourseData(course);
+        setTrial(course.trial.video);
       } catch (error) {
-        console.error("Error fetching course:", error);
+        console.error('Error fetching course:', error);
       }
     };
-    dispatch(fetchAllInstructors()).then((res: any) => {
-      setAllInstructors(res.payload.instructors);
-    });
+
+    const fetchInstructors = async () => {
+      try {
+        const instructorsResponse = await dispatch(fetchVerifiedInstructors());
+        setAllInstructors(instructorsResponse.payload.instructors);
+      } catch (error) {
+        console.error('Error fetching verified instructors:', error);
+      }
+    };
+
     fetchCourse();
+    fetchInstructors();
   }, [dispatch, id]);
 
   useEffect(() => {

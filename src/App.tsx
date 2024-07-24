@@ -37,15 +37,15 @@ import ViewCourse from "./pages/UserPages/ViewCourse";
 import Public from "./layouts/Public";
 import AllCategories from "./pages/UserPages/AllCategories";
 import ViewCategory from "./pages/UserPages/ViewCategory";
-import ExamPassedMessage from "./components/common/ExamPassedMessage";
-import PaymentPage from "./pages/UserPages/Payment";
 import ChatUI from "./pages/Chat/UserChat";
+import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 
 
 function App() {
   return (
     <Router>
       <Routes>
+
         <Route path={routes.ROOT} element={<SignupPage />} />
         <Route path={routes.LOGIN} element={<LoginPage />} />
         <Route path={routes.HOME} element={<Home />} />
@@ -93,14 +93,15 @@ function App() {
           <Route path={routes.PUBLIC.VIEW_COURSE} element={<ViewCourse />} />
           <Route path={routes.PUBLIC.VIEW_CATEGORY} element={<ViewCategory />} />
           <Route path={routes.PUBLIC.COURSE_DETAIL} element={<CourseDetail />} />
-          <Route path={routes.PUBLIC.PAYMENT} element={<PaymentPage />} />
-          <Route path={routes.PUBLIC.CHAT} element={<ChatUI/>}/>
+          <Route path={routes.PUBLIC.SUCCESS} element={<PaymentSuccess/>}/>
         </Route>
 
         <Route path={routes.STUDENT.ROOT} element={<Student />}>
           <Route path={routes.STUDENT.PROFILE} element={<UserProfile />} />
           <Route path={routes.STUDENT.MY_COURSES} element={<MyCourse />} />
+          <Route path={routes.STUDENT.CHAT} element={<ChatUI/>}/>
         </Route>
+          
       </Routes>
     </Router>
   );

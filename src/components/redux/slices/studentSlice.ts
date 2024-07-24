@@ -202,26 +202,34 @@ const studentSlice = createSlice({
       })
       .addCase(blockUser.fulfilled, (state, action: PayloadAction<{ email: string; isBlocked: boolean }>) => {
         const user = state.user;
-        const index = state.allUsers?.findIndex(user => user.email === action.payload.email);
-
-        if (index !== undefined && index !== -1) {
-          state.allUsers[index].isBlocked = action.payload.isBlocked;
+        const allUsers = state.allUsers;
+      
+        if (allUsers) { 
+          const index = allUsers.findIndex(u => u.email === action.payload.email);
+      
+          if (index !== -1) {
+            state.allUsers[index].isBlocked = action.payload.isBlocked;
+          }
         }
-
+      
         if (user && user.email === action.payload.email) {
-          state.user.isBlocked = action.payload.isBlocked;
+          state.user!.isBlocked = action.payload.isBlocked;
         }
       })
       .addCase(unblockUser.fulfilled, (state, action: PayloadAction<{ email: string; isBlocked: boolean }>) => {
         const user = state.user;
-        const index = state.allUsers?.findIndex(user => user.email === action.payload.email);
-
-        if (index !== undefined && index !== -1) {
-          state.allUsers[index].isBlocked = action.payload.isBlocked;
+        const allUsers = state.allUsers;
+      
+        if (allUsers) { 
+          const index = allUsers.findIndex(user => user.email === action.payload.email);
+      
+          if (index !== -1) { 
+            allUsers[index].isBlocked = action.payload.isBlocked;
+          }
         }
-
+      
         if (user && user.email === action.payload.email) {
-          state.user.isBlocked = action.payload.isBlocked;
+          user.isBlocked = action.payload.isBlocked;
         }
       })
       .addCase(ApproveInstructor.pending, (state) => {
@@ -232,8 +240,8 @@ const studentSlice = createSlice({
         ApproveInstructor.fulfilled,
         (state, action: PayloadAction<any>) => {
           state.loading = false;
-          console.log("actionpaylod of approved user", action.payload);
-          state.user = action.payload.user
+          console.log('approved user is',action.payload)
+          state.user = action.payload.user;
           state.error = null;
         }
       )
@@ -252,8 +260,9 @@ const studentSlice = createSlice({
         RejectInstructor.fulfilled,
         (state, action: PayloadAction<any>) => {
           state.loading = false;
-          console.log("actionpaylod of approved user", action.payload);
-          state.user = action.payload.user
+          if (state.user) { 
+            state.user.isVerified = false; 
+          }
           state.error = null;
         }
       )

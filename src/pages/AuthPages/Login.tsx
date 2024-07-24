@@ -43,6 +43,7 @@ const LoginPage: React.FC = () => {
       if (response.payload && response.payload.error) {
         throw new Error(response.payload.error);
       }
+      console.log('response of login',response)
       
       if (response.payload?.user?.role == "admin") {
         navigate("/admin/overview");
@@ -51,7 +52,7 @@ const LoginPage: React.FC = () => {
       }
     } catch (error: any) {
       toast.error(error.message || "An unexpected error occurred");
-      console.error("Login failed:", error);
+      console.error("Login failed:", error); 
     } finally {
       setSubmitting(false);
     }

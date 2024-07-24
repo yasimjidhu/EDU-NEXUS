@@ -15,7 +15,7 @@ const Users: React.FC = () => {
   const [currentRole, setCurrentRole] = useState<"student" | "instructor">(
     "student"
   );
-  // const [allUsers,setAllUsers] = useState([])
+
   const {allUsers} = useSelector((state:RootState)=>state.user)
 
   useEffect(() => {
@@ -147,12 +147,14 @@ const Users: React.FC = () => {
             </div>
           ))}
         </div>
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          currentUsers={currentUsers.length}
-          onPageChange={handlePageChange}
-        />
+        {currentUsers.length >0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            currentUsers={currentUsers.length}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
     </>
   );

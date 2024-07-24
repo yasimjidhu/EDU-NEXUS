@@ -1,7 +1,7 @@
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
-import { useParams,useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   CourseState,
   addReview,
@@ -27,16 +27,20 @@ import {
   Star,
   IndianRupee,
 } from "lucide-react";
-import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
-import Navbar from "../../components/Instructor/Navbar";
+import {  fetchVerifiedInstructors } from "../../components/redux/slices/instructorSlice";
 import { CompletionStatus } from "../../types/enrollment";
 import { toast } from "react-toastify";
-import { Dispatch } from "redux";
 import { getAllUsers } from "../../components/redux/slices/studentSlice";
-import StripePaymentForm from "../../components/payment/paymentForm";
+import {  Elements, useElements, useStripe } from "@stripe/react-stripe-js";
+import {makePayment } from "../../components/redux/slices/paymentSlice";
+import { loadStripe } from "@stripe/stripe-js";
 
 const CourseDetails: React.FC = () => {
+
   const { id } = useParams();
+  const stripe = useStripe()
+  const elements = useElements()
+  const [loading,setLoading] = useState(false)
   const dispatch: AppDispatch = useDispatch();
   const [courseData, setCourseData] = useState<CourseState | null>(null);
   const [trial, setTrial] = useState<string | null>(null);
@@ -51,33 +55,38 @@ const CourseDetails: React.FC = () => {
   const [courseId, setCourseId] = useState("");
   const [userReviews, setUserReviews] = useState([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const { user } = useSelector((state: RootState) => state.user);
-  const userData = useSelector((state: RootState) => state.auth);
   const courseStoredData = useSelector((state: RootState) => state.course);
 
   const toggleLesson = (index) => {
     setOpenLesson(openLesson === index ? null : index);
   };
 
-  const navigate = useNavigate();
-
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const course = await dispatch(getCourse(id as string));
-        setCourseId(course.payload.course._id);
-        setCourseData(course.payload.course);
-        setTrial(course.payload.course.trial.video);
+        const courseResponse = await dispatch(getCourse(id));
+        const course = courseResponse.payload.course;
+        setCourseId(course._id);
+        setCourseData(course);
+        setTrial(course.trial.video);
       } catch (error) {
-        console.error("Error fetching course:", error);
+        console.error('Error fetching course:', error);
       }
     };
-    dispatch(fetchAllInstructors()).then((res: any) => {
-      setAllInstructors(res.payload.instructors);
-    });
+
+    const fetchInstructors = async () => {
+      try {
+        const instructorsResponse = await dispatch(fetchVerifiedInstructors());
+        setAllInstructors(instructorsResponse.payload.instructors);
+      } catch (error) {
+        console.error('Error fetching verified instructors:', error);
+      }
+    };
+
     fetchCourse();
+    fetchInstructors();
   }, [dispatch, id]);
 
   useEffect(() => {
@@ -111,38 +120,72 @@ const CourseDetails: React.FC = () => {
     dispatch(getAllUsers()).then((res) => setAllUsers(res.payload));
   }, []);
 
-  const handleEnrollment = async (courseId: string) => {
-    if (courseData?.pricing.type == "free") {
-      const enrollmentInfo = {
-        userId: user?._id,
-        courseId: courseId,
-        enrolledAt: new Date().toISOString(),
-        completionStatus: CompletionStatus.Enrolled,
-        progress: {
-          completedLessons: [],
-          completedAssessments: [],
-          overallCompletionPercentage: 0,
-        },
-      };
-      try {
+  const handleEnrollment = async () => {
+    if (!courseData || !user) {
+      toast.error("Course data or user information is missing");
+      return;
+    }
+  
+    try {
+      setLoading(true);
+  
+      if (courseData.pricing.type === "free") {
+        // Handle free course enrollment
+        const enrollmentInfo = {
+          userId: user._id,
+          courseId: courseData._id,
+          enrolledAt: new Date().toISOString(),
+          completionStatus: 'Enrolled' as CompletionStatus,
+          progress: {
+            completedLessons: [],
+            completedAssessments: [],
+            overallCompletionPercentage: 0,
+          },
+        };
         const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
         setEnrolled(true);
         toast.success(enrolledStudent.payload.message);
-      } catch (error: any) {
-        toast.error(error.message);
-      }
-    } else {
-       // Redirect to the payment page
-      navigate(`/payment/${courseId}`, {
-        state: {
-          courseTitle: courseData.title,
-          amount: courseData.pricing.amount,
-          currency: 'INR', // Assuming USD, adjust if needed
-          userId: user?._id,
+      } else {
+        const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+        
+        if (!stripe) {
+          throw new Error("Failed to load Stripe");
         }
-    });
-  };
+  
+        if (!user._id || !courseData._id) {
+          throw new Error('User or course information is incomplete');
+        }
+  
+        const paymentResponse = await dispatch(makePayment({
+          user_id: user._id,
+          course_id: courseData._id,
+          amount: courseData.pricing.amount,
+          currency: 'inr',
+          course_name: courseData.title,
+          email:user.email
+        }));
+
+        console.log('paymentResposne in frontend',paymentResponse)
+  
+        if (paymentResponse.payload.data && paymentResponse.payload.data.id) {
+          const result = await stripe.redirectToCheckout({
+            sessionId: paymentResponse.payload  .data.id,
+          });
+  
+          if (result.error) {
+            throw new Error(result.error.message);
+          }
+        } else {
+          throw new Error("Failed to create checkout session");
+        }
+      }
+    } catch (error) {
+      console.error('Error processing enrollment:', error);
+      toast.error(`An error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
     }
+  };
 
     const handleReviewChange = (event: ChangeEvent<HTMLInputElement>) => {
       setNewReview(event.target.value);
@@ -216,9 +259,13 @@ const CourseDetails: React.FC = () => {
         </div>
       );
     }
+
+    const publishable_key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ""
+    const stripePromise = loadStripe(publishable_key);  
   
   return (
     <>
+    <Elements stripe={stripePromise}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-2/3">
@@ -507,6 +554,7 @@ const CourseDetails: React.FC = () => {
           </div>
         </div>
       </div>
+    </Elements>
     </>
   );
 };

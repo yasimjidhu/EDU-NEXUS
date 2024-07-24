@@ -2,25 +2,28 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { CourseState, getAllCoursesOfInstructor } from "../../components/redux/slices/courseSlice";
+import {  getAllCoursesOfInstructor } from "../../components/redux/slices/courseSlice";
 import { PencilIcon } from "lucide-react";
+import { createGzip } from "zlib";
 
 const MyCourses = () => {
-  const { allCourses } = useSelector((state: RootState) => state.course);
+  
   const { categories } = useSelector((state: RootState) => state.category);
   const { user } = useSelector((state: RootState) => state.user);
-  const [myCourses, setMyCourses] = useState<CourseState[]>([]);
+  const [myCourses, setMyCourses] = useState<any[]>([]);
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()
 
   useEffect(() => {
     if (user._id) {
+      console.log('getall course called')
       dispatch(getAllCoursesOfInstructor(user._id)).then((res) => {
+        console.log('response of allcourses of instructor',res)
         setMyCourses(res.payload.courses);
       });
     }
-  }, []);
+  }, [dispatch]);
 
    const handleEditClick = (e: React.MouseEvent, courseId: string) => {
     e.preventDefault();
@@ -28,6 +31,10 @@ const MyCourses = () => {
     navigate(`/instructor/add-course`,{state:courseId});
   };
 
+  useEffect(()=>{
+    console.log('mycourses',myCourses)
+    console.log('categories',categories)
+  },[])
   return (
     <>
       <div className="ml-52 space-y-4">
