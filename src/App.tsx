@@ -39,6 +39,7 @@ import AllCategories from "./pages/UserPages/AllCategories";
 import ViewCategory from "./pages/UserPages/ViewCategory";
 import ChatUI from "./pages/Chat/UserChat";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
+import AuthSuccess from "./components/authentication/AuthSuccess";
 
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
         <Route path={routes.HOME} element={<Home />} />
         <Route path={routes.VERIFY_OTP} element={<OtpVerify />} />
         <Route path={routes.GOOGLE_CALLBACK} element={<GoogleCallback />} />
+        <Route path={routes.AUTH_SUCCESS} element={<AuthSuccess/>}/>
         <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
         <Route path={routes.FORGOT_PASS_VERIFY_OTP}element={<OtpVerifyForResetPass />}/>
         <Route path={routes.RESET_PASS} element={<ResetPassword />} />

@@ -4,6 +4,7 @@ const routes = {
     HOME: "/home",
     VERIFY_OTP: "/verify-otp",
     GOOGLE_CALLBACK: "/auth/google/callback",
+    AUTH_SUCCESS:"/auth-success",
     FORGOT_PASSWORD: "/forgot-password",
     FORGOT_PASS_VERIFY_OTP: "/forgot-pass-verify-otp",
     RESET_PASS: "/reset-pass",

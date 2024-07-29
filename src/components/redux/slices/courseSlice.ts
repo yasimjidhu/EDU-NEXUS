@@ -57,6 +57,8 @@ export interface CourseState {
   pricing: Pricing
   level:'beginner' | 'intermediate'|'expert';
   courseAmount:number|null;
+  enrolledStudentsCount?:number;
+  language:string;
   lessons: Lesson[];
   loading: boolean;
   error: string | null;
@@ -84,6 +86,8 @@ const initialState: CourseState = {
   },
   level:'beginner',
   courseAmount:null,
+  enrolledStudentsCount:0,
+  language:'english',
   lessons: [],
   loading: false,
   error: null,
@@ -198,15 +202,22 @@ export const getCourse= createAsyncThunk(
   }
 );
 
-export const getAllCourses= createAsyncThunk(
+export const getAllCourses = createAsyncThunk(
   'course/getAllCourses',
-  async (page:number, { rejectWithValue }) => {
+  async ({ page, sort, filters }: { page: number; sort?: string; filters?: any }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/courses?page=${page}`);
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        ...(sort && { sort }),
+        ...(filters?.price && { price: filters.price }),
+        ...(filters?.level && { level: filters.level }),
+      });
+
+      const response = await axiosInstance.get(`/course/courses?${queryParams}`);
       return {
-        courses:response.data.courses.allCourses,
+        courses: response.data.courses.allCourses,
         totalPages: Math.ceil(response.data.courses.totalCourses / 6)
-      }
+      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -215,14 +226,18 @@ export const getAllCourses= createAsyncThunk(
 
 export const getCategoryWiseCourses = createAsyncThunk(
   'course/getCategoryWiseCourses',
-  async ( payload: { page: number; categoryId: string }, { rejectWithValue }) => {
+  async ({categoryId,page,sort,filters}:{categoryId:string,page:number;sort?:string;filters?:any}, { rejectWithValue }) => {
+  
     try {
-      const { page, categoryId } = payload;
-      const response = await axiosInstance.get(`/course/courses/categorywise/${categoryId}`, {
-        params: {
-          page,
-        },
-      });
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        ...(sort && { sort }),
+        ...(filters?.price && { price: filters.price }),
+        ...(filters?.level && { level: filters.level }),
+      }).toString();
+
+      const response = await axiosInstance.get(`/course/courses/categorywise/${categoryId}?${queryParams}`);
+      
       return {
         courses: response.data.allCourses,
         totalPages: Math.ceil(response.data.totalCourses / 8),
@@ -277,15 +292,30 @@ export const rejectCourse= createAsyncThunk(
 
 export const updateCourse= createAsyncThunk(
   'course/updateCourse',
-  async (data:UpdateData, { rejectWithValue }) => {
+  async (data:{courseId:string,course:UpdateData}, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.put(`/course/courses/update-course`,data);
+      const { courseId, course } = data;
+      const response = await axiosInstance.put(`/course/courses/update-course/${courseId}`,{course});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
+
+export const updateLesson = createAsyncThunk(
+  'course/updateLesson',
+  async (data: { courseId: string; lessons: Lesson[] }, { rejectWithValue }) => {
+    try {
+      const { courseId, lessons } = data;
+      const response = await axiosInstance.put(`/course/courses/update-lessons/${courseId}`, { lessons });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 
 export const updateLessonProgress = createAsyncThunk(
   'course/updateLessonProgress',

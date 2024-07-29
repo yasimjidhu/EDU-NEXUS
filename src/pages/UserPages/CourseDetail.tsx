@@ -67,6 +67,7 @@ const CourseDetails: React.FC = () => {
     const fetchCourse = async () => {
       try {
         const courseResponse = await dispatch(getCourse(id));
+        console.log('response of getcourse',courseResponse.payload)
         const course = courseResponse.payload.course;
         setCourseId(course._id);
         setCourseData(course);
@@ -131,20 +132,25 @@ const CourseDetails: React.FC = () => {
   
       if (courseData.pricing.type === "free") {
         // Handle free course enrollment
-        const enrollmentInfo = {
-          userId: user._id,
-          courseId: courseData._id,
-          enrolledAt: new Date().toISOString(),
-          completionStatus: 'Enrolled' as CompletionStatus,
-          progress: {
-            completedLessons: [],
-            completedAssessments: [],
-            overallCompletionPercentage: 0,
-          },
-        };
-        const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
-        setEnrolled(true);
-        toast.success(enrolledStudent.payload.message);
+        try{
+          const enrollmentInfo = {
+            userId: user._id,
+            courseId: courseData._id,
+            enrolledAt: new Date().toISOString(),
+            completionStatus: 'enrolled' as CompletionStatus,
+            progress: {
+              completedLessons: [],
+              completedAssessments: [],
+              overallCompletionPercentage: 0,
+            },
+          };
+          const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
+          setEnrolled(true);
+          toast.success(enrolledStudent.payload.message);
+        }catch(error:any){
+          console.log(error)
+          toast.error(error.message)
+        }
       } else {
         const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
         
@@ -315,7 +321,7 @@ const CourseDetails: React.FC = () => {
                 <div className="flex items-center">
                   <Users className="w-5 h-5 mr-2 text-blue-500" />
                   <span className="text-sm">
-                    {courseData.students || "0"} Students
+                    {courseData.enrolledStudentsCount || "0"} Students
                   </span>
                 </div>
               </div>
@@ -477,17 +483,11 @@ const CourseDetails: React.FC = () => {
                 {courseData.lessons.map((lesson, index) => (
                   <div
                     key={index}
-                    className="border rounded-lg overflow-hidden"
+                    className="border rounded-lg overflow-hidden p-4 bg-white"
                   >
-                    <button
-                      className="w-full text-left bg-white p-4 flex justify-between items-center hover:bg-gray-50 transition-colors"
-                      onClick={() => toggleLesson(index)}
-                    >
-                      <span className="font-semibold">
+                    <span className="font-semibold">
                         Lesson {index + 1}: {lesson.title}
                       </span>
-                      {openLesson === index ? <ChevronUp /> : <ChevronDown />}
-                    </button>
                     {openLesson === index && (
                       <div className="p-4 bg-white">
                         <div className="mb-4">

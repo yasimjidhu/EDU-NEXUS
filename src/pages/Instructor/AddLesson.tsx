@@ -1,18 +1,19 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { RootState } from "../../components/redux/store/store";
 import {
   clearCourseInfo,
   getCourse,
   submitCourse,
   updateCourse,
+  updateLesson,
 } from "../../components/redux/slices/courseSlice";
 import { BeatLoader } from "react-spinners";
 import axios from "axios";
 import { Video } from "cloudinary-react";
 import { toast } from "react-toastify";
-import { PlusCircle, Save, File, X, ChevronDown, ChevronUp } from "lucide-react";
+import { PlusCircle, Save, File, X, ChevronDown, ChevronUp ,Edit} from "lucide-react";
 import { Lesson } from "../../types/course";
 
 const AddLesson: React.FC = () => {
@@ -24,28 +25,27 @@ const AddLesson: React.FC = () => {
     attachments: []
   });
   const [attachmentTitle, setAttachmentTitle] = useState<string>("");
-
   const [videoLoading, setVideoLoading] = useState<boolean>(false);
   const [attachmentLoading, setAttachmentLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<"add" | "edit">("add");
-  const [courseIdToUpdate, setCourseIdToUpdate] = useState<string>("");
-
+  const [index,setIndex] = useState<number>(0)
   const [expandedLessonIndex, setExpandedLessonIndex] = useState<number>(-1);
+  const [editingLessonIndex, setEditingLessonIndex] = useState<number>(-1);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const course = useSelector((state: RootState) => state.course);
 
   useEffect(() => {
-    if (course.courseId) {
-      setCourseIdToUpdate(course.courseId);
+    if (location.state) {
       setMode("edit");
-      dispatch(getCourse(course.courseId) as any).then((res: any) => {
+      dispatch(getCourse(location.state) as any).then((res: any) => {
         setLessons(res.payload.course.lessons);
       });
     }
-  }, [course.courseId, dispatch]);
+  }, [location.state, dispatch]);
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
@@ -108,19 +108,40 @@ const AddLesson: React.FC = () => {
     }));
   };
 
-  const handleAddLesson = () => {
+  const handleAddOrUpdateLesson = () => {
     if (!currentLesson.title || !currentLesson.video) {
-      toast.error("Please add a title and upload a video before adding the lesson.");
+      toast.error("Please add a title and upload a video before adding/updating the lesson.");
       return;
     }
-    setLessons((prev) => [...prev, { ...currentLesson, lessonNumber: (prev.length + 1).toString() }]);
+
+    if (editingLessonIndex > -1) {
+      // Update existing lesson
+      setLessons((prev) =>
+        prev.map((lesson, index) =>
+          index === editingLessonIndex ? { ...currentLesson, lessonNumber: (index + 1).toString() } : lesson
+        )
+      );
+      setEditingLessonIndex(-1);
+      toast.success("Lesson updated successfully");
+    } else {
+      // Add new lesson
+      setLessons((prev) => [...prev, { ...currentLesson, lessonNumber: (prev.length + 1).toString() }]);
+      toast.success("Lesson added successfully");
+    }
+
     setCurrentLesson({
       title: "",
       description: "",
       video: "",
       attachments: []
     });
-    toast.success("Lesson added successfully");
+  };
+
+  const handleEditLesson = (index: number) => {
+    setCurrentLesson(lessons[index]);
+    setIndex(index)
+    setEditingLessonIndex(index);
+    setExpandedLessonIndex(-1);
   };
 
   const handleRemoveAttachment = (index: number) => {
@@ -144,12 +165,11 @@ const AddLesson: React.FC = () => {
         await dispatch(submitCourse({ ...course, lessons: updatedLessons }) as any);
         toast.success("Course submitted successfully");
       } else {
-        await dispatch(updateCourse({ courseId: courseIdToUpdate, ...course, lessons: updatedLessons }) as any);
-        toast.success("Course updated successfully");
+        await dispatch(updateLesson({ courseId: location.state, lessons: updatedLessons }) as any);
+        toast.success("Lesson updated successfully");
       }
-      await dispatch(clearCourseInfo())
+      await dispatch(clearCourseInfo());
       navigate("/instructor/courses");
-      
     } catch (error) {
       console.error("Error submitting/updating course:", error);
       toast.error("Failed to submit/update course. Please try again.");
@@ -166,9 +186,13 @@ const AddLesson: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 ml-52">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Add Lessons</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">
+        {mode === "edit" ? "Edit Course" : "Add Course"}
+      </h1>
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Current Lesson</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">
+          {editingLessonIndex > -1 ? "Edit Lesson" : "Add New Lesson"}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -227,19 +251,20 @@ const AddLesson: React.FC = () => {
               accept="video/*"
             />
           </div>
-          <div>
-            <label htmlFor="attachment" className="block text-sm font-medium text-gray-700 mb-1">
-              Lesson Attachments
-            </label>
-            <div className="mb-2">
-              <input
-                type="text"
-                value={attachmentTitle}
-                onChange={(e) => setAttachmentTitle(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Attachment Title"
-              />
-            </div>
+        <div>
+          <label htmlFor="attachment" className="block text-sm font-medium text-gray-700 mb-1">
+            Lesson Attachments
+          </label>
+          <div className="mb-2">
+          <input
+            type="text"
+            value={currentLesson.attachments.length > 0 ? currentLesson.attachments[0].title : ""}
+            onChange={(e) => setAttachmentTitle(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Attachment Title"
+          />
+        </div>
+
             <div
               className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => handleInputClick("attachments-input")}
@@ -288,16 +313,16 @@ const AddLesson: React.FC = () => {
         <div className="mt-6 flex justify-end">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center"
-            onClick={handleAddLesson}
+            onClick={handleAddOrUpdateLesson}
           >
             <PlusCircle className="w-5 h-5 mr-2" />
-            Add Lesson
+            {editingLessonIndex > -1 ? 'Update Lesson' : 'Add Lesson'}
           </button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-700">Added Lessons</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-gray-700">Course Lessons</h2>
         {lessons.length === 0 ? (
           <p className="text-gray-500">No lessons added yet.</p>
         ) : (
@@ -308,12 +333,20 @@ const AddLesson: React.FC = () => {
                   <h3 className="text-lg font-semibold">
                     Lesson {index + 1}: {lesson.title}
                   </h3>
-                  <button
-                    className="text-blue-500 hover:text-blue-700"
-                    onClick={() => toggleLessonDetails(index)}
-                  >
-                    {expandedLessonIndex === index ? <ChevronUp /> : <ChevronDown />}
-                  </button>
+                  <div>
+                    <button
+                      className="text-blue-500 hover:text-blue-700 mr-2"
+                      onClick={() => handleEditLesson(index)}
+                    >
+                      <Edit/>
+                    </button>
+                    <button
+                      className="text-blue-500 hover:text-blue-700"
+                      onClick={() => toggleLessonDetails(index)}
+                    >
+                      {expandedLessonIndex === index ? <ChevronUp /> : <ChevronDown />}
+                    </button>
+                  </div>
                 </div>
                 {expandedLessonIndex === index && (
                   <>

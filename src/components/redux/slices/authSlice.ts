@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../../constants/axiosInstance";
 import axios from 'axios'
+import { useDispatch } from "react-redux";
 
 
 export interface AuthState {
@@ -38,6 +39,7 @@ interface ResetPassword{
     newPassword:string,
     email:string
 }
+
 
 export const signupUser = createAsyncThunk<
     any,
@@ -115,11 +117,10 @@ export const userLogin = createAsyncThunk<
       }
     );
       const {access_token,refresh_token,user} = response.data
-      console.log('user in login',user)
-      if(user.role !== 'admin'){
-          localStorage.setItem('access_token',access_token)
-          localStorage.setItem('refresh_token',refresh_token)
-      }
+
+      localStorage.setItem('access_token',access_token)
+      localStorage.setItem('refresh_token',refresh_token)
+
       return response.data;
     } catch (error: any) {
         console.log('login error in slice',error)
@@ -213,8 +214,11 @@ const authSlice = createSlice({
     reducers: {
         logout(state) {
             state.user = null;
-            state.token = null;
-          },
+        },
+        setUser:(state,action:PayloadAction<any>)=>{
+            state.user = action.payload
+        }
+
     },
     extraReducers: (builder) => {
         builder
@@ -285,5 +289,7 @@ const authSlice = createSlice({
             })
         }
 });
+
+export const {setUser} = authSlice.actions;
 
 export default authSlice.reducer;

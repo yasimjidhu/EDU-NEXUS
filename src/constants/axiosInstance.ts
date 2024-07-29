@@ -61,27 +61,6 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token refreshing
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   async (error: AxiosError) => {
-//     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
-//     if (error.response?.status === 401 && !originalRequest._retry) {
-//       originalRequest._retry = true;
-//       try {
-//         const newToken = await refreshToken();
-//         if (newToken && originalRequest.headers) {
-//           originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-//           return axiosInstance(originalRequest);
-//         }
-//       } catch (refreshError) {
-//         console.error('Failed to refresh token:', refreshError);
-//       }
-//     }
-//     return Promise.reject(error);
-//   }
-// );
-
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {

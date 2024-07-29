@@ -5,6 +5,7 @@ import {
   Pricing,
   getCourse,
   setCourseInfo,
+  updateCourse,
 } from "../../components/redux/slices/courseSlice";
 import axios from "axios";
 import { Image, Video } from "cloudinary-react";
@@ -21,6 +22,7 @@ const AddCourse: React.FC = () => {
   const [trial, setTrial] = useState<string | null>(null);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [language, setLanguage] = useState<string>("English");
   const [category, setCategory] = useState<string>("");
   const [categoryRef, setCategoryRef] = useState<string>(
     categories.length > 0 ? categories[0].id : ""
@@ -36,6 +38,7 @@ const AddCourse: React.FC = () => {
   const [imageLoading, setImageLoading] = useState<boolean>(false);
   const [videoLoading, setVideoLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false); 
+  const [updateLoading, setUpdateLoading] = useState<boolean>(false); 
   const [mode,setMode]=useState<"add"|"edit">("add")
 
   const dispatch = useDispatch();
@@ -43,11 +46,11 @@ const AddCourse: React.FC = () => {
   const location = useLocation();
 
   useEffect(()=>{
-    console.log('user now',user)
     if(location.state){
       setMode("edit")
     }
   },[])
+
 
   useEffect(() => {
     if (location.state ) {
@@ -64,6 +67,7 @@ const AddCourse: React.FC = () => {
         setCertificationAvailable(course.certificationAvailable);
         setPricing(course.pricing);
         setCourseAmount(course?.pricing?.amount);
+        setLanguage(course.language)
       });
     } else {
 
@@ -75,6 +79,7 @@ const AddCourse: React.FC = () => {
       setCertificationAvailable(false);
       setPricing({ type: "free", amount: 0 });
       setCourseAmount(null);
+      setLanguage("English"); // Reset to default
     }
   }, [dispatch, location.state, categories]);
 
@@ -133,6 +138,38 @@ const AddCourse: React.FC = () => {
     }
   };
 
+  const handleUpdateCourse = async ()=>{
+    setUpdateLoading(true)
+
+    const courseInfo = {
+      thumbnail,
+      trial,
+      title,
+      description,
+      category,
+      categoryRef,
+      instructorRef,
+      certificationAvailable,
+      pricing,
+      level,
+      courseAmount,
+      language
+    };
+
+    try{
+
+      const response = await dispatch(updateCourse({courseId:location.state,course:courseInfo}))
+      toast.success(response.payload.message)
+      navigate('/instructor/courses')
+    }catch(error:any){
+      console.log(error)
+      toast.error(error.message)
+    }finally{
+      setUpdateLoading(false)
+    }
+
+  }
+
   const handleNext = async () => {
     setLoading(true);
 
@@ -149,11 +186,12 @@ const AddCourse: React.FC = () => {
       pricing,
       level,
       courseAmount,
+      language
     };
 
     try {
       await dispatch(setCourseInfo( courseInfo ));
-      navigate("/instructor/add-lesson");
+      navigate("/instructor/add-lesson",{state:location.state});
     } catch (error: any) {
       toast.error(error.message);
       console.error("Error saving course:", error);
@@ -195,9 +233,9 @@ const AddCourse: React.FC = () => {
 
   return (
     <div className="ml-52">
+      <h6 className="inter text-xl text-black text-center">Add Course</h6>
       <div className="grid grid-cols-12 space-x-4">
-        <div className="col-span-7 space-y-2 p-4">
-          <h6 className="inter text-xl text-black">Add Course</h6>
+        <div className="col-span-7 space-y-2 p-4 ">
           <section>
             <h6 className="inter-sm text-blue-700">Course Thumbnail</h6>
             <div
@@ -282,67 +320,16 @@ const AddCourse: React.FC = () => {
               </button>
             )}
           </section>
-        </div>
-        <div className="col-span-5 p-4">
-          <div>
-            <label htmlFor="title" className="text-sm">
-              Course Title
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="mt-2 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
-              placeholder="Data structures and algorithms"
-            />
-          </div>
-          <div>
-            <label htmlFor="description" className="text-sm">
-              Course Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-2 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
-            />
-          </div>
-          <div>
-            <label htmlFor="category" className="text-sm">
-              Category
-            </label>
-            <select
-              id="category"
-              value={categoryRef}
-              onChange={handleCategoryChange}
-              className="mt-2 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
-            >
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            <select
-              id="course-level"
-              className="mt-4 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
-              value={level}
-              onChange={handleLevelChange}
-            >
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="expert">Expert</option>
-            </select>
-          </div>
-          <div className="flex justify-start items-center space-x-4 mt-10">
+          <div className="flex justify-start items-center space-x-4 mt-16 ">
             <input
               type="checkbox"
               checked={certificationAvailable}
               onChange={handleCertificationAvailableChange}
               className="w-4 h-4 cursor-pointer"
             />
-            <p className="inter-sm">Certification available</p>
+            <p className="inter-sm mt-4">Certification available</p>
           </div>
-          <div className="mt-6">
+          <div className="mt-8 w-full max-w-md">
             <p className="inter-sm">Pricing</p>
             <div className="flex justify-between space-x-8 mt-2">
               <div className="mt-1 w-1/2">
@@ -390,16 +377,91 @@ const AddCourse: React.FC = () => {
                 />
               </div>
             )}
-            <div className="w-full mt-8">
+        
+          </div>
+        </div>
+        <div className="col-span-5 p-4">
+          <div>
+            <label htmlFor="title" className="text-sm">
+              Course Title
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mt-2 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
+              placeholder="Data structures and algorithms"
+            />
+          </div>
+          <div>
+            <label htmlFor="description" className="text-sm">
+              Course Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-2 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
+            />
+          </div>
+          <div>
+            <label htmlFor="category" className="text-sm">
+              Category
+            </label>
+            <select
+              id="category"
+              value={categoryRef}
+              onChange={handleCategoryChange}
+              className="mt-2 mb-4 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
+            >
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <label htmlFor="level" className="text-sm ">
+              Level
+            </label>
+            <select
+              id="course-level"
+              className="mt-2 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
+              value={level}
+              onChange={handleLevelChange}
+            >
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="expert">Expert</option>
+            </select>
+            <label htmlFor="language" className=" mt-3 block text-sm font-medium text-gray-700">Language</label>
+            <select
+              id="language"
+              name="language"
+              className="mt-2 mb-4 w-full bg-pure-white rounded-lg py-2 px-3 text-md"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              <option value="English">English</option>
+              <option value="Spanish">Spanish</option>
+              <option value="French">French</option>
+              <option value="German">German</option>
+            </select>
+          </div>
+          <div className="w-full mt-8 flex justify-between space-x-2">
               <button
-                className="bg-medium-rose py-1 w-full px-10 text-white inter rounded-md"
+                className="bg-black py-2 w-full px-5 text-white inter rounded-md"
+                onClick={handleUpdateCourse}
+                disabled={loading}
+              >
+                {updateLoading ? <BeatLoader color="white" /> : "Update"}
+              </button>
+              <button
+                className="bg-medium-rose py-2 w-full px-5 text-white inter rounded-md"
                 onClick={handleNext}
                 disabled={loading}
               >
                 {loading ? <BeatLoader color="white" /> : "Save & Next"}
               </button>
             </div>
-          </div>
         </div>
       </div>
     </div>

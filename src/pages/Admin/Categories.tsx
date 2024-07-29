@@ -26,13 +26,11 @@ const Categories: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('Fetching categories for page:', currentPage);
     fetchCategories(currentPage);
 }, [currentPage]);
 
   const fetchCategories = async (page: number) => {
     const response = await dispatch(getAllCategories(page));
-    console.log('response of get allcoures infrontend',response)
     const { categories, totalPages } = response.payload;
     setTotalPages(totalPages);
 };
@@ -62,7 +60,7 @@ const Categories: React.FC = () => {
 
   const handleSaveCategory = (updatedCategory: Partial<Category>) => {
     if (selectedCategory) {
-      dispatch(updateCategories(updatedCategory));
+      dispatch(updateCategories({categoryId:updatedCategory._id,category:updatedCategory}));
     }
     dispatch(getAllCategories(currentPage))
     closeEditModal();

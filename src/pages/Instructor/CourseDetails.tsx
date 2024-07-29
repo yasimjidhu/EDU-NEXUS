@@ -63,6 +63,7 @@ const CourseDetails: React.FC = () => {
       try {
         const courseResponse = await dispatch(getCourse(id));
         const course = courseResponse.payload.course;
+        console.log('single course',course)
         setCourseId(course._id);
         setCourseData(course);
         setTrial(course.trial.video);
@@ -259,7 +260,7 @@ const getUserData = (id: string): any | undefined => {
                 <div className="flex items-center">
                   <Users className="w-5 h-5 mr-2 text-blue-500" />
                   <span className="text-sm">
-                    {courseData.students || "0"} Students
+                    {courseData.enrolledStudentsCount || "0"} Students
                   </span>
                 </div>
               </div>

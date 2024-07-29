@@ -22,7 +22,7 @@ const Home = () => {
 
   const fetchCourses = async (page: number) => {
     try {
-      const response = await dispatch(getAllCourses(page)).unwrap();
+      const response = await dispatch(getAllCourses({page})).unwrap();
       if (response.courses.length > 0) {
         setAllCourses(response.courses);
       }
@@ -142,7 +142,7 @@ const Home = () => {
                     />
                   </div>
                   <h1 className="mt-3 text-md inter ">{category.name}</h1>
-                  <p className="text-sm inter-sm">11 Courses</p>
+                  <p className="text-sm inter">{category.coursesCount} Courses</p>
                 </div>
               ))}
             </div>
@@ -172,7 +172,7 @@ const Home = () => {
                 </div>
                 <div className="flex items-center">
                   <img src="/assets/png/student.png" className="w-3 h-3 mr-1" alt="" />
-                  <p>Students: 17</p>
+                  <p>Students: {course.enrolledStudentsCount}</p>
                 </div>
                 <div className="flex items-center">
                   <img src="/assets/png/level.png" className="w-3 h-3 mr-1" alt="" />

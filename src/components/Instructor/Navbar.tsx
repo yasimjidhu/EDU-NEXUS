@@ -30,6 +30,12 @@ const Navbar: React.FC = () => {
     }
   };
 
+  useEffect(()=>{
+    if(!user?._id){
+      navigate('/login')
+    }
+  },[])
+
   // useEffect(()=>{
   //   if(user?.isBlocked){
   //     (dispatch as AppDispatch)(logoutAdmin());

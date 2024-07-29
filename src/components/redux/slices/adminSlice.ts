@@ -7,7 +7,7 @@ interface Category {
     name: string;
     description: string;
     image: File| string|null;
-    
+    coursesCount?:number | null;
 }
 
 interface RejectValue {
@@ -72,9 +72,10 @@ export const  updateCategories = createAsyncThunk<
     { rejectValue: RejectValue }
 >(
     'categories/update-category',
-    async (data:Category, { rejectWithValue }) => {
+    async (data: {categoryId:string,category:Category}, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/course/categories',data);
+            const {categoryId,category} = data
+            const response = await axiosInstance.put(`/course/categories/${categoryId}`,{category});
             return response.data; 
         } catch (error: any) {
             console.error('Failed to edit categories:', error);
@@ -127,7 +128,6 @@ const categorySlice = createSlice({
             })
             .addCase(getAllCategories.fulfilled, (state, action: PayloadAction<any>) => {
                 state.loading = false;
-                console.log('action payload of getallcategories',action.payload)
                 state.categories = action.payload.categories
                 state.error = null;
             })

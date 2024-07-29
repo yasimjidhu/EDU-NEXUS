@@ -8,7 +8,6 @@ const NotVerified: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.user);
 
-  console.log('user>>>',user)
   useEffect(() => {
     if (user?.isVerified) {
       navigate("/home");

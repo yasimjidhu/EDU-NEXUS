@@ -1,19 +1,24 @@
-
 import React from 'react';
 
-const GoogleSignInButton = ({message}:any) => {
-  const  handleSignup = ()=>{
-    window.location.href = 'http://localhost:3001/auth/google'
-  }
+interface GoogleSignInButtonProps {
+  message: string;
+}
+
+const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ message }) => {
+  const handleSignup = () => {
+    window.location.href = 'http://localhost:3001/auth/google';
+  };
 
   return (
-    <button onClick={handleSignup} className='w-full bg-hash-black py-2 rounded-md text-black flex justify-center items-center font-semibold'>
-    <span className='flex items-center text-white'> 
-      <img src="/assets/images/google.png" alt="" width='25px' height='auto' className='mr-3'/>
-      {message} With Google
-    </span>
-  </button>
-  
+    <button 
+      onClick={handleSignup} 
+      className='w-full bg-hash-black py-2 rounded-md text-black flex justify-center items-center font-semibold'
+    >
+      <span className='flex items-center text-white'> 
+        <img src="/assets/images/google.png" alt="" width='25px' height='auto' className='mr-3'/>
+        {message} With Google
+      </span>
+    </button>
   );
 };
 

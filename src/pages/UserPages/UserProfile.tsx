@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { fetchUserData } from '../../components/redux/slices/studentSlice';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../components/redux/store/store';
-import { User } from '../../components/redux/slices/instructorSlice';
+import {  useSelector } from 'react-redux';
+import {  RootState } from '../../components/redux/store/store';
 import { 
   User as UserIcon, 
   Mail, 
@@ -20,12 +19,10 @@ import {
 } from 'lucide-react';
 
 const UserProfile: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const dispatch: AppDispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(fetchUserData()).then((res) => setUser(res.payload));
-  }, [dispatch]);
+  const authData = useSelector((state:RootState)=>state.auth)
+  const {user} = useSelector((state:RootState)=>state.user)
+
 
   if (!user) {
     return <div className="flex justify-center items-center h-screen">
@@ -46,8 +43,8 @@ const UserProfile: React.FC = () => {
           <div className="w-40 h-40 sm:w-48 sm:h-48 bg-gray-100 rounded-full flex items-center justify-center shadow-lg">
             {user.profile.avatar ? (
               <img
-                src={user.profile.avatar}
-                alt={`${user.firstName} ${user.lastName}`}
+                src={authData.user.profileImage || user.profile.avatar}
+                alt={`${authData.user.username}`}
                 className="w-full h-full object-cover rounded-full"
               />
             ) : (
@@ -62,11 +59,11 @@ const UserProfile: React.FC = () => {
         </div>
         <div className="flex-1 text-center sm:text-left">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            {user.firstName} {user.lastName}
+            {authData.user.username}
           </h1>
           {/* <p className="text-lg text-gray-600 mb-4">{user.qualification}</p> */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-            <InfoItem icon={<Mail size={18} />} label="Email" value={user.email} />
+            <InfoItem icon={<Mail size={18} />} label="Email" value={authData.user.email} />
             <InfoItem icon={<Phone size={18} />} label="Phone" value={user.contact.phone} />
             <InfoItem icon={<MapPin size={18} />} label="Address" value={user.contact.address} />
             <InfoItem icon={<Calendar size={18} />} label="Date of Birth" value={user.profile.dateOfBirth} />

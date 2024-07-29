@@ -3,37 +3,34 @@ import { Send, Phone, Video, Paperclip, Smile } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
-import { fetchAllInstructors } from '../../components/redux/slices/instructorSlice';
-import { useFilterEnrolledInstructors } from '../../utils/filterInstructors';
 import { User } from '../../components/redux/slices/studentSlice';
-import useWebSocket from '../../hooks/useWebSocket';
+import io, { Socket } from 'socket.io-client';
+import { getCookie } from '../../utils/cookieHandler';
 
 interface Message {
   id: string;
+  conversationId: string;
+  senderId: string;
   text: string;
-  sender: 'user' | 'instructor';
-  timestamp: Date;
+  createdAt: Date;
 }
 
 interface ChatUIProps {
   currentUser?: { id: string; name: string; avatar: string };
-  onSendMessage?: (instructorId: string, message: string) => void;
   onStartCall?: (instructorId: string, type: 'audio' | 'video') => void;
 }
 
-const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onSendMessage, onStartCall }) => {
-  const [allInstructors, setAllInstructors] = useState<User[]>([]);
-  const [enrolledInstructorRefs, setEnrolledInstructorRefs] = useState<string[]>([]);
+const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
+  const [enrolledInstructors, setEnrolledInstructors] = useState<User[]>([]);
   const [selectedInstructor, setSelectedInstructor] = useState<User | null>(null);
   const [inputMessage, setInputMessage] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { user } = useSelector((state: RootState) => state.user);
   const dispatch: AppDispatch = useDispatch();
 
-  const enrolledInstructors = useFilterEnrolledInstructors(allInstructors, enrolledInstructorRefs);
-
-  const {messages,sendMessage,isConnected} = useWebSocket('ws://your-websocket-url')
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -41,13 +38,31 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onSendMessage, onStartCall
   useEffect(() => {
     if (user?._id) {
       dispatch(getEnrolledStudentInstructors(user._id)).then((res) => {
-        setEnrolledInstructorRefs(res.payload.instructorRefs);
+        setEnrolledInstructors(res.payload.instructors);
       });
     }
-    dispatch(fetchAllInstructors()).then((res: any) => {
-      console.log('fetched All instructors', res.payload.instructors);
-      setAllInstructors(res.payload.instructors);
+
+    const token = getCookie('access_token') || '';
+    console.log('token in cookie',token)
+    const newSocket = io('http://localhost:3000', {
+      auth: {
+        token: token
+      }
     });
+
+    newSocket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    newSocket.on('message', (message: Message) => {
+      setMessages(prevMessages => [...prevMessages, message]);
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
   }, [dispatch, user?._id]);
 
   const scrollToBottom = () => {
@@ -55,15 +70,16 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onSendMessage, onStartCall
   };
 
   const handleSendMessage = () => {
-    if (inputMessage.trim() && selectedInstructor) {
+    if (inputMessage.trim() && selectedInstructor && socket) {
       const newMessage: Message = {
         id: Date.now().toString(),
+        conversationId: `${user?._id}-${selectedInstructor._id}`,
+        senderId: user?._id || '',
         text: inputMessage,
-        sender: 'user',
-        timestamp: new Date(),
+        createdAt: new Date(),
       };
-      sendMessage(newMessage)
-      onSendMessage?.(selectedInstructor._id, inputMessage);
+      socket.emit('message', newMessage);
+      setMessages(prevMessages => [...prevMessages, newMessage]);
       setInputMessage('');
     }
   };
@@ -74,9 +90,19 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onSendMessage, onStartCall
     }
   };
 
+  useEffect(() => {
+    if (selectedInstructor && socket) {
+      socket.emit('join', `${user?._id}-${selectedInstructor._id}`);
+      socket.emit('fetchMessages', `${user?._id}-${selectedInstructor._id}`);
+
+      return () => {
+        socket.emit('leave', `${user?._id}-${selectedInstructor._id}`);
+      };
+    }
+  }, [selectedInstructor, socket, user?._id]);
+
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Instructor List */}
       <div className="w-1/4 bg-white border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold">Chats</h2>
@@ -118,19 +144,18 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onSendMessage, onStartCall
         </div>
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 flex flex-col">
         {selectedInstructor ? (
           <>
             <div className="flex justify-between items-center border-b border-gray-200 p-4 bg-white">
-              <div className="flex items-center">
+              <div className="flex items-center w-full h-full rounded-full">
                 <img
                   src={selectedInstructor.profile?.avatar || '/default-avatar.png'}
                   alt={`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}
-                  className="w-10 h-10 rounded-full mr-3"
+                  className="w-12 h-12 object-cover rounded-full mr-3"
                 />
                 <div>
-                  <h2 className="text-lg font-semibold">{`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}</h2>
+                  <h2 className="text-md inter ">{`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}</h2>
                   <p className="text-sm text-gray-500">{selectedInstructor.status || 'Offline'}</p>
                 </div>
               </div>
@@ -150,7 +175,27 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onSendMessage, onStartCall
               </div>
             </div>
             <div className="flex-grow overflow-y-auto p-4 bg-gray-100">
-              {/* Messages should be rendered here */}
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`mb-4 ${
+                    message.senderId === user?._id ? 'text-right' : 'text-left'
+                  }`}
+                >
+                  <div
+                    className={`inline-block p-2 rounded-lg ${
+                      message.senderId === user?._id
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-300 text-black'
+                    }`}
+                  >
+                    {message.text}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {new Date(message.createdAt).toLocaleTimeString()}
+                  </div>
+                </div>
+              ))}
               <div ref={messagesEndRef} />
             </div>
             <div className="border-t border-gray-200 p-4 bg-white">
@@ -166,8 +211,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onSendMessage, onStartCall
                   placeholder="Type a message..."
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="flex-grow p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onKeyPress={handleKeyPress}
+                  className="flex-grow p-2 border px-4 border-gray-300 rounded-full focus:outline-none "
                 />
                 <button
                   onClick={handleSendMessage}
