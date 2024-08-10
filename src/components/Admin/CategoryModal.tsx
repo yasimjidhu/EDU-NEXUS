@@ -13,7 +13,7 @@ interface CategoryModalProps {
 }
 
 export interface Category {
-  _id:string;
+  _id:string | null | undefined;
   name: string;
   description: string;
   image: File | string|null;
@@ -78,22 +78,27 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
         image: imageUrl,
       };
 
-      const data = await dispatch(addCategory(payload))
-      console.log('response of add cateogory in modal',data)
-      if(data.payload.error){
-        toast.error(data.payload.error)
-        return
+      // const data = await dispatch(addCategory(payload))
+      // if(data.payload){
+      //   await dispatch(getAllCategories(1))
+      //   toast.success("Category added successfully");
+      //   onAddCategory(data.payload);
+      // }
+      const data = await dispatch(addCategory(payload));
+
+      if (data.payload && 'name' in data.payload) {
+        const category = data.payload as Category; // Type assertion
+
+        if (category._id) { // Type guard for _id
+          await dispatch(getAllCategories(1));
+          toast.success("Category added successfully");
+          onAddCategory(category);
+        } else {
+          toast.error("Category ID is missing.");
+        }
       }
-      await dispatch(getAllCategories())
-      toast.success("Category added successfully");
-      onAddCategory(payload);
-    } catch (error) {
-      console.log("Error in frontend:", error);
-      if(error instanceof AxiosError){
-        const err = error.response.data.error.message
-        toast.error(err)
-        return
-      }
+
+    } catch (error:any) {
       toast.error(error);
     }
 

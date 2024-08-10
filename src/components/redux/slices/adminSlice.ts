@@ -1,14 +1,15 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../../constants/axiosInstance";
+import { Category } from "@/types/category";
 
 
-interface Category {
-    _id?:string | null;
-    name: string;
-    description: string;
-    image: File| string|null;
-    coursesCount?:number | null;
-}
+// interface Category {
+//     _id?:string | null;
+//     name: string;
+//     description: string;
+//     image: File| string|null;
+//     coursesCount?:number | null;
+// }
 
 interface RejectValue {
     error: string;
@@ -66,23 +67,42 @@ export const getAllCategories = createAsyncThunk(
 );
 
 
-export const  updateCategories = createAsyncThunk<
-    Category,
-    Category,
-    { rejectValue: RejectValue }
+// export const  updateCategories = createAsyncThunk<
+//     Category,
+//     Category,
+//     { rejectValue: RejectValue }
+// >(
+//     'categories/update-category',
+//     async (data: {categoryId:string,category:Category}, { rejectWithValue }) => {
+//         try {
+//             const {categoryId,category} = data
+//             const response = await axiosInstance.put(`/course/categories/${categoryId}`,{category});
+//             return response.data; 
+//         } catch (error: any) {
+//             console.error('Failed to edit categories:', error);
+//             return rejectWithValue({ error: error.message || 'Failed to update categories' });
+//         }
+//     }
+// );
+
+export const updateCategories = createAsyncThunk<
+  Category, 
+  { categoryId: string; category: Partial<Category> },
+  { rejectValue: RejectValue }
 >(
-    'categories/update-category',
-    async (data: {categoryId:string,category:Category}, { rejectWithValue }) => {
-        try {
-            const {categoryId,category} = data
-            const response = await axiosInstance.put(`/course/categories/${categoryId}`,{category});
-            return response.data; 
-        } catch (error: any) {
-            console.error('Failed to edit categories:', error);
-            return rejectWithValue({ error: error.message || 'Failed to update categories' });
-        }
+  'categories/update-category',
+  async (data, { rejectWithValue }) => {
+    try {
+      const { categoryId, category } = data;
+      const response = await axiosInstance.put(`/course/categories/${categoryId}`, { category });
+      return response.data; 
+    } catch (error: any) {
+      console.error('Failed to edit categories:', error);
+      return rejectWithValue({ error: error.message || 'Failed to update categories' });
     }
+  }
 );
+
 
 
 export const blockCategory = createAsyncThunk<

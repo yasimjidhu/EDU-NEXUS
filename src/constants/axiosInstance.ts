@@ -4,8 +4,7 @@ interface RefreshTokenResponse {
   access_token: string;
 }
 
-export const 
-axiosInstance: AxiosInstance = axios.create({
+export const axiosInstance: AxiosInstance = axios.create({
   baseURL: 'http://localhost:4000',
   withCredentials: true,
 });
@@ -14,7 +13,6 @@ axiosInstance: AxiosInstance = axios.create({
 async function refreshToken(): Promise<string> {
   const refresh_token = localStorage.getItem('refresh_token');
   if (!refresh_token) {
-    console.log('no refreshtoken')
     // Redirect to login page if refresh token is missing
     window.location.href = '/login'; 
     throw new Error('No refresh token found');
@@ -28,7 +26,6 @@ async function refreshToken(): Promise<string> {
     );
     // Update the access token cookie
     document.cookie = `access_token=${response.data.access_token}; path=/`;
-    console.log('response of get refreshtoken',response.data)
     return response.data.access_token;
   } catch (error) {
     console.error('Error refreshing token:', error);
@@ -78,8 +75,7 @@ axiosInstance.interceptors.response.use(
         console.error('Failed to refresh token:', refreshError);
       }
     } else if (error.response?.status === 403) {
-      console.log('error in instance',error)
-      const errorMessage:any = error.response.data.message;
+      const errorMessage = (error.response.data as { message?: string }).message;
       if (errorMessage === 'Unauthorized' || errorMessage === 'You are blocked by the respective authority') {
         // Clear cookies or local storage as needed
         document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";

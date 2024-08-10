@@ -1,10 +1,10 @@
-import React from "react";
+
 import { Link } from "react-router-dom";
 
 const Sidebar = () => {
   return (
     <div>
-      <section className="bg-gray-50 bg-medium-rose">
+      <section className=" bg-medium-rose">
         <>
           <aside
             id="default-sidebar"

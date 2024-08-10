@@ -32,7 +32,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
 
   useEffect(() => {
     if (initialData) {
-      setCategoryId(initialData.id || "");
+      setCategoryId(initialData._id || "");
       setCategoryName(initialData.name || "");
       setDescription(initialData.description || "");
       setImage(initialData.image || null);

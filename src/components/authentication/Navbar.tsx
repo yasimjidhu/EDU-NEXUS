@@ -58,7 +58,6 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
   };
 
   const renderProfileImage = () => {
-    console.log('authdata profileimage>>>,',authData.user)
     if (authData.user.profileImage) {
       return (
         <img

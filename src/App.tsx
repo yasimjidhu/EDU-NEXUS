@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import routes from "./config/Routes";
 import SignupPage from "./pages/AuthPages/Signup";
@@ -40,13 +39,15 @@ import ViewCategory from "./pages/UserPages/ViewCategory";
 import ChatUI from "./pages/Chat/UserChat";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import AuthSuccess from "./components/authentication/AuthSuccess";
+import InstructorChat from "./pages/Chat/InstructorChat";
+import { SocketProvider } from "./contexts/SocketContext";
 
 
 function App() {
   return (
+    <SocketProvider>
     <Router>
       <Routes>
-
         <Route path={routes.ROOT} element={<SignupPage />} />
         <Route path={routes.LOGIN} element={<LoginPage />} />
         <Route path={routes.HOME} element={<Home />} />
@@ -85,7 +86,7 @@ function App() {
           <Route path={routes.INSTRUCTOR.ANALYTICS} element={<Categories />} />
           <Route path={routes.INSTRUCTOR.REQUESTS} element={<Requests />} />
           <Route path={routes.INSTRUCTOR.COURSE_DETAIL} element={<CourseDetails />} />
-          <Route path={routes.INSTRUCTOR.MESSAGES} element={<Users />} />
+          <Route path={routes.INSTRUCTOR.CHAT} element={<InstructorChat />} />
           <Route path={routes.INSTRUCTOR.SETTINGS} element={<Users />} />
         </Route>
 
@@ -106,6 +107,7 @@ function App() {
           
       </Routes>
     </Router>
+    </SocketProvider>
   );
 }
 

@@ -36,6 +36,7 @@ const CategoryBlockConfirmation: React.FC<CategoryBlockConfirmationProps> = ({ c
         if (!isConfirmed) return;
         setIsLoading(true);
         try {
+            if(!categoryId) return;
             await dispatch(blockCategory(categoryId))
             onSuccess?.();
         } catch (error) {

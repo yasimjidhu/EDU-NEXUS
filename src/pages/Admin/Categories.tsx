@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CategoryModal from "../../components/Admin/CategoryModal";
 import EditCategoryModal from "../../components/Admin/EditCategoryModal";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
-import {addCategory,getAllCategories,updateCategories,deleteCategory} from "../../components/redux/slices/adminSlice";
+import {getAllCategories,updateCategories} from "../../components/redux/slices/adminSlice";
 import { Category } from "../../types/category";
 import CategoryBlockConfirmation from "../../components/ui/categoryBlockConfirmation";
 import { toast } from "react-toastify";
@@ -31,7 +31,7 @@ const Categories: React.FC = () => {
 
   const fetchCategories = async (page: number) => {
     const response = await dispatch(getAllCategories(page));
-    const { categories, totalPages } = response.payload;
+    const { totalPages } = response.payload as any
     setTotalPages(totalPages);
 };
 
@@ -59,14 +59,14 @@ const Categories: React.FC = () => {
   };
 
   const handleSaveCategory = (updatedCategory: Partial<Category>) => {
-    if (selectedCategory) {
+    if (selectedCategory && updatedCategory._id) {
       dispatch(updateCategories({categoryId:updatedCategory._id,category:updatedCategory}));
     }
     dispatch(getAllCategories(currentPage))
     closeEditModal();
   };
 
-  const handleAddCategory = (newCategory: Category) => {
+  const handleAddCategory = () => {
     closeCreateModal();
   };
 
@@ -126,7 +126,7 @@ const Categories: React.FC = () => {
                     Edit
                   </button>
                   <CategoryBlockConfirmation
-                    categoryId={category.id}
+                    categoryId={category._id}
                     onSuccess={handleBlockSuccess}
                     onError={handleBlockError}
                   />

@@ -3,7 +3,6 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Home from '../pages/UserPages/Home';
 import Enrollment from '../pages/UserPages/Enrollment';
-import Registration from '../layouts/Registration';
 import InstructorRegistration from '../pages/UserPages/InstructorRegistration';
 import NotVerified from '../pages/UserPages/NotVerified';
 

@@ -52,21 +52,6 @@ const paymentSlice = createSlice({
   initialState,
   reducers: {
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(CreatePaymentIntent.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(CreatePaymentIntent.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-      })
-      .addCase(CreatePaymentIntent.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string; 
-      });
-  },
 });
 
 export default paymentSlice.reducer;

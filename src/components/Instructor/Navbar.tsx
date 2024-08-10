@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { logoutAdmin, logoutUser } from "../redux/slices/authSlice";
+import { logoutUser } from "../redux/slices/authSlice";
 import { RootState } from "../redux/store/store";
 
 const Navbar: React.FC = () => {
@@ -36,17 +36,7 @@ const Navbar: React.FC = () => {
     }
   },[])
 
-  // useEffect(()=>{
-  //   if(user?.isBlocked){
-  //     (dispatch as AppDispatch)(logoutAdmin());
-  //     navigate('/login')
-  //     toast.error('Access Denied')
-  //   }
-  // },[user])
 
-  const handleProfile = () => {
-    console.log("viewing profile");
-  };
 
   return (
     <div className="bg-white border-b border-gray-200  shadow-lg">
@@ -93,7 +83,6 @@ const Navbar: React.FC = () => {
                 <ul className="divide-y divide-gray-200">
                   <li
                     className="px-4 py-2 text-sm text-gray-900 hover:bg-medium-rose hover:text-white cursor-pointer"
-                    onClick={handleProfile}
                   >
                     Profile
                   </li>

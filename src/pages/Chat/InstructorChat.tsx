@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, Paperclip, Smile, StopCircleIcon,Mic, StopCircle, X, Play } from 'lucide-react';
+import { Send, Phone, Video, Paperclip, Smile, StopCircle, Mic, X, Play } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
-import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
 import { User } from '../../components/redux/slices/studentSlice';
-import { addMessage, getMessages, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useSocket } from '../../contexts/SocketContext';
+import { addMessage, getMessagedStudents, getMessages, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useMessageObserver } from '../../hooks/useMessageObserver';
 import { ReactMic } from 'react-mic';
 import Picker from 'emoji-picker-react'  
@@ -15,22 +14,22 @@ import Lightbox from '../../components/chat/LightBox';
 
 interface ChatUIProps {
   currentUser?: { id: string; name: string; avatar: string };
-  onStartCall?: (instructorId: string, type: 'audio' | 'video') => void;
+  onStartCall?: (studentId: string, type: 'audio' | 'video') => void;
 }
 
-const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
-  const [enrolledInstructors, setEnrolledInstructors] = useState<User[]>([]);
-  const [selectedInstructor, setSelectedInstructor] = useState<User | null>(null);
+const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
+  const [messagedStudents, setMessagedStudents] = useState<User[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLightboxOpen,setIsLightboxOpen] = useState<boolean>(false)
   const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [inputMessage, setInputMessage] = useState('');
   const [conversationId, setConversationId] = useState<string>('');
-  const [isRecording,setIsRecording] = useState<boolean>(false)
-  const [audioBlob,setAudioBlob] = useState<Blob | null>(null) 
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<NodeJS.Timeout | null>(null);
   const [audioProgress, setAudioProgress] = useState(0);
@@ -38,7 +37,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const audioRef = useRef(new Audio());
 
   const { user } = useSelector((state: RootState) => state.user);
-  const { messages } = useSelector((state: RootState) => state.chat);
+  const { messages, loading, error } = useSelector((state: RootState) => state.chat);
 
   const dispatch: AppDispatch = useDispatch();
   const { socket, onlineUsers } = useSocket();
@@ -49,9 +48,9 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
 
   useEffect(() => {
     if (user?._id) {
-      dispatch(getEnrolledStudentInstructors(user._id)).then((res) => {
-        if (getEnrolledStudentInstructors.fulfilled.match(res)) {
-          setEnrolledInstructors(res.payload.instructors);
+      dispatch(getMessagedStudents(user._id)).then((action: any) => {
+        if (action.type === getMessagedStudents.fulfilled.type) {
+          setMessagedStudents(action.payload);
         }
       });
     }
@@ -97,8 +96,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   }, []);
 
   useEffect(() => {
-    if (selectedInstructor && socket) {
-      const conversationid = [user?._id, selectedInstructor._id].sort().join('-');
+    if (selectedStudent && socket) {
+      const conversationid = [user?._id, selectedStudent._id].sort().join('-');
       setConversationId(conversationid);
 
       socket.emit('join', conversationid);
@@ -108,19 +107,17 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         socket.emit('leave', conversationid);
       };
     }
-  }, [selectedInstructor, socket, user?._id, dispatch]);
-
+  }, [selectedStudent, socket, user?._id, dispatch]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-
   const handleSendMessage = async () => {
-    if ((inputMessage.trim() || audioBlob || selectedFile) && selectedInstructor && socket) {
+    if ((inputMessage.trim() || audioBlob || selectedFile) && selectedStudent && socket) {
       let fileUrl = '';
       let fileType = '';
-  
+
       if (selectedFile) {
         try {
           fileUrl = await uploadToCloudinary(selectedFile, setUploadProgress);
@@ -133,13 +130,12 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         try {
           fileUrl = await uploadToCloudinary(new File([audioBlob], 'audio.webm', { type: 'audio/webm' }), setUploadProgress);
           fileType = 'audio';
-          console.log('audio file uploaded to cloudinary',fileUrl)
         } catch (error) {
           console.error('Error uploading audio:', error);
           return; // Exit if upload fails
         }
       }
-  
+
       const messageData = {
         conversationId,
         senderId: user?._id || '',
@@ -148,11 +144,11 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         fileType,
         status: 'sent'
       };
-  
+
       try {
         const response = await dispatch(sendMessage(messageData));
         const savedMessage = response.payload;
-  
+
         socket.emit('message', savedMessage);
         setInputMessage('');
         setSelectedFile(null);
@@ -160,7 +156,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         setUploadProgress(0);
         setAudioProgress(0);
         setAudioDuration(0);
-  
+
         // Clear typing status
         if (typingTimer.current) {
           clearTimeout(typingTimer.current);
@@ -172,7 +168,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
       }
     }
   };
-  
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -187,17 +182,17 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (socket && selectedInstructor) {
+    if (socket && selectedStudent) {
       setInputMessage(e.target.value);
-  
+
       if (typingTimer.current) {
         clearTimeout(typingTimer.current);
       }
-  
+
       typingTimer.current = setTimeout(() => {
         socket.emit('typing', { conversationId, userId: user?._id, isTyping: false });
       }, 1000);
-  
+
       if (!isTyping) {
         socket.emit('typing', { conversationId, userId: user?._id, isTyping: true });
       }
@@ -210,7 +205,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
     }
   };
 
-  const handleEmojiClick = (emojiData: {emoji: string}) => {
+  const handleEmojiClick = (emojiData: { emoji: string }) => {
     setInputMessage((prev) => prev + emojiData.emoji);
     setShowEmojiPicker(false);
   };
@@ -223,16 +218,15 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const startRecording = () => {
     setIsRecording(true);
   };
-  
+
   const stopRecording = () => {
     setIsRecording(false);
   };
 
   const onData = (recordedBlob: Blob) => {
-    console.log('this is the recorded voice message',recordedBlob)
     // You can use this to visualize the recording if needed
   };
-  
+
   const onStop = (recordedBlob: { blob: Blob; blobURL: string }) => {
     setAudioBlob(recordedBlob.blob);
   };
@@ -241,30 +235,30 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
     if (audioBlob) {
       const url = URL.createObjectURL(audioBlob);
       audioRef.current.src = url;
-      audioRef.current.play();  
-      
+      audioRef.current.play();
+
       audioRef.current.onloadedmetadata = () => {
         setAudioDuration(audioRef.current.duration);
       };
-  
+
       audioRef.current.ontimeupdate = () => {
         setAudioProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
       };
-  
+
       audioRef.current.onended = () => {
         setAudioProgress(0);
       };
     }
   };
-  
+
   const cancelRecording = () => {
     setIsRecording(false);
     setAudioBlob(null);
     setAudioProgress(0);
     setAudioDuration(0);
   };
-  
-  const formatDuration = (seconds:number) => {
+
+  const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
@@ -289,25 +283,25 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
           <h2 className="text-xl font-semibold">Chats</h2>
         </div>
         <div className="overflow-y-auto h-full">
-          {enrolledInstructors.length > 0 ? (
-            enrolledInstructors.map((instructor) => (
+          {messagedStudents.length > 0 ? (
+            messagedStudents.map((student) => (
               <div
-                key={instructor._id}
+                key={student._id}
                 className={`flex items-center p-3 border-b border-gray-200 cursor-pointer transition-colors duration-200 ease-in-out
-                  ${selectedInstructor?._id === instructor._id ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                onClick={() => setSelectedInstructor(instructor)}
+                  ${selectedStudent?._id === student._id ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                onClick={() => setSelectedStudent(student)}
               >
                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 flex-shrink-0">
                   <img
-                    src={instructor.profile?.avatar || '/default-avatar.png'}
-                    alt={`${instructor.firstName} ${instructor.lastName}`}
+                    src={student.profile?.avatar || '/default-avatar.png'}
+                    alt={`${student.firstName} ${student.lastName}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="ml-3 flex-grow">
-                  <p className="font-semibold text-gray-800">{`${instructor.firstName} ${instructor.lastName}`}</p>
+                  <p className="font-semibold text-gray-800">{`${student.firstName} ${student.lastName}`}</p>
                   <p className="text-sm text-gray-500">
-                    {onlineUsers[instructor.email] === 'online' ? (
+                    {onlineUsers[student.email] === 'online' ? (
                       <span className="flex items-center">
                         <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
                         Online
@@ -320,29 +314,28 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
               </div>
             ))
           ) : (
-            <div className="p-4 text-center text-gray-500">No instructors found</div>
+            <div className="p-4 text-center text-gray-500">No students have messaged you yet.</div>
           )}
         </div>
       </div>
-
       <div className="flex-1 flex flex-col">
-        {selectedInstructor ? (
+        {selectedStudent ? (
           <>
             <div className="flex items-center p-4 bg-white border-b border-gray-200">
               <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 flex-shrink-0">
                 <img
-                  src={selectedInstructor.profile?.avatar || '/default-avatar.png'}
-                  alt={`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}
+                  src={selectedStudent.profile?.avatar || '/default-avatar.png'}
+                  alt={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="ml-3 flex-grow">
-                <p className="font-semibold text-gray-800">{`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}</p>
+                <p className="font-semibold text-gray-800">{`${selectedStudent.firstName} ${selectedStudent.lastName}`}</p>
                 <p className="text-sm text-gray-500">
                   {isTyping ? (
-                      <p className="text-sm text-black">Typing...</p>
+                    <p className="text-sm text-black">Typing...</p>
                   ) : (
-                    onlineUsers[selectedInstructor.email] === 'online' ? (
+                    onlineUsers[selectedStudent.email] === 'online' ? (
                       <span className="flex items-center">
                         <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
                         Online
@@ -355,13 +348,13 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
               </div>
               <div className="flex space-x-4">
                 <button
-                  onClick={() => onStartCall?.(selectedInstructor._id, 'audio')}
+                  onClick={() => onStartCall?.(selectedStudent._id, 'audio')}
                   className="text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
                   <Phone size={20} />
                 </button>
                 <button
-                  onClick={() => onStartCall?.(selectedInstructor._id, 'video')}
+                  onClick={() => onStartCall?.(selectedStudent._id, 'video')}
                   className="text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
                   <Video size={20} />
@@ -370,38 +363,37 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
             </div>
             <div className="flex-1 overflow-y-auto p-3 bg-gradient-to-b from-gray-100 to-gray-200">
               {messages.map((message) => {
-                const onlyEmojis = isOnlyEmojis(message.text);
+                const onlyEmojis = isOnlyEmojis(message.text || '');
                 return (
                   <div
                     key={message._id}
                     className={`flex ${message.senderId === user?._id ? 'justify-end' : 'justify-start'}`}
                   >
-                     <div
-                        data-message-id={message._id}
-                        ref={(el) => el && messageObserver.current?.observe(el)}
-                        className={`max-w-xs p-3 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${
-                          message.senderId === user?._id
-                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                            : 'bg-white text-gray-800'
-                        }`}
-                      >
-                        {message.fileUrl ? (
+                    <div
+                      data-message-id={message._id}
+                      ref={(el) => el && messageObserver.current?.observe(el)}
+                      className={`max-w-xs p-3 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${
+                        message.senderId === user?._id
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                          : 'bg-white text-gray-800'
+                      }`}
+                    >
+                      {message.fileUrl ? (
                         message.fileType === 'audio' ? (
                           <audio controls src={message.fileUrl} className="w-full" />
                         ) : message.fileType === 'image' ? (
                           <>
-                          <img 
+                          <img
                           src={message.fileUrl}
-                          alt="Uploaded image"
-                          className="w-full rounded cursor-pointer" 
-                          onClick={() => handleImageClick(message.fileUrl)}
-                          />
+                          alt="Uploaded image" 
+                          className="w-full rounded" 
+                          onClick={() => handleImageClick(message.fileUrl)}/>
                           {isLightboxOpen && (
                             <Lightbox imageUrl={currentImageUrl} onClose={handleCloseLightbox}/>
                           )}
                           </>
                         ) : message.fileType === 'video' ? (
-                          <video controls src={message.fileUrl} className="w-full rounded cursor-pointer" />
+                          <video controls src={message.fileUrl} className="w-full rounded" />
                         ) : null
                       ) : (
                         <p className={`inter ${onlyEmojis ? 'text-4xl' : 'text-sm md:text-base'}`}>
@@ -414,10 +406,10 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                         </span>
                         {message.senderId === user?._id && (
                           <span className="ml-2 flex items-center">
-                            {message.status === 'sent' && <span className="text-xs">✓</span>}
-                            {message.status === 'delivered' && <span className="text-xs">✓✓</span>}
+                            {message.status === 'sent' && <span className="text-xs text-blue-100">✓</span>}
+                            {message.status === 'delivered' && <span className="text-xs text-blue-100">✓✓</span>}
                             {message.status === 'read' && (
-                              <span className="text-green-500 text-xs">✓✓</span>
+                              <span className="text-xl text-medium-rose">✓✓</span>
                             )}
                           </span>
                         )}
@@ -429,21 +421,21 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
               <div ref={messagesEndRef}></div>
             </div>
             <div className="p-4 bg-white border-t border-gray-200">
-  <div className="flex items-center space-x-2">
-    <button
-      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-      className="text-gray-500 hover:text-gray-700 focus:outline-none"
-    >
-      <Smile size={24} />
-    </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  <Smile size={24} />
+                </button>
 
-    {showEmojiPicker && (
-      <div className="absolute bottom-16 left-4">
-        <Picker onEmojiClick={handleEmojiClick} />
-      </div>
-    )}
+                {showEmojiPicker && (
+                  <div className="absolute bottom-16 left-4">
+                    <Picker onEmojiClick={handleEmojiClick} />
+                  </div>
+                )}
 
-              <div className="flex-grow flex items-center bg-white rounded-full border border-gray-300">
+                <div className="flex-grow flex items-center bg-white rounded-full border border-gray-300">
                   {isRecording ? (
                     <div className="flex-grow flex items-center justify-between p-2">
                       <ReactMic
@@ -515,13 +507,12 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                     <Paperclip size={24} className="text-gray-500 hover:text-gray-700" />
                   </label>
                 )}
-  </div>
-</div>
-
+              </div>
+            </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-500">Select an instructor to start chatting</p>
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-gray-500">Select a student to start chatting</p>
           </div>
         )}
       </div>
@@ -529,4 +520,4 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   );
 };
 
-export default ChatUI;
+export default InstructorChat;

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Link } from 'react-router-dom';
 
 interface status{
@@ -8,7 +8,7 @@ interface status{
 const Sidebar = ({isActive}:status) => {
   return (  
     <div>
-      <section className="bg-gray-50 bg-medium-rose">
+      <section className=" bg-medium-rose">
         <>
           
           <aside

@@ -56,6 +56,7 @@ export interface CourseState {
   certificationAvailable: boolean;
   pricing: Pricing
   level:'beginner' | 'intermediate'|'expert';
+  rating?:number;
   courseAmount:number|null;
   enrolledStudentsCount?:number;
   language:string;
@@ -85,6 +86,7 @@ const initialState: CourseState = {
     amount: 0,
   },
   level:'beginner',
+  rating:0,
   courseAmount:null,
   enrolledStudentsCount:0,
   language:'english',
@@ -157,7 +159,6 @@ export const submitCourse = createAsyncThunk(
   'course/submitCourse',
   async (courseData: CourseState, { rejectWithValue }) => {
     try {
-      console.log('submit coursedata got',courseData)
       const response = await axiosInstance.post('/course/courses/add-course', courseData);
       return response.data;
     } catch (error:any) {
@@ -326,9 +327,9 @@ export const updateLessonProgress = createAsyncThunk(
         courseId,userId,lessonId,progress,totalLesson
       });
       return response.data;
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error updating lesson progress:', error);
-      throw error;
+      return rejectWithValue(error.respone?.data || error.message)
     }
   }
 );
@@ -458,7 +459,6 @@ export const updateAssessmentCompletion = createAsyncThunk<
   'course/update-assessment-completion',
   async ({ userId, courseId }: UpdateAssessmentPayload, { rejectWithValue }) => {
     try {
-      console.log('request updated assessment reached in slice', userId, courseId);
       const response = await axiosInstance.post<EnrollmentEntity>(`/course/enrollments/update-completion`, { userId, courseId });
       return response.data;
     } catch (error: any) {
@@ -475,7 +475,6 @@ export const getEnrolledStudentInstructors = createAsyncThunk(
   async (userId:string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/course/enrollments/instructorRefs/${userId}`);
-      console.log("get student enrolled courses instructors  in courseslice", response);
       return response.data;
     } catch (error: any) {
         console.log(error)
@@ -494,7 +493,7 @@ const courseSlice = createSlice({
     addLesson(state, action: PayloadAction<Lesson>) {
       state.lessons.push(action.payload);
     },
-    clearCourseInfo(state) {
+    clearCourseInfo() {
       return initialState
     },
 

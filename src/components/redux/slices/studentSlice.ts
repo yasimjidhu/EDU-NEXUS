@@ -76,6 +76,7 @@ export const fetchUserData = createAsyncThunk(
       const response = await axiosInstance.get('/user/getUser');
       return response.data.user;
     } catch (error: any) {
+      console.log('this is the get user error',error)
       return rejectWithValue(error.response.data);
     }
   }
@@ -97,7 +98,7 @@ export const blockUser = createAsyncThunk(
   'student/blockUser',
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/user/block', { email });
+      await axiosInstance.post('/user/block', { email });
       return {email,isBlocked:true}
 
     } catch (error: any) {
@@ -110,7 +111,7 @@ export const unblockUser = createAsyncThunk(
   'student/unblockUser',
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/user/unblock', { email });
+      await axiosInstance.post('/user/unblock', { email });
       return {email,isBlocked:false}
 
     } catch (error: any) {
@@ -123,9 +124,7 @@ export const ApproveInstructor = createAsyncThunk(
   'student/approve',
   async (email:string, { rejectWithValue }) => {
     try {
-      console.log('request reached in register slice',email);
       const response = await axiosInstance.post('/user/approve',email);
-      console.log('response of approveduser',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -137,9 +136,7 @@ export const RejectInstructor = createAsyncThunk(
   'student/reject',
   async (email:string, { rejectWithValue }) => {
     try {
-      console.log('request reached in rejection slice',email);
       const response = await axiosInstance.post('/user/reject',email);
-      console.log('response of rejected user',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -207,7 +204,7 @@ const studentSlice = createSlice({
         if (allUsers) { 
           const index = allUsers.findIndex(u => u.email === action.payload.email);
       
-          if (index !== -1) {
+          if (index !== -1 && state.allUsers?.length) {
             state.allUsers[index].isBlocked = action.payload.isBlocked;
           }
         }
@@ -258,7 +255,7 @@ const studentSlice = createSlice({
       })
       .addCase(
         RejectInstructor.fulfilled,
-        (state, action: PayloadAction<any>) => {
+        (state) => {
           state.loading = false;
           if (state.user) { 
             state.user.isVerified = false; 

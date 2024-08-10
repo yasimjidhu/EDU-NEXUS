@@ -58,7 +58,7 @@ const Courses: React.FC = () => {
     dispatch(fetchAllInstructors()).then((res: any) => {
       setAllInstructors(res.payload.instructors);
     });
-    dispatch(getAllCourses(currentPage)).then((res: any) => {
+    dispatch(getAllCourses({page:currentPage})).then((res: any) => {
       setAllCourses(res.payload.courses);
       setTotalPages(res.payload.totalPages);
       setFilteredCourses(res.payload.courses);
@@ -87,7 +87,7 @@ const Courses: React.FC = () => {
 
     if (filters.review.length > 0) {
       result = result.filter((course) => {
-        return filters.review.some((rating) => course.rating >= rating);
+        return course.rating !== undefined && filters.review.some((rating) => course.rating! >= rating);
       });
     }
 

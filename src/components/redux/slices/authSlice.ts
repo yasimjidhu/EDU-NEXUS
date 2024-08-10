@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../../constants/axiosInstance";
 import axios from 'axios'
-import { useDispatch } from "react-redux";
 
 
 export interface AuthState {
@@ -109,6 +108,7 @@ export const userLogin = createAsyncThunk<
   'auth/login',
   async (data: LoginData, { rejectWithValue }) => {
     try {
+        console.log('login called in slice',data)
       const response = await axios.post('http://localhost:4000/auth/login', 
         data,{
         headers:{
@@ -116,10 +116,12 @@ export const userLogin = createAsyncThunk<
         }
       }
     );
-      const {access_token,refresh_token,user} = response.data
+      const {access_token,refresh_token} = response.data
 
       localStorage.setItem('access_token',access_token)
       localStorage.setItem('refresh_token',refresh_token)
+
+      sessionStorage.setItem('access_token',access_token)
 
       return response.data;
     } catch (error: any) {
