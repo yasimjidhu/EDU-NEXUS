@@ -44,7 +44,7 @@ const AllCategories = () => {
                     />
                   </div>
                   <h1 className="mt-3 text-md inter ">{category.name}</h1>
-                  <p className="text-sm inter-sm">11 Courses</p>
+                  <p className="text-sm inter-sm">{category.coursesCount} Courses</p>
                 </div>
               ))}
             </div>
