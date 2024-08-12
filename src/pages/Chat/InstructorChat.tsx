@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, Paperclip, Smile, StopCircle, Mic, X, Play, Pause } from 'lucide-react';
+import { Send, Phone, Video, Paperclip, Smile, StopCircle, Mic, X, Play, Pause, Plus } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { User } from '../../components/redux/slices/studentSlice';
 import { useSocket } from '../../contexts/SocketContext';
-import { addMessage, getMessagedStudents, getMessages, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import { addMessage, createGroup, getMessagedStudents, getMessages, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useMessageObserver } from '../../hooks/useMessageObserver';
 import AudioPlayer from '../../components/chat/AudioPlayer';
 import { AudioRecorder, useAudioRecorder } from 'react-audio-voice-recorder';
@@ -12,6 +12,9 @@ import Picker from 'emoji-picker-react'
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { Message } from '../../types/chat';
 import Lightbox from '../../components/chat/LightBox';
+import CreateGroupModal from '../../components/chat/createGroup';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface ChatUIProps {
   currentUser?: { id: string; name: string; avatar: string };
@@ -29,11 +32,13 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [inputMessage, setInputMessage] = useState('');
   const [conversationId, setConversationId] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<NodeJS.Timeout | null>(null);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [createdGroup, setCreatedGroup] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(new Audio());
 
@@ -41,6 +46,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   const { messages, loading, error } = useSelector((state: RootState) => state.chat);
 
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate()
   const { socket, onlineUsers } = useSocket();
 
   const recorderControls = useAudioRecorder();
@@ -174,7 +180,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      console.log('file selected',event.target.files[0])
+      console.log('file selected', event.target.files[0])
       setSelectedFile(event.target.files[0]);
     }
   };
@@ -287,13 +293,28 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const handleCreateGroup = async (data:any)=>{
+    try {
+      const response = await dispatch(createGroup(data))
+      console.log('response of create group',response)
+      navigate('/instructor/group')
+    } catch (error:any) {
+      toast.error(error.message)
+    }
+  }
+
   const messageObserver = useMessageObserver(handleMessageRead);
 
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-1/4 bg-white border-r border-gray-200">
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Chats</h2>
+          <div className="flex items-center">
+            <button className="inter text-md bg-strong-rose text-white px-4 py-2 rounded-full flex items-center" onClick={() => setIsModalOpen(true)}>
+              <Plus className="mr-2" /> Create Group
+            </button>
+          </div>
         </div>
         <div className="overflow-y-auto h-full">
           {messagedStudents.length > 0 ? (
@@ -331,6 +352,20 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           )}
         </div>
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+          <div className="relative z-10 bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <CreateGroupModal
+              show={isModalOpen}
+              students={messagedStudents}
+              handleClose={() => setIsModalOpen(false)}
+              onCreateGroup={(data: any) => handleCreateGroup(data)}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col">
         {selectedStudent ? (
           <>
@@ -375,6 +410,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-3 bg-gradient-to-b from-gray-100 to-gray-200">
+
               {messages.map((message) => {
                 const onlyEmojis = isOnlyEmojis(message.text || '');
                 return (
@@ -386,13 +422,13 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
                       data-message-id={message._id}
                       ref={(el) => el && messageObserver.current?.observe(el)}
                       className={`max-w-xs p-3 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${message.senderId === user?._id
-                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                          : 'bg-white text-gray-800'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                        : 'bg-white text-gray-800'
                         }`}
                     >
                       {message.fileUrl ? (
                         message.fileType === 'audio' ? (
-                          <AudioPlayer src={message.fileUrl}/>
+                          <AudioPlayer src={message.fileUrl} />
                         ) : message.fileType === 'image' ? (
                           <>
                             <img
@@ -448,9 +484,9 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
                 )}
 
                 <div className="flex-grow flex items-center bg-white rounded-full border border-gray-300">
-                {recorderControls.isRecording ? (
+                  {recorderControls.isRecording ? (
                     <div className="flex-grow flex items-center justify-between p-2">
-                      <AudioRecorder 
+                      <AudioRecorder
                         onRecordingComplete={onRecordingComplete}
                         recorderControls={recorderControls}
                       />
@@ -502,11 +538,10 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
                     />
                   )}
 
-                <button
+                  <button
                     onClick={recorderControls.isRecording ? stopRecording : (audioBlob || selectedFile ? handleSendMessage : startRecording)}
-                    className={`p-2 rounded-full focus:outline-none transition duration-300 ${
-                      recorderControls.isRecording || audioBlob || selectedFile ? 'bg-green-500 hover:bg-green-600' : 'text-blue-500 hover:text-blue-700'
-                    }`}
+                    className={`p-2 rounded-full focus:outline-none transition duration-300 ${recorderControls.isRecording || audioBlob || selectedFile ? 'bg-green-500 hover:bg-green-600' : 'text-blue-500 hover:text-blue-700'
+                      }`}
                   >
                     {recorderControls.isRecording || audioBlob || selectedFile ? (
                       <Send size={20} className="text-white" />

@@ -33,6 +33,7 @@ const routes = {
       REQUESTS: "/instructor/requests",
       COURSE_DETAIL: "/instructor/course-detail/:id",
       CHAT: "/instructor/chat",
+      CHATGROUP:"/instructor/group",
       SETTINGS: "/instructor/settings",
     },
     STUDENT: {

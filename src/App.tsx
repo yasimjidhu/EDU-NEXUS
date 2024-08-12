@@ -41,6 +41,7 @@ import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import AuthSuccess from "./components/authentication/AuthSuccess";
 import InstructorChat from "./pages/Chat/InstructorChat";
 import { SocketProvider } from "./contexts/SocketContext";
+import GroupChat from "./pages/Chat/GroupChat";
 
 
 function App() {
@@ -87,6 +88,7 @@ function App() {
           <Route path={routes.INSTRUCTOR.REQUESTS} element={<Requests />} />
           <Route path={routes.INSTRUCTOR.COURSE_DETAIL} element={<CourseDetails />} />
           <Route path={routes.INSTRUCTOR.CHAT} element={<InstructorChat />} />
+          <Route path={routes.INSTRUCTOR.CHATGROUP} element={<GroupChat />} />
           <Route path={routes.INSTRUCTOR.SETTINGS} element={<Users />} />
         </Route>
 

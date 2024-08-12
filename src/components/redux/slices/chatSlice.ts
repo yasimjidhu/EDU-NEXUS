@@ -1,12 +1,13 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '../../../constants/axiosInstance';
-import {TStudent} from '../../../types/chat'
+import {Group, TStudent} from '../../../types/chat'
 import { Message } from '../../../pages/Chat/InstructorChat';
 
 
 export interface ChatState {
   messages: Message[];
   messagedStudents:TStudent[];
+  group?:Group | null;
   loading: boolean;
   error: string | null;
 }
@@ -14,6 +15,7 @@ export interface ChatState {
 const initialState: ChatState = {
   messages: [],
   messagedStudents:[],
+  group:null,
   loading: false,
   error: null,
 };
@@ -55,6 +57,33 @@ export const getMessagedStudents = createAsyncThunk(
   }
 );
 
+
+export const createGroup = createAsyncThunk(
+  'chat/createGroup',
+  async (groupData: Omit<Group, '_id'>, { rejectWithValue }) => {
+    try {
+      console.log('create group called in slice',groupData)
+      const response = await axiosInstance.post('/chat/group', groupData);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const getGroup = createAsyncThunk(
+  'chat/getGroup',
+  async (groupId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/chat/groups/${groupId}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
 const chatSlice = createSlice({
   name: 'chat',
   initialState,
@@ -63,15 +92,16 @@ const chatSlice = createSlice({
       state.messages.push(action.payload);
     },
     updateMessageStatus:(state,action:PayloadAction<Message>)=>{
-      console.log('update messsage status reached in slice',action.payload)
-      const index = state.messages.findIndex((msg)=>msg._id == action.payload._id)
-      console.log('index of update message',index)
+      const index = state.messages.findIndex((msg:any)=>msg._id == action.payload._id)
       if(index !== -1){
         state.messages[index] = action.payload
       }
     },
     clearMessages: (state) => {
       state.messages = [];
+    },
+    clearGroup: (state) => {
+      state.group = null;
     },
   },
   extraReducers: (builder) => {
@@ -108,10 +138,36 @@ const chatSlice = createSlice({
       .addCase(getMessagedStudents.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(createGroup.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createGroup.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading = false;
+        state.group = action.payload;
+      })
+      .addCase(createGroup.rejected, (state, action: PayloadAction<string | undefined>) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to create group';
+      })
+      // Handle pending state for getting a group
+      .addCase(getGroup.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getGroup.fulfilled, (state, action: PayloadAction<Group>) => {
+        state.loading = false;
+        state.group = action.payload;
+      })
+      .addCase(getGroup.rejected, (state, action: PayloadAction<string | undefined>) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch group';
       });
+      
   },
 });
 
-export const { addMessage, clearMessages,updateMessageStatus } = chatSlice.actions;
+
+
+export const { addMessage, clearMessages,updateMessageStatus,clearGroup } = chatSlice.actions;
 
 export default chatSlice.reducer;

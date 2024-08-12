@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, Paperclip, Smile, StopCircleIcon, Mic, StopCircle, X, Play, Pause } from 'lucide-react';
+import { Send, Phone, Video, Paperclip, Smile, StopCircleIcon, Mic, StopCircle, X, Play, Pause, Plus } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
@@ -13,6 +13,7 @@ import { uploadToCloudinary } from '../../utils/cloudinary';
 import { Message } from '../../types/chat';
 import Lightbox from '../../components/chat/LightBox';
 import AudioPlayer from '../../components/chat/AudioPlayer';
+import CreateGroupModal from '@/components/chat/createGroup';
 
 interface ChatUIProps {
   currentUser?: { id: string; name: string; avatar: string };
@@ -294,8 +295,13 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-1/4 bg-white border-r border-gray-200">
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Chats</h2>
+          <div className="flex items-center">
+            <button className="inter text-md bg-strong-rose text-white px-4 py-2 rounded-full flex items-center">
+              <Plus className="mr-2" /> Create Group
+            </button>
+          </div>
         </div>
         <div className="overflow-y-auto h-full">
           {enrolledInstructors.length > 0 ? (
@@ -396,7 +402,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                       {message.fileUrl ? (
                         message.fileType === 'audio' ? (
                           // <audio controls src={message.fileUrl} className="w-full" />
-                          <AudioPlayer src={message.fileUrl}/>
+                          <AudioPlayer src={message.fileUrl} />
                         ) : message.fileType === 'image' ? (
                           <>
                             <img
@@ -455,7 +461,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                 <div className="flex-grow flex items-center bg-white rounded-full border border-gray-300">
                   {recorderControls.isRecording ? (
                     <div className="flex-grow flex items-center justify-between p-2">
-                      <AudioRecorder 
+                      <AudioRecorder
                         onRecordingComplete={onRecordingComplete}
                         recorderControls={recorderControls}
                       />
@@ -509,9 +515,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
 
                   <button
                     onClick={recorderControls.isRecording ? stopRecording : (audioBlob || selectedFile ? handleSendMessage : startRecording)}
-                    className={`p-2 rounded-full focus:outline-none transition duration-300 ${
-                      recorderControls.isRecording || audioBlob || selectedFile ? 'bg-green-500 hover:bg-green-600' : 'text-blue-500 hover:text-blue-700'
-                    }`}
+                    className={`p-2 rounded-full focus:outline-none transition duration-300 ${recorderControls.isRecording || audioBlob || selectedFile ? 'bg-green-500 hover:bg-green-600' : 'text-blue-500 hover:text-blue-700'
+                      }`}
                   >
                     {recorderControls.isRecording || audioBlob || selectedFile ? (
                       <Send size={20} className="text-white" />
