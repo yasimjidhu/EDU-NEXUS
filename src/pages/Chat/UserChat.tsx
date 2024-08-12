@@ -514,12 +514,12 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                   )}
 
                   <button
-                    onClick={recorderControls.isRecording ? stopRecording : (audioBlob || selectedFile ? handleSendMessage : startRecording)}
+                    onClick={recorderControls.isRecording ? stopRecording : (audioBlob || selectedFile || inputMessage.trim() != '' ? handleSendMessage : startRecording)}
                     className={`p-2 rounded-full focus:outline-none transition duration-300 ${recorderControls.isRecording || audioBlob || selectedFile ? 'bg-green-500 hover:bg-green-600' : 'text-blue-500 hover:text-blue-700'
                       }`}
                   >
-                    {recorderControls.isRecording || audioBlob || selectedFile ? (
-                      <Send size={20} className="text-white" />
+                    {recorderControls.isRecording || audioBlob || selectedFile || inputMessage.trim() !== '' ? (
+                      <Send size={20} className="text-black" />
                     ) : (
                       <Mic size={20} />
                     )}

@@ -3,7 +3,9 @@ import { useSocket } from '../../contexts/SocketContext';
 import { Send, UserPlus, LogOut, MoreVertical, Paperclip, Mic } from 'lucide-react';
 import { Message } from '../../types/chat';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/components/redux/store/store';
+import { RootState } from '../../components/redux/store/store';
+import MessageList from '../../components/chat/MessageList';
+import MessageInput from '../../components/chat/MessageInput';
 
 const GroupChat = () => {
   const [groupName, setGroupName] = useState('Group Name');
@@ -55,6 +57,10 @@ const GroupChat = () => {
     setTimeout(() => setAlertMessage(''), 3000);
   };
 
+  const handleSendMessage = async (data:any)=>{
+    console.log('message send in group chat')
+  }
+
   return (
     <div className="flex flex-col h-screen bg-[#e5ddd5]">
       <div className="bg-[#075e54] p-3 text-white flex items-center justify-between">
@@ -73,41 +79,12 @@ const GroupChat = () => {
       </div>
 
       <div className="flex-grow overflow-y-auto p-4 space-y-2">
-        {messages.map((msg, index) => (
-          <div key={index} className={`flex ${msg.senderId === user?._id ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[70%] rounded-lg p-2 ${msg.senderId === user?._id ? 'bg-[#dcf8c6]' : 'bg-white'}`}>
-              {msg.senderId !== user?._id && <p className="text-xs font-semibold text-[#075e54]">{msg.senderId}</p>}
-              <p>{msg.text}</p>
-              <p className="text-xs text-gray-500 text-right">{new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-            </div>
-          </div>
-        ))}
+          {<MessageList currentUserId={user?._id} messages={messages} key={user?._id}/>}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="bg-[#f0f0f0] p-2">
-        <form onSubmit={sendMessage} className="flex items-center space-x-2">
-          <button type="button" className="text-gray-600">
-            <Paperclip size={24} />
-          </button>
-          <input
-            type="text"
-            placeholder="Type a message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="flex-grow p-2 rounded-full bg-white"
-          />
-          {message.trim() ? (
-            <button type="submit" className="text-[#075e54]">
-              <Send size={24} />
-            </button>
-          ) : (
-            <button type="button" className="text-[#075e54]">
-              <Mic size={24} />
-            </button>
-          )}
-        </form>
-      </div>
+      {/* input section */}
+      <MessageInput onSendMessage={(data:any)=>handleSendMessage(data)} key={user?._id}/>
 
       {alertMessage && (
         <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white py-2 px-4 rounded-full shadow-lg">
