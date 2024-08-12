@@ -38,7 +38,7 @@ export interface TStudent {
 }
 
 export interface Group {
-    id?: string;
+    _id?: string;
     name: string;
     image:string;
     description:string;

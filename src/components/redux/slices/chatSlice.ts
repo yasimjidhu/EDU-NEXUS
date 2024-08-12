@@ -75,7 +75,8 @@ export const getGroup = createAsyncThunk(
   'chat/getGroup',
   async (groupId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/chat/groups/${groupId}`);
+      const response = await axiosInstance.get(`/chat/group/${groupId}`);
+      console.log('get group called in slice ,and it is the response',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -83,6 +84,17 @@ export const getGroup = createAsyncThunk(
   }
 );
 
+export const getUserJoinedGroups = createAsyncThunk(
+  'chat/getGroup',
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/chat/joined-groups/${userId}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 
 const chatSlice = createSlice({
   name: 'chat',

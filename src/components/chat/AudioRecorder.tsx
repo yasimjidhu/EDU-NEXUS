@@ -187,16 +187,6 @@ export const AudioRecord: React.FC<AudioRecordProps> = ({
                     onKeyDown={handleKeyPress}
                 />
             )}
-            {/* <button
-                onClick={isRecording ? handleStopRecording : (audioBlob || selectedFile ? () => handleSaveRecordedAudio(audioBlob!) : handleStartRecording)}
-                className={`p-2 rounded-full focus:outline-none transition duration-300 ${isRecording || audioBlob || selectedFile ? 'bg-green-500 hover:bg-green-600' : 'text-blue-500 hover:text-blue-700'}`}
-            >
-                {isRecording || audioBlob || selectedFile || inputMessage.trim() !== '' ? (
-                    <Send size={20} className="text-black" />
-                ) : (
-                    <Mic size={20} />
-                )}
-            </button> */}
             <button
                 onClick={handleSendButtonClick}
                 className={`p-2 rounded-full focus:outline-none transition duration-300 ${isRecording || audioBlob || selectedFile

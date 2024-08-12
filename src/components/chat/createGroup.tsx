@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { User as UserType } from '../redux/slices/studentSlice';
 import { useAxios } from '../../hooks/useAxios';
 import { User, X } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store/store';
 
 interface CreateGroupModalProps {
   show: boolean;
@@ -19,6 +21,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
+  const {user}  = useSelector((state:RootState)=>state.user)
   const { response, error, loading: uploadLoading, sendRequest } = useAxios({
     method: 'POST',
     url: import.meta.env.VITE_CLOUDINARY_UPLOAD_URL,
@@ -30,9 +33,14 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
   });
 
   useEffect(() => {
+    if (user?._id) {
+      setSelectedStudents([user._id]);
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (response && response.secure_url) {
       setUploadedImageUrl(response.secure_url);
-      console.log('Image uploaded successfully:', response.secure_url);
     }
   }, [response]);
 
