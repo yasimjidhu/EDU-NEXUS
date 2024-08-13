@@ -12,8 +12,8 @@ export const uploadToCloudinary = async (file: File, setUploadProgress: (progres
 
       xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
-              const progress = (event.loaded / event.total) * 100;
-              setUploadProgress(progress); // Update progress state
+              const progress = Math.round((event.loaded / event.total) * 100)
+              setUploadProgress(progress);
           }
       };
 
@@ -21,20 +21,18 @@ export const uploadToCloudinary = async (file: File, setUploadProgress: (progres
           if (xhr.status === 200) {
               try {
                   const response = JSON.parse(xhr.responseText);
+                  setUploadProgress(0);  
                   resolve(response.secure_url);
               } catch (error) {
                   console.error('Error parsing response:', error);
                   reject(new Error('Error parsing response'));
               }
           } else {
-              console.error('Upload failed with status:', xhr.status);
-              console.error('Response text:', xhr.responseText);
               reject(new Error(`Upload failed with status: ${xhr.status}`));
           }
       };
 
       xhr.onerror = () => {
-          console.error('Network error occurred during upload');
           reject(new Error('Network error occurred during upload'));
       };
 

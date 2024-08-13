@@ -25,7 +25,7 @@ export const useFileUpload = () => {
       return null;
     };
   
-    return { selectedFile, uploadProgress, handleFileSelect, uploadFile,setSelectedFile };
+    return { selectedFile, uploadProgress,setUploadProgress, handleFileSelect, uploadFile,setSelectedFile};
   };
 
   

@@ -10,9 +10,9 @@ import { useLocation } from 'react-router-dom';
 import { getGroup, getGroupMessages, sendMessage } from '../../components/redux/slices/chatSlice';
 
 // Import custom hooks
-import { useTypingStatus } from '../../hooks/useTypingStatus'; 
-import { useFileUpload } from '../../hooks/useUploadFile'; 
-import { useAudioRecording } from '../../hooks/useAudioRecording'; 
+import { useTypingStatus } from '../../hooks/useTypingStatus';
+import { useFileUpload } from '../../hooks/useUploadFile';
+import { useAudioRecording } from '../../hooks/useAudioRecording';
 
 interface GroupChatProps {
   id: string;
@@ -23,7 +23,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id }) => {
   const [groupData, setGroupData] = useState<Group | null>(null);
   const [alertMessage, setAlertMessage] = useState('');
   const [inputMessage, setInputMessage] = useState('');
-  const [groupMessages,setGroupMessages] = useState<Message[]>([])
+  const [groupMessages, setGroupMessages] = useState<Message[]>([])
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { socket, onlineUsers } = useSocket();
@@ -34,8 +34,8 @@ const GroupChat: React.FC<GroupChatProps> = ({ id }) => {
 
   // Use custom hooks
   const { isTyping, handleTyping } = useTypingStatus(socket, groupId, user?._id || '');
-  const { selectedFile,setSelectedFile, uploadProgress, handleFileSelect, uploadFile } = useFileUpload();
-  const { audioBlob,setAudioBlob, audioProgress, audioDuration, handleRecordedAudio, uploadAudio, setAudioProgress, setAudioDuration } = useAudioRecording();
+  const { selectedFile, setSelectedFile, uploadProgress,setUploadProgress, handleFileSelect, uploadFile } = useFileUpload();
+  const { audioBlob, setAudioBlob, audioProgress, audioDuration, handleRecordedAudio, uploadAudio, setAudioProgress, setAudioDuration } = useAudioRecording();
 
   useEffect(() => {
     if (groupId) {
@@ -43,15 +43,15 @@ const GroupChat: React.FC<GroupChatProps> = ({ id }) => {
     }
   }, [dispatch, groupId]);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchGroupMessages(groupId)
-  },[groupId,dispatch])
+  }, [groupId, dispatch])
 
-  useEffect(()=>{
-    if(audioBlob || selectedFile || inputMessage.trim() !== ''){
+  useEffect(() => {
+    if (audioBlob || selectedFile || inputMessage.trim() !== '') {
       handleSendMessage()
     }
-  },[audioBlob,selectedFile,inputMessage.trim()])
+  }, [audioBlob, selectedFile, inputMessage.trim()])
 
   useEffect(() => {
     if (!socket) return;
@@ -104,14 +104,60 @@ const GroupChat: React.FC<GroupChatProps> = ({ id }) => {
     setTimeout(() => setAlertMessage(''), 3000);
   };
 
+  // const handleSendMessage = async () => {
+  //   if ((inputMessage.trim() || audioBlob || selectedFile) && socket) {
+  //     console.log('handle send message called')
+  //     let fileData = await uploadFile() || await uploadAudio();
+
+  //     const messageData: Message = {
+  //       conversationId: groupData?._id!,
+  //       senderId: user?._id || '',
+  //       text: inputMessage.trim() || undefined,
+  //       fileUrl: fileData?.fileUrl || undefined,
+  //       fileType: fileData?.fileType as 'audio' | 'image' | 'video' | undefined,
+  //       status: 'sent',
+  //       createdAt: new Date(),
+  //       updatedAt: new Date(),
+  //       isGroup: true,
+  //     };
+
+  //     try {
+  //       const response = await dispatch(sendMessage(messageData));
+  //       console.log('response of group chat message sent', response)
+  //       const savedMessage = response.payload;
+
+  //       socket.emit('groupMessage', groupData?._id, savedMessage);
+  //       setGroupMessages((prev) => [...prev, savedMessage])
+
+  //       setInputMessage('');
+  //       handleFileSelect(null);
+  //       handleRecordedAudio(null);
+  //       setAudioProgress(0);
+  //       setAudioDuration(0);
+
+  //       handleTyping(); // Clear typing status
+  //     } catch (error) {
+  //       console.error('Error sending message:', error);
+  //     }
+  //   }
+  // };
+
   const handleSendMessage = async () => {
     if ((inputMessage.trim() || audioBlob || selectedFile) && socket) {
-      console.log('handle send message called')
-      let fileData = await uploadFile() || await uploadAudio();
-
+      let fileData;
+  
+      if (selectedFile) {
+        fileData = await uploadFile();
+        setUploadProgress(0); // Reset the progress after file upload
+      } else if (audioBlob) {
+        fileData = await uploadAudio();
+        setAudioProgress(0); // Reset the progress after audio upload
+      }
+  
       const messageData: Message = {
         conversationId: groupData?._id!,
         senderId: user?._id || '',
+        senderProfile:user?.profile.avatar,
         text: inputMessage.trim() || undefined,
         fileUrl: fileData?.fileUrl || undefined,
         fileType: fileData?.fileType as 'audio' | 'image' | 'video' | undefined,
@@ -120,40 +166,44 @@ const GroupChat: React.FC<GroupChatProps> = ({ id }) => {
         updatedAt: new Date(),
         isGroup: true,
       };
-
+  
       try {
         const response = await dispatch(sendMessage(messageData));
-        console.log('response of group chat message sent',response)
+        console.log('response of group chat message sent', response);
         const savedMessage = response.payload;
-
+  
         socket.emit('groupMessage', groupData?._id, savedMessage);
-        setGroupMessages((prev)=>[...prev,savedMessage])
-
+        setGroupMessages((prev) => [...prev, savedMessage]);
+  
+        // Reset input and file states
         setInputMessage('');
         handleFileSelect(null);
+        setAudioBlob(null)
         handleRecordedAudio(null);
-        setAudioProgress(0);
+        setAudioProgress(0);  // Reset audio progress
+        setUploadProgress(0);  // Reset file upload progress
         setAudioDuration(0);
-
+        setSelectedFile(null)
+  
         handleTyping(); // Clear typing status
       } catch (error) {
         console.error('Error sending message:', error);
       }
     }
   };
-
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(e.target.value);
     handleTyping();
   };
 
-  const handleOnSendMessage  = (message:message)=>{
-    console.log('emoji selected got inc callback',message)
-    if(message.audioBlob){
+  const handleOnSendMessage = (message: message) => {
+    console.log('emoji selected got inc callback', message)
+    if (message.audioBlob) {
       setAudioBlob(message.audioBlob)
-    }else if(message.file){
+    } else if (message.file) {
       setSelectedFile(message.file)
-    }else if(message.text){
+    } else if (message.text) {
       setInputMessage(message.text)
     }
   }
@@ -185,8 +235,8 @@ const GroupChat: React.FC<GroupChatProps> = ({ id }) => {
           <div ref={messagesEndRef} />
         </div>
 
-          {/* Loading Indicator */}
-          {(uploadProgress > 0 || audioProgress > 0) && (
+        {/* Loading Indicator */}
+        {(uploadProgress > 0 || audioProgress > 0) && (
           <div className="flex items-center justify-center bg-gray-200 p-2">
             <div className="text-gray-700">Uploading... {uploadProgress || audioProgress}%</div>
           </div>
