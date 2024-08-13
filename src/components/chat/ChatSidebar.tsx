@@ -8,9 +8,10 @@ interface ChatSidebarProps {
   onlineUsers: { [email: string]: string };
   onSelectStudent: (student: User) => void;
   onSelectGroup: (group: Group) => void;
-  onClickEntity:(item:'students' | 'group')=>void;
+  onClickEntity:(item:'students' | 'group' | 'instructor')=>void;
   selectedStudent: User | null;
   selectedGroup: Group | null; 
+  user:'student'|'instructor';
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
@@ -21,7 +22,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onSelectGroup,
   onClickEntity,
   selectedStudent,
-  selectedGroup
+  selectedGroup,
+  user
 }) => {
   const [showGroups, setShowGroups] = useState(false);
 
@@ -43,7 +45,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           className={`flex-1 py-2 px-4 font-semibold ${!showGroups ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
           onClick={()=>handleClickEntity('students')}
         >
-          Students
+          {user == 'student' ? 'Instructors' : 'Students'}
+          
         </button>
         <button
           className={`flex-1 py-2 px-4 font-semibold ${showGroups ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}

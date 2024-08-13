@@ -40,7 +40,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   const [joinedGroups, setJoinedGroups] = useState<Group[]>([])
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
   const [showMessages, setShowMessages] = useState<"user" | "group" | ''>('')
-  const [clickedItem,setClickedItem] = useState<'students'|'group'|''>('')
+  const [clickedItem,setClickedItem] = useState<'students'|'group'|''|'instructor'>('')
 
 
   const { user } = useSelector((state: RootState) => state.user);
@@ -63,7 +63,6 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   useEffect(() => {
     if (user?._id) {
       dispatch(getUserJoinedGroups(user._id)).then((res: any) => {
-        console.log('response of getuserjoined groups in frontend', res)
         setJoinedGroups(res.payload.groups)
       })
     }
@@ -246,7 +245,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     setAudioBlob(blob)
   }
 
-  const handleClickEntity = (item: 'students' | 'group')=>{
+  const handleClickEntity = (item: 'students' | 'group'|'instructor')=>{
     setClickedItem(item)
   }
 
@@ -275,6 +274,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           onSelectGroup={handleSelectGroup}
           selectedGroup={selectedGroup}
           onClickEntity={handleClickEntity}
+          user={'instructor'}
         />
       </div>
 
@@ -295,7 +295,8 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       <div className="flex-1 flex flex-col">
         {/* Render Group Chat UI if a group is selected */}
         {showMessages == "group" && selectedGroup ? (
-          <GroupChat id={selectedGroup._id!} />
+          <GroupChat id={selectedGroup._id!} 
+          userId={user?._id!}/>
         ) : showMessages == "user" && selectedStudent ? (
           <>
           

@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, Paperclip, Smile, StopCircleIcon, Mic, StopCircle, X, Play, Pause, Plus } from 'lucide-react';
+import { Smile, Plus } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
 import { User } from '../../components/redux/slices/studentSlice';
-import { addMessage, getMessages, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import { addMessage, createGroup, getMessages, getUserJoinedGroups, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useSocket } from '../../contexts/SocketContext';
-import { useMessageObserver } from '../../hooks/useMessageObserver';
-import { AudioRecorder, useAudioRecorder } from 'react-audio-voice-recorder';
 import Picker from 'emoji-picker-react'
 import { uploadToCloudinary } from '../../utils/cloudinary';
-import { Message } from '../../types/chat';
-import Lightbox from '../../components/chat/LightBox';
-import AudioPlayer from '../../components/chat/AudioPlayer';
-import CreateGroupModal from '@/components/chat/createGroup';
+import { Group, Message } from '../../types/chat';
+import CreateGroupModal from '../../components/chat/createGroup';
+import { ChatSidebar } from '../../components/chat/ChatSidebar';
+import GroupChat from './GroupChat';
+import { Header } from '../../components/chat/Header';
+import { DisplayMessages } from '../../components/chat/DisplayMessages';
+import { AudioRecord } from '../../components/chat/AudioRecorder';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface ChatUIProps {
   currentUser?: { id: string; name: string; avatar: string };
@@ -23,8 +26,6 @@ interface ChatUIProps {
 const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const [enrolledInstructors, setEnrolledInstructors] = useState<User[]>([]);
   const [selectedInstructor, setSelectedInstructor] = useState<User | null>(null);
-  const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false)
-  const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -34,18 +35,22 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<NodeJS.Timeout | null>(null);
+  const [joinedGroups, setJoinedGroups] = useState<Group[]>([])
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
+  const [showMessages, setShowMessages] = useState<"user" | "group" | ''>('')
+  const [clickedItem, setClickedItem] = useState<'instructor' | 'group' | '' | 'students'>('')
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const audioRef = useRef(new Audio());
 
   const { user } = useSelector((state: RootState) => state.user);
   const { messages } = useSelector((state: RootState) => state.chat);
 
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate()
   const { socket, onlineUsers } = useSocket();
 
-  const recorderControls = useAudioRecorder();
 
   useEffect(() => {
     scrollToBottom();
@@ -60,6 +65,14 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
       });
     }
   }, [dispatch, user?._id]);
+
+  useEffect(() => {
+    if (user?._id) {
+      dispatch(getUserJoinedGroups(user._id)).then((res: any) => {
+        setJoinedGroups(res.payload.groups)
+      })
+    }
+  }, [dispatch, user?._id])
 
   useEffect(() => {
     if (socket) {
@@ -147,8 +160,10 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         senderId: user?._id || '',
         text: inputMessage.trim(),
         fileUrl,
-        fileType,
-        status: 'sent'
+        fileType: fileType as 'audio' | 'image' | 'video' | undefined,
+        status: 'sent',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       try {
@@ -174,10 +189,9 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
       }
     }
   };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
+  const handleFileSelect = (file: File) => {
+    if (file) {
+      setSelectedFile(file);
     }
   };
 
@@ -205,92 +219,42 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
     }
   };
 
-  const handleMessageRead = (messageId: string) => {
-    if (socket) {
-      socket.emit('messageRead', messageId);
-    }
-  };
-
   const handleEmojiClick = (emojiData: { emoji: string }) => {
     setInputMessage((prev) => prev + emojiData.emoji);
     setShowEmojiPicker(false);
   };
 
-  const isOnlyEmojis = (str: string) => {
-    const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?)+$/u;
-    return emojiRegex.test(str);
-  };
-
-  const startRecording = () => {
-    recorderControls.startRecording();
-  };
-
-  const stopRecording = () => {
-    recorderControls.stopRecording();
-  };
-
-  const cancelRecording = () => {
-    recorderControls.stopRecording();
-    setAudioBlob(null);
-    setAudioProgress(0);
-    setAudioDuration(0);
-  };
-
-  const onRecordingComplete = (blob: Blob) => {
-    setAudioBlob(blob);
-    const audio = new Audio(URL.createObjectURL(blob));
-    audio.onloadedmetadata = () => {
-      setAudioDuration(audio.duration);
-    };
-  };
-
-  const playRecording = () => {
-    if (audioBlob) {
-      const url = URL.createObjectURL(audioBlob);
-      audioRef.current.src = url;
-      audioRef.current.play();
-      setIsPlaying(true);
-
-      audioRef.current.onloadedmetadata = () => {
-        setAudioDuration(audioRef.current.duration);
-      };
-
-      audioRef.current.ontimeupdate = () => {
-        setAudioProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
-      };
-
-      audioRef.current.onended = () => {
-        setAudioProgress(0);
-        setIsPlaying(false);
-      };
+  const handleCreateGroup = async (data: any) => {
+    try {
+      const response = await dispatch(createGroup(data))
+      console.log('response of create group', response)
+      navigate('/instructor/group', { state: response.payload.group._id })
+    } catch (error: any) {
+      toast.error(error.message)
     }
-  };
+  }
 
-  const pauseRecording = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
+  const handleSelectStudent = (instructor: User) => {
+    setSelectedInstructor(instructor)
+    setSelectedGroup(null)
+    setShowMessages("user")
+    console.log('showMessage is', showMessages)
+  }
 
-  const handleImageClick = (url: string) => {
-    setCurrentImageUrl(url)
-    setIsLightboxOpen(true);
-  };
+  const handleSelectGroup = (group: Group) => {
+    setSelectedGroup(group)
+    setSelectedInstructor(null);
+    setShowMessages("group");
+    console.log('showMessage is', showMessages)
+  }
 
-  const handleCloseLightbox = () => {
-    setIsLightboxOpen(false);
-    setCurrentImageUrl('')
-  };
+  const handleRecordedAudio = (blob: Blob) => {
+    setAudioBlob(blob)
+  }
 
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const messageObserver = useMessageObserver(handleMessageRead);
-
+  const handleClickEntity = (item: 'instructor' | 'group' | 'students') => {
+    setClickedItem(item)
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -298,153 +262,63 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Chats</h2>
           <div className="flex items-center">
-            <button className="inter text-md bg-strong-rose text-white px-4 py-2 rounded-full flex items-center">
+            <button className="inter text-md bg-strong-rose text-white px-4 py-2 rounded-full flex items-center"
+              onClick={() => setIsModalOpen(true)}>
               <Plus className="mr-2" /> Create Group
             </button>
           </div>
         </div>
-        <div className="overflow-y-auto h-full">
-          {enrolledInstructors.length > 0 ? (
-            enrolledInstructors.map((instructor) => (
-              <div
-                key={instructor._id}
-                className={`flex items-center p-3 border-b border-gray-200 cursor-pointer transition-colors duration-200 ease-in-out
-                  ${selectedInstructor?._id === instructor._id ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                onClick={() => setSelectedInstructor(instructor)}
-              >
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 flex-shrink-0">
-                  <img
-                    src={instructor.profile?.avatar || '/default-avatar.png'}
-                    alt={`${instructor.firstName} ${instructor.lastName}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="ml-3 flex-grow">
-                  <p className="font-semibold text-gray-800">{`${instructor.firstName} ${instructor.lastName}`}</p>
-                  <p className="text-sm text-gray-500">
-                    {onlineUsers[instructor.email] === 'online' ? (
-                      <span className="flex items-center">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                        Online
-                      </span>
-                    ) : (
-                      'Offline'
-                    )}
-                  </p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="p-4 text-center text-gray-500">No instructors found</div>
-          )}
-        </div>
+
+        {/* sidebar */}
+        <ChatSidebar
+          messagedStudents={enrolledInstructors}
+          onlineUsers={onlineUsers}
+          onSelectStudent={handleSelectStudent}
+          selectedStudent={selectedInstructor}
+          onSelectGroup={handleSelectGroup}
+          selectedGroup={selectedGroup}
+          joinedGroups={joinedGroups}
+          onClickEntity={handleClickEntity}
+          user={'student'}
+        />
+
       </div>
 
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+          <div className="relative z-10 bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <CreateGroupModal
+              show={isModalOpen}
+              students={enrolledInstructors}
+              handleClose={() => setIsModalOpen(false)}
+              onCreateGroup={(data: any) => handleCreateGroup(data)}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col">
-        {selectedInstructor ? (
+        {/* Render Group Chat UI if a group is selected */}
+        {showMessages == "group" && selectedGroup ? (
+          <GroupChat id={selectedGroup._id!}
+            userId={user?._id!} />
+        ) : showMessages == "user" && selectedInstructor ? (
           <>
-            <div className="flex items-center p-4 bg-white border-b border-gray-200">
-              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 flex-shrink-0">
-                <img
-                  src={selectedInstructor.profile?.avatar || '/default-avatar.png'}
-                  alt={`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="ml-3 flex-grow">
-                <p className="font-semibold text-gray-800">{`${selectedInstructor.firstName} ${selectedInstructor.lastName}`}</p>
-                <p className="text-sm text-gray-500">
-                  {isTyping ? (
-                    <p className="text-sm text-black">Typing...</p>
-                  ) : (
-                    onlineUsers[selectedInstructor.email] === 'online' ? (
-                      <span className="flex items-center">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                        Online
-                      </span>
-                    ) : (
-                      'Offline'
-                    )
-                  )}
-                </p>
-              </div>
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => onStartCall?.(selectedInstructor._id, 'audio')}
-                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                >
-                  <Phone size={20} />
-                </button>
-                <button
-                  onClick={() => onStartCall?.(selectedInstructor._id, 'video')}
-                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                >
-                  <Video size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-2 bg-gradient-to-b from-gray-100 to-gray-200">
-              {messages.map((message) => {
-                const onlyEmojis = isOnlyEmojis(message.text!);
-                return (
-                  <div
-                    key={message._id}
-                    className={`flex ${message.senderId === user?._id ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      data-message-id={message._id}
-                      ref={(el) => el && messageObserver.current?.observe(el)}
-                      className={`max-w-xs p-2 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${message.senderId === user?._id
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                        : 'bg-white text-gray-800'
-                        }`}
-                    >
-                      {message.fileUrl ? (
-                        message.fileType === 'audio' ? (
-                          <AudioPlayer src={message.fileUrl} />
-                        ) : message.fileType === 'image' ? (
-                          <>
-                            <img
-                              src={message.fileUrl}
-                              alt="Uploaded image"
-                              className="w-full rounded cursor-pointer"
-                              onClick={() => handleImageClick(message.fileUrl)}
-                            />
-                            {isLightboxOpen && (
-                              <Lightbox imageUrl={currentImageUrl} onClose={handleCloseLightbox} />
-                            )}
-                          </>
-                        ) : message.fileType === 'video' ? (
-                          <video controls src={message.fileUrl} className="w-full rounded cursor-pointer" />
-                        ) : null
-                      ) : (
-                        <p className={`inter ${onlyEmojis ? 'text-4xl' : 'text-sm md:text-base'}`}>
-                          {message.text}
-                        </p>
-                      )}
-                      <div className="text-xs mt-2 flex items-center justify-between">
-                        <span className={`${message.senderId === user?._id ? 'text-blue-100' : 'text-gray-500'}`}>
-                          {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        {message.senderId === user?._id && (
-                          <span className="ml-2 flex 
-                          items-center">
-                            {message.status === 'sent' && <span className="text-xs">✓</span>}
-                            {message.status === 'delivered' && <span className="text-xs">✓✓</span>}
-                            {message.status === 'read' && (
-                              <span className="text-green-500 text-xs">✓✓</span>
-                            )}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={messagesEndRef}></div>
-            </div>
-            <div className="p-4 bg-white border-t border-gray-200 relative">
-              <div className="flex items-center space-x-2">
+
+            {/* Chat Header */}
+            <Header
+              isTyping={isTyping}
+              onlineUsers={onlineUsers}
+              selectedStudent={selectedInstructor}
+              key={selectedInstructor._id}
+            />
+
+            {/* Show Messages */}
+            <DisplayMessages messages={messages} />
+
+            <div className="sticky bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
+              <div className="flex items-center space-x-2 relative">
                 <button
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   className="text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -457,93 +331,28 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                     <Picker onEmojiClick={handleEmojiClick} />
                   </div>
                 )}
-
-                <div className="flex-grow flex items-center bg-white rounded-full border border-gray-300">
-                  {recorderControls.isRecording ? (
-                    <div className="flex-grow flex items-center justify-between p-2">
-                      <AudioRecorder
-                        onRecordingComplete={onRecordingComplete}
-                        recorderControls={recorderControls}
-                      />
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                        <span className="text-sm text-gray-500">Recording: {formatDuration(recorderControls.recordingTime)}</span>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button onClick={cancelRecording} className="text-red-500 hover:text-red-700">
-                          <X size={20} />
-                        </button>
-                        <button onClick={stopRecording} className="text-blue-500 hover:text-blue-700">
-                          <StopCircle size={20} />
-                        </button>
-                      </div>
-                    </div>
-                  ) : audioBlob ? (
-                    <div className="flex-grow flex items-center justify-between p-2">
-                      <div className="flex items-center space-x-2">
-                        {isPlaying ? (
-                          <button onClick={pauseRecording} className="text-blue-500 hover:text-blue-700">
-                            <Pause size={20} />
-                          </button>
-                        ) : (
-                          <button onClick={playRecording} className="text-blue-500 hover:text-blue-700">
-                            <Play size={20} />
-                          </button>
-                        )}
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-in-out"
-                            style={{ width: `${audioProgress}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm text-gray-500">{formatDuration(audioDuration)}</span>
-                      </div>
-                      <button onClick={cancelRecording} className="text-red-500 hover:text-red-700">
-                        <X size={20} />
-                      </button>
-                    </div>
-                  ) : (
-                    <input
-                      type="text"
-                      className="flex-grow px-4 py-2 focus:outline-none"
-                      placeholder="Type a message"
-                      value={inputMessage}
-                      onChange={handleInput}
-                      onKeyDown={handleKeyPress}
-                    />
-                  )}
-
-                  <button
-                    onClick={recorderControls.isRecording ? stopRecording : (audioBlob || selectedFile || inputMessage.trim() != '' ? handleSendMessage : startRecording)}
-                    className={`p-2 rounded-full focus:outline-none transition duration-300 ${recorderControls.isRecording || audioBlob || selectedFile ? 'bg-green-500 hover:bg-green-600' : 'text-blue-500 hover:text-blue-700'
-                      }`}
-                  >
-                    {recorderControls.isRecording || audioBlob || selectedFile || inputMessage.trim() !== '' ? (
-                      <Send size={20} className="text-black" />
-                    ) : (
-                      <Mic size={20} />
-                    )}
-                  </button>
-                </div>
-
-                {!recorderControls.isRecording && !selectedFile && !audioBlob && inputMessage.trim() === '' && (
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileSelect}
-                      accept="image/*,video/*,audio/*"
-                    />
-                    <Paperclip size={24} className="text-gray-500 hover:text-gray-700" />
-                  </label>
-                )}
+                <AudioRecord
+                  handleInput={handleInput}
+                  handleKeyPress={handleKeyPress}
+                  handleSendMessage={handleSendMessage}
+                  recordedAudio={handleRecordedAudio}
+                  inputMessage={inputMessage}
+                  onSelectFile={(file) => handleFileSelect(file)}
+                  selectedFile={selectedFile}
+                  key={selectedInstructor._id}
+                />
               </div>
             </div>
-
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-500">Select an instructor to start chatting</p>
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-gray-500">
+              {clickedItem === "instructor"
+                ? "Select an instructor to start chatting"
+                : clickedItem === "group"
+                  ? "Select a group to start chatting"
+                  : "Please select a chat to start messaging"}
+            </p>
           </div>
         )}
       </div>
