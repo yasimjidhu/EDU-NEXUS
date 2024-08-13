@@ -1,51 +1,62 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSocket } from '../../contexts/SocketContext';
-import { Send, UserPlus, LogOut, MoreVertical, Paperclip, Mic } from 'lucide-react';
+import { UserPlus, LogOut, MoreVertical } from 'lucide-react';
 import { Group, Message } from '../../types/chat';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import MessageList from '../../components/chat/MessageList';
-import MessageInput from '../../components/chat/MessageInput';
+import MessageInput, { message } from '../../components/chat/MessageInput';
 import { useLocation } from 'react-router-dom';
-import { getGroup, getMessagedStudents, getUserJoinedGroups } from '../../components/redux/slices/chatSlice';
-import { User } from '../../components/redux/slices/studentSlice';
+import { getGroup, getGroupMessages, sendMessage } from '../../components/redux/slices/chatSlice';
 
-interface GroupChatProps{
-  id:string;
+// Import custom hooks
+import { useTypingStatus } from '../../hooks/useTypingStatus'; 
+import { useFileUpload } from '../../hooks/useUploadFile'; 
+import { useAudioRecording } from '../../hooks/useAudioRecording'; 
+
+interface GroupChatProps {
+  id: string;
 }
-const GroupChat : React.FC<GroupChatProps> =  ({id}) => {
-  const [message, setMessage] = useState('');
+
+const GroupChat: React.FC<GroupChatProps> = ({ id }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [groupData,setGroupData] = useState<Group | null>(null)
+  const [groupData, setGroupData] = useState<Group | null>(null);
   const [alertMessage, setAlertMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState('');
+  const [groupMessages,setGroupMessages] = useState<Message[]>([])
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   const { socket, onlineUsers } = useSocket();
-  const {user} = useSelector((state:RootState)=>state.user)
-
-  const location = useLocation()
+  const { user } = useSelector((state: RootState) => state.user);
   const dispatch: AppDispatch = useDispatch();
-  const groupId = location.state ? location.state : id
+  const location = useLocation();
+  const groupId = location.state ? location.state : id;
+
+  // Use custom hooks
+  const { isTyping, handleTyping } = useTypingStatus(socket, groupId, user?._id || '');
+  const { selectedFile,setSelectedFile, uploadProgress, handleFileSelect, uploadFile } = useFileUpload();
+  const { audioBlob,setAudioBlob, audioProgress, audioDuration, handleRecordedAudio, uploadAudio, setAudioProgress, setAudioDuration } = useAudioRecording();
+
+  useEffect(() => {
+    if (groupId) {
+      fetchGroupData(groupId);
+    }
+  }, [dispatch, groupId]);
 
   useEffect(()=>{
-    if(groupId){
-      fetchGroupData(groupId)
-    }
-  },[dispatch,groupId])
+    fetchGroupMessages(groupId)
+  },[groupId,dispatch])
 
-  const fetchGroupData = async (groupId:string)=>{
-    try {
-      const response  = await dispatch(getGroup(groupId))
-      setGroupData(response.payload.group)
-    } catch (error:any) {
-      console.log(error)
+  useEffect(()=>{
+    if(audioBlob || selectedFile || inputMessage.trim() !== ''){
+      handleSendMessage()
     }
-  }
+  },[audioBlob,selectedFile,inputMessage.trim()])
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('message', (msg: Message) => {
+    socket.on('groupMessage', (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
     });
 
@@ -57,6 +68,24 @@ const GroupChat : React.FC<GroupChatProps> =  ({id}) => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const fetchGroupData = async (groupId: string) => {
+    try {
+      const response = await dispatch(getGroup(groupId));
+      setGroupData(response.payload.group);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+
+  const fetchGroupMessages = async (groupId: string) => {
+    try {
+      const response = await dispatch(getGroupMessages(groupId));
+      setGroupMessages(response.payload.messages);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
 
   const joinGroup = () => {
     if (!socket) return;
@@ -70,34 +99,77 @@ const GroupChat : React.FC<GroupChatProps> =  ({id}) => {
     showAlertMessage(`Left group: ${groupData?.name}`);
   };
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!socket || !message.trim()) return;
-    socket.emit('groupMessage', groupData?.name, message);
-    setMessage('');
-  };
-
   const showAlertMessage = (message: string) => {
     setAlertMessage(message);
     setTimeout(() => setAlertMessage(''), 3000);
   };
 
-  const handleSendMessage = async (data:any)=>{
-    console.log('message send in group chat')
-  }
+  const handleSendMessage = async () => {
+    if ((inputMessage.trim() || audioBlob || selectedFile) && socket) {
+      console.log('handle send message called')
+      let fileData = await uploadFile() || await uploadAudio();
 
+      const messageData: Message = {
+        conversationId: groupData?._id!,
+        senderId: user?._id || '',
+        text: inputMessage.trim() || undefined,
+        fileUrl: fileData?.fileUrl || undefined,
+        fileType: fileData?.fileType as 'audio' | 'image' | 'video' | undefined,
+        status: 'sent',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isGroup: true,
+      };
+
+      try {
+        const response = await dispatch(sendMessage(messageData));
+        console.log('response of group chat message sent',response)
+        const savedMessage = response.payload;
+
+        socket.emit('groupMessage', groupData?._id, savedMessage);
+        setGroupMessages((prev)=>[...prev,savedMessage])
+
+        setInputMessage('');
+        handleFileSelect(null);
+        handleRecordedAudio(null);
+        setAudioProgress(0);
+        setAudioDuration(0);
+
+        handleTyping(); // Clear typing status
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputMessage(e.target.value);
+    handleTyping();
+  };
+
+  const handleOnSendMessage  = (message:message)=>{
+    console.log('emoji selected got inc callback',message)
+    if(message.audioBlob){
+      setAudioBlob(message.audioBlob)
+    }else if(message.file){
+      setSelectedFile(message.file)
+    }else if(message.text){
+      setInputMessage(message.text)
+    }
+  }
 
   return (
     <div className="flex h-screen bg-[#e5ddd5]">
       <div className="flex flex-col flex-grow">
-        <div className="bg-[#075e54] p-3 text-white flex items-center justify-between">
+        {/* Group header */}
+        <div className="bg-[#075e54] p-3 text-white flex items-center justify-between rounded-xs">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-gray-300 rounded-full mr-3 ">
-              <img src={groupData?.image} alt="" className="w-full object-cover" />
+            <div className="w-10 h-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
+              <img src={groupData?.image} alt="" className="w-full h-full object-cover rounded-full" />
             </div>
             <div>
               <h2 className="text-lg font-semibold">{groupData?.name}</h2>
-              <p className="text-sm">{onlineUsers.length} participants</p>
+              <p className="text-sm">{groupData?.members.length} participants</p>
             </div>
           </div>
           <div className="flex space-x-4">
@@ -107,13 +179,25 @@ const GroupChat : React.FC<GroupChatProps> =  ({id}) => {
           </div>
         </div>
 
+        {/* Message list */}
         <div className="flex-grow overflow-y-auto p-4 space-y-2">
-          {<MessageList currentUserId={user?._id} messages={messages} key={user?._id} />}
+          <MessageList currentUserId={user?._id} messages={groupMessages} key={user?._id} />
           <div ref={messagesEndRef} />
         </div>
 
-        <MessageInput onSendMessage={(data: any) => handleSendMessage(data)} key={user?._id} />
+          {/* Loading Indicator */}
+          {(uploadProgress > 0 || audioProgress > 0) && (
+          <div className="flex items-center justify-center bg-gray-200 p-2">
+            <div className="text-gray-700">Uploading... {uploadProgress || audioProgress}%</div>
+          </div>
+        )}
 
+        {/* Message input */}
+        <MessageInput
+          onSendMessage={handleOnSendMessage}
+        />
+
+        {/* Alert message */}
         {alertMessage && (
           <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white py-2 px-4 rounded-full shadow-lg">
             {alertMessage}

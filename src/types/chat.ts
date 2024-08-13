@@ -1,13 +1,15 @@
 export interface Message {
-    id: string;
+    id?: string;
     conversationId: string;
     senderId: string;
     text?: string;
     fileUrl?: string;
     fileType?: 'audio' | 'image' | 'video';
     status: string;
-    createdAt: Date;
+    createdAt?: Date;
+    updatedAt?:Date;
     _id?: string;
+    isGroup?:boolean;
   }
 
 export interface TStudent {

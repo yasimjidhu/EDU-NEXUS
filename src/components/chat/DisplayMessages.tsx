@@ -15,8 +15,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
     const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false)
     const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    console.log('display message reached')
+    
     const { user } = useSelector((state: RootState) => state.user)
     const { socket } = useSocket()
 

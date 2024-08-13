@@ -1,8 +1,7 @@
 
 
 export const uploadToCloudinary = async (file: File, setUploadProgress: (progress: number) => void): Promise<string> => {
-  console.log('cloudinary chat preset',import.meta.env.VITE_CLOUDINARY_CHAT_FILES_PRESET)
-  console.log('cloudinary cloud name',import.meta.env.VITE_CLOUDINARY_CLOUD_NAME)
+  
   return new Promise((resolve, reject) => {
       const formData = new FormData();
       formData.append('file', file);

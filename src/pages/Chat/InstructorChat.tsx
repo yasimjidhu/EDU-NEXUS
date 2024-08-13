@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, Paperclip, Smile, StopCircle, Mic, X, Play, Pause, Plus } from 'lucide-react';
+import { Smile, Plus } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { User } from '../../components/redux/slices/studentSlice';
 import { useSocket } from '../../contexts/SocketContext';
 import { addMessage, createGroup, getMessagedStudents, getMessages, getUserJoinedGroups, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
-import AudioPlayer from '../../components/chat/AudioPlayer';
-import { AudioRecorder, useAudioRecorder } from 'react-audio-voice-recorder';
 import Picker from 'emoji-picker-react'
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { Group, Message } from '../../types/chat';
@@ -39,10 +37,10 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   const typingTimer = useRef<NodeJS.Timeout | null>(null);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
-  const [joinedGroups,setJoinedGroups] = useState<Group[]>([])
-  const [selectedGroup,setSelectedGroup] = useState<Group | null>(null)
+  const [joinedGroups, setJoinedGroups] = useState<Group[]>([])
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
   const [showMessages, setShowMessages] = useState<"user" | "group" | ''>('')
-
+  const [clickedItem,setClickedItem] = useState<'students'|'group'|''>('')
 
 
   const { user } = useSelector((state: RootState) => state.user);
@@ -62,14 +60,14 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     }
   }, [dispatch, user?._id]);
 
-  useEffect(()=>{
-    if(user?._id){
-      dispatch(getUserJoinedGroups(user._id)).then((res:any)=>{
-        console.log('response of getuserjoined groups in frontend',res)
+  useEffect(() => {
+    if (user?._id) {
+      dispatch(getUserJoinedGroups(user._id)).then((res: any) => {
+        console.log('response of getuserjoined groups in frontend', res)
         setJoinedGroups(res.payload.groups)
       })
     }
-  },[dispatch,user?._id])
+  }, [dispatch, user?._id])
 
   useEffect(() => {
     if (socket) {
@@ -124,7 +122,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     }
   }, [selectedStudent, socket, user?._id, dispatch]);
 
-  
+
 
   const handleSendMessage = async () => {
     if ((inputMessage.trim() || audioBlob || selectedFile) && selectedStudent && socket) {
@@ -182,7 +180,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     }
   };
 
-  const handleFileSelect = (file:File) => {
+  const handleFileSelect = (file: File) => {
     if (file) {
       setSelectedFile(file);
     }
@@ -224,26 +222,32 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     try {
       const response = await dispatch(createGroup(data))
       console.log('response of create group', response)
-      navigate('/instructor/group',{state:response.payload.group._id})
+      navigate('/instructor/group', { state: response.payload.group._id })
     } catch (error: any) {
       toast.error(error.message)
     }
   }
 
-  const handleSelectStudent = (student:User)=>{
+  const handleSelectStudent = (student: User) => {
     setSelectedStudent(student)
     setSelectedGroup(null)
     setShowMessages("user")
+    console.log('showMessage is',showMessages)
   }
 
-  const handleSelectGroup = (group:Group)=>{
+  const handleSelectGroup = (group: Group) => {
     setSelectedGroup(group)
-    setSelectedStudent(null);  
-    setShowMessages("group"); 
+    setSelectedStudent(null);
+    setShowMessages("group");
+    console.log('showMessage is',showMessages)
   }
 
-  const handleRecordedAudio = (blob:Blob)=>{
+  const handleRecordedAudio = (blob: Blob) => {
     setAudioBlob(blob)
+  }
+
+  const handleClickEntity = (item: 'students' | 'group')=>{
+    setClickedItem(item)
   }
 
   return (
@@ -260,7 +264,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
             </button>
           </div>
         </div>
-  
+
         {/* messaged students list */}
         <ChatSidebar
           messagedStudents={messagedStudents}
@@ -270,9 +274,10 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           joinedGroups={joinedGroups}
           onSelectGroup={handleSelectGroup}
           selectedGroup={selectedGroup}
+          onClickEntity={handleClickEntity}
         />
       </div>
-  
+
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
@@ -286,33 +291,34 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           </div>
         </div>
       )}
-  
+
       <div className="flex-1 flex flex-col">
         {/* Render Group Chat UI if a group is selected */}
         {showMessages == "group" && selectedGroup ? (
           <GroupChat id={selectedGroup._id!} />
-        ) : showMessages == "user" && selectedStudent  ? (
+        ) : showMessages == "user" && selectedStudent ? (
           <>
+          
             {/* Chat Header */}
             <Header
               isTyping={isTyping}
               onlineUsers={onlineUsers}
               selectedStudent={selectedStudent}
-              key={selectedStudent._id} // Ensure unique key for each student
+              key={selectedStudent._id}
             />
-  
+
             {/* Show Messages */}
             <DisplayMessages messages={messages} />
-  
-            <div className="p-4 bg-white border-t border-gray-200 relative">
-              <div className="flex items-center space-x-2">
+
+            <div className="sticky bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
+              <div className="flex items-center space-x-2 relative">
                 <button
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   className="text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
                   <Smile size={24} />
                 </button>
-  
+
                 {showEmojiPicker && (
                   <div className="absolute bottom-20 left-2">
                     <Picker onEmojiClick={handleEmojiClick} />
@@ -326,21 +332,25 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
                   inputMessage={inputMessage}
                   onSelectFile={(file) => handleFileSelect(file)}
                   selectedFile={selectedFile}
-                  key={selectedStudent._id} // Ensure unique key for each student
+                  key={selectedStudent._id}
                 />
               </div>
             </div>
           </>
         ) : (
           <div className="flex items-center justify-center flex-1">
-            <p className="text-gray-500">Select a student or group to start chatting</p>
+            <p className="text-gray-500">
+              {clickedItem === "students"
+                ? "Select a student to start chatting"
+                : clickedItem === "group"
+                ? "Select a group to start chatting"
+                : "Please select a chat to start messaging"}
+            </p>
           </div>
         )}
       </div>
     </div>
   );
-  
-
 };
 
 export default InstructorChat;

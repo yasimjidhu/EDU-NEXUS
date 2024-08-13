@@ -1,71 +1,16 @@
-// import React from 'react';
-// import { User } from '../redux/slices/studentSlice';
-
-// interface ChatSidebarProps {
-//   messagedStudents: User[];
-//   onlineUsers: { [email: string]: string };
-//   onSelectStudent:(student:User)=> void;
-//   selectedStudent:User | null;
-// }
-
-// export const ChatSidebar: React.FC<ChatSidebarProps> = ({
-//   messagedStudents,
-//   onlineUsers,
-//   onSelectStudent,
-//   selectedStudent
-// }) => {
-
-//   return (
-//     <div className="overflow-y-auto h-full">
-//       {messagedStudents.length > 0 ? (
-//         messagedStudents.map((student) => (
-//           <div
-//             key={student._id}
-//             className={`flex items-center p-3 border-b border-gray-200 cursor-pointer transition-colors duration-200 ease-in-out
-//               ${selectedStudent?._id === student._id ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-//             onClick={() => onSelectStudent(student)}
-//           >
-//             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 flex-shrink-0">
-//               <img
-//                 src={student.profile?.avatar || '/default-avatar.png'}
-//                 alt={`${student.firstName} ${student.lastName}`}
-//                 className="w-full h-full object-cover"
-//               />
-//             </div>
-//             <div className="ml-3 flex-grow">
-//               <p className="font-semibold text-gray-800">{`${student.firstName} ${student.lastName}`}</p>
-//               <p className="text-sm text-gray-500">
-//                 {onlineUsers[student.email] === 'online' ? (
-//                   <span className="flex items-center">
-//                     <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-//                     Online
-//                   </span>
-//                 ) : (
-//                   'Offline'
-//                 )}
-//               </p>
-//             </div>
-//           </div>
-//         ))
-//       ) : (
-//         <div className="p-4 text-center text-gray-500">No students have messaged you yet.</div>
-//       )}
-//     </div>
-//   );
-// };
-
 import React, { useState } from 'react';
 import { User } from '../redux/slices/studentSlice';
 import { Group } from '../../types/chat'; // Assuming you have a Group type defined
 
 interface ChatSidebarProps {
   messagedStudents: User[];
-  joinedGroups: Group[]; // Add this prop for joined groups
+  joinedGroups: Group[];
   onlineUsers: { [email: string]: string };
   onSelectStudent: (student: User) => void;
-  onSelectGroup: (group: Group) => void; // Add this prop for group selection
+  onSelectGroup: (group: Group) => void;
+  onClickEntity:(item:'students' | 'group')=>void;
   selectedStudent: User | null;
-  selectedGroup: Group | null; // Add this prop for selected group
+  selectedGroup: Group | null; 
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
@@ -74,23 +19,35 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onlineUsers,
   onSelectStudent,
   onSelectGroup,
+  onClickEntity,
   selectedStudent,
   selectedGroup
 }) => {
   const [showGroups, setShowGroups] = useState(false);
+
+  const handleClickEntity = (item: 'students' | 'group') => {
+      if (item === 'students') {
+        setShowGroups(false);
+        onClickEntity(item)
+      } else if (item === 'group') {
+        setShowGroups(true);
+        onClickEntity(item)
+      }
+  };
+  
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
       <div className="flex border-b border-gray-200">
         <button
           className={`flex-1 py-2 px-4 font-semibold ${!showGroups ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
-          onClick={() => setShowGroups(false)}
+          onClick={()=>handleClickEntity('students')}
         >
           Students
         </button>
         <button
           className={`flex-1 py-2 px-4 font-semibold ${showGroups ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
-          onClick={() => setShowGroups(true)}
+          onClick={()=>handleClickEntity('group')}
         >
           Groups
         </button>

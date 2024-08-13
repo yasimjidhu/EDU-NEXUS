@@ -385,7 +385,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
             </div>
             <div className="flex-1 overflow-y-auto p-2 bg-gradient-to-b from-gray-100 to-gray-200">
               {messages.map((message) => {
-                const onlyEmojis = isOnlyEmojis(message.text);
+                const onlyEmojis = isOnlyEmojis(message.text!);
                 return (
                   <div
                     key={message._id}
@@ -401,7 +401,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                     >
                       {message.fileUrl ? (
                         message.fileType === 'audio' ? (
-                          // <audio controls src={message.fileUrl} className="w-full" />
                           <AudioPlayer src={message.fileUrl} />
                         ) : message.fileType === 'image' ? (
                           <>
@@ -428,7 +427,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                           {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                         {message.senderId === user?._id && (
-                          <span className="ml-2 flex items-center">
+                          <span className="ml-2 flex 
+                          items-center">
                             {message.status === 'sent' && <span className="text-xs">✓</span>}
                             {message.status === 'delivered' && <span className="text-xs">✓✓</span>}
                             {message.status === 'read' && (

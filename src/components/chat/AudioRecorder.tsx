@@ -189,7 +189,7 @@ export const AudioRecord: React.FC<AudioRecordProps> = ({
             )}
             <button
                 onClick={handleSendButtonClick}
-                className={`p-2 rounded-full focus:outline-none transition duration-300 ${isRecording || audioBlob || selectedFile
+                className={`p-2 rounded-full focus:outline-none mr-3 transition duration-300 ${isRecording || audioBlob || selectedFile
                         ? 'bg-green-500 hover:bg-green-600'
                         : 'text-blue-500 hover:text-blue-700'
                     }`}

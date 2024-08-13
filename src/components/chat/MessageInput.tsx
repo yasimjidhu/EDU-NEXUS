@@ -1,47 +1,95 @@
 // MessageInput.tsx
 import React, { useState } from 'react';
-import { Send, Paperclip, Mic } from 'lucide-react';
+import { Send, Paperclip, Mic, Smile } from 'lucide-react';
+import Picker from 'emoji-picker-react';
+import { AudioRecord } from './AudioRecorder';
 
+export interface message{
+  text?:string|null;
+  file?:File|null;
+  audioBlob?: Blob|null;
+}
 interface MessageInputProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message:message) => void;
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
   const [message, setMessage] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim()) {
-      onSendMessage(message);
+  const handleSubmit = () => {
+    if (message.trim() || selectedFile || audioBlob) {
+      onSendMessage({ text: message.trim(), file: selectedFile, audioBlob });
       setMessage('');
+      setSelectedFile(null);
+      setAudioBlob(null);
+      setIsRecording(false);
     }
   };
 
+
+  const handleEmojiClick = (emojiData: { emoji: string }) => {
+    setMessage((prev) => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessage(e.target.value);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
+
+  const handleRecordedAudio = (audioBlob: Blob) => {
+    setAudioBlob(audioBlob);
+  };
+
   return (
-    <div className="bg-[#f0f0f0] p-2">
-      <form onSubmit={handleSubmit} className="flex items-center space-x-2">
-        <button type="button" className="text-gray-600">
-          <Paperclip size={24} />
+    <div className="sticky bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
+      <div className="flex items-center space-x-2 relative">
+        <button
+          type="button"
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          className="text-gray-500 hover:text-gray-700 focus:outline-none"
+        >
+          <Smile size={24} />
         </button>
-        <input
-          type="text"
-          placeholder="Type a message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          className="flex-grow p-2 rounded-full bg-white"
-        />
-        {message.trim() ? (
-          <button type="submit" className="text-[#075e5 4]">
-            <Send size={24} />
-          </button>
-        ) : (
-          <button type="button" className="text-[#075e54]">
-            <Mic size={24} />
-          </button>
+
+        {showEmojiPicker && (
+          <div className="absolute bottom-20 left-2 z-50">
+            <Picker onEmojiClick={handleEmojiClick} />
+          </div>
         )}
-      </form>
+
+        <AudioRecord
+          inputMessage={message}
+          handleInput={handleInputChange}
+          handleKeyPress={handleKeyPress}
+          selectedFile={selectedFile}
+          onSelectFile={(file) => setSelectedFile(file)}
+          handleSendMessage={handleSubmit}
+          recordedAudio={handleRecordedAudio}
+        />
+
+        <button
+          onClick={handleSubmit}
+          className={`p-2 rounded-full focus:outline-none mr-3 transition duration-300 ${isRecording || audioBlob || selectedFile || message.trim() !== '' 
+            ? 'bg-green-500 hover:bg-green-600' 
+            : 'text-blue-500 hover:text-blue-700'
+          }`}
+        >
+          <Send size={20} className="text-black" />
+        </button>
+      </div>
     </div>
   );
 };
 
-export default MessageInput
+export default MessageInput;

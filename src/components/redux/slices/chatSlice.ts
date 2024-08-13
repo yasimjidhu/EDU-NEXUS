@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '../../../constants/axiosInstance';
 import {Group, TStudent} from '../../../types/chat'
-import { Message } from '../../../pages/Chat/InstructorChat';
+import { Message } from '../../../types/chat';
 
 
 export interface ChatState {
@@ -49,7 +49,6 @@ export const getMessagedStudents = createAsyncThunk(
   async (instructorId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/messaged-students/${instructorId}`);
-      console.log('response of getmessagedstudents in slice',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -62,7 +61,6 @@ export const createGroup = createAsyncThunk(
   'chat/createGroup',
   async (groupData: Omit<Group, '_id'>, { rejectWithValue }) => {
     try {
-      console.log('create group called in slice',groupData)
       const response = await axiosInstance.post('/chat/group', groupData);
       return response.data;
     } catch (error: any) {
@@ -76,7 +74,6 @@ export const getGroup = createAsyncThunk(
   async (groupId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/group/${groupId}`);
-      console.log('get group called in slice ,and it is the response',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -89,6 +86,19 @@ export const getUserJoinedGroups = createAsyncThunk(
   async (userId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/joined-groups/${userId}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const getGroupMessages = createAsyncThunk(
+  'chat/group-messages',
+  async (groupId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/chat/group-messages/${groupId}`);
+      console.log('response of getGroupMessages in slice',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -159,7 +169,7 @@ const chatSlice = createSlice({
         state.group = action.payload;
       })
       .addCase(createGroup.rejected, (state, action: PayloadAction<string | undefined>) => {
-        state.loading = false;
+        state.loading = false;  
         state.error = action.payload || 'Failed to create group';
       })
       // Handle pending state for getting a group
