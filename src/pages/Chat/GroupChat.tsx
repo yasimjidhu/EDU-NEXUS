@@ -7,36 +7,49 @@ import { AppDispatch, RootState } from '../../components/redux/store/store';
 import MessageList from '../../components/chat/MessageList';
 import MessageInput, { message } from '../../components/chat/MessageInput';
 import { useLocation } from 'react-router-dom';
-import { getGroup, getGroupMessages, sendMessage } from '../../components/redux/slices/chatSlice';
+import { addUsersToGroup, getGroup, getGroupMessages, removeUserFromGroup, sendMessage } from '../../components/redux/slices/chatSlice';
+import AddMembersModal from '../../components/chat/AddMembersModal';
+import { useMessagedStudents } from '../../contexts/messagedStudentsContext';
+import { toast } from 'react-toastify';
+import { showAlert } from '../../utils/alert';
 
 // Import custom hooks
 import { useTypingStatus } from '../../hooks/useTypingStatus';
 import { useFileUpload } from '../../hooks/useUploadFile';
 import { useAudioRecording } from '../../hooks/useAudioRecording';
 
+
 interface GroupChatProps {
   id: string;
-  userId:string;
+  userId: string;
 }
 
-const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
+const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [groupData, setGroupData] = useState<Group | null>(null);
   const [alertMessage, setAlertMessage] = useState('');
   const [inputMessage, setInputMessage] = useState('');
   const [groupMessages, setGroupMessages] = useState<Message[]>([])
-
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // contexts
   const { socket, onlineUsers } = useSocket();
+  const { messagedStudents, loading } = useMessagedStudents()
+
+  // store
   const { user } = useSelector((state: RootState) => state.user);
+
   const dispatch: AppDispatch = useDispatch();
   const location = useLocation();
   const groupId = location.state ? location.state : id;
 
-  // Use custom hooks
+  // custom hooks
   const { isTyping, handleTyping } = useTypingStatus(socket, groupId, user?._id || '');
-  const { selectedFile, setSelectedFile, uploadProgress,setUploadProgress, handleFileSelect, uploadFile } = useFileUpload();
+  const { selectedFile, setSelectedFile, uploadProgress, setUploadProgress, handleFileSelect, uploadFile } = useFileUpload();
   const { audioBlob, setAudioBlob, audioProgress, audioDuration, handleRecordedAudio, uploadAudio, setAudioProgress, setAudioDuration } = useAudioRecording();
+
+  const userName = `${user?.firstName} ${user?.lastName}`
 
   useEffect(() => {
     if (groupId) {
@@ -56,15 +69,14 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
 
   useEffect(() => {
     if (!socket || !groupId) return;
-  
-    console.log('joining group', groupId);
+
     socket.emit('joinGroup', groupId);
-  
+
     socket.on('groupMessage', (msg: Message) => {
       console.log('group message received from socket', msg);
       setGroupMessages((prev) => [...prev, msg]);
     });
-  
+
     return () => {
       socket.off('groupMessage');
       socket.emit('leaveGroup', groupId);
@@ -101,20 +113,20 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
   const handleSendMessage = async () => {
     if ((inputMessage.trim() || audioBlob || selectedFile) && socket) {
       let fileData;
-  
+
       if (selectedFile) {
         fileData = await uploadFile();
         setUploadProgress(0);
       } else if (audioBlob) {
         fileData = await uploadAudio();
-        setAudioProgress(0); 
+        setAudioProgress(0);
       }
-  
+
       const messageData: Message = {
         conversationId: groupData?._id!,
         senderId: user?._id || '',
-        senderProfile:user?.profile.avatar,
-        senderName:`${user?.firstName} ${user?.lastName}`,
+        senderProfile: user?.profile.avatar,
+        senderName: `${user?.firstName} ${user?.lastName}`,
         text: inputMessage.trim() || undefined,
         fileUrl: fileData?.fileUrl || undefined,
         fileType: fileData?.fileType as 'audio' | 'image' | 'video' | undefined,
@@ -123,11 +135,11 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
         updatedAt: new Date(),
         isGroup: true,
       };
-  
+
       try {
         const response = await dispatch(sendMessage(messageData));
         const savedMessage = response.payload;
-  
+
         socket.emit('groupMessage', groupData?._id, savedMessage);
 
         // Reset input and file states
@@ -135,25 +147,24 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
         handleFileSelect(null);
         setAudioBlob(null)
         handleRecordedAudio(null);
-        setAudioProgress(0);  
-        setUploadProgress(0); 
+        setAudioProgress(0);
+        setUploadProgress(0);
         setAudioDuration(0);
         setSelectedFile(null)
-  
-        handleTyping(); 
+
+        handleTyping();
       } catch (error) {
         console.error('Error sending message:', error);
       }
     }
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(e.target.value);
     handleTyping();
   };
 
   const handleOnSendMessage = (message: message) => {
-    console.log('emoji selected got inc callback', message)
     if (message.audioBlob) {
       setAudioBlob(message.audioBlob)
     } else if (message.file) {
@@ -162,6 +173,44 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
       setInputMessage(message.text)
     }
   }
+
+  const handleAddStudents = () => {
+    setIsAddModalOpen(true)
+  }
+
+  const handleOnAddStudents =async (userIds: string[]) => {
+    try {
+      await dispatch(addUsersToGroup({ groupId: groupData?._id!, userIds }));
+
+      setGroupData((prev) => {
+        if (prev) {
+          // Add new users to the members list
+          const updatedMembers = [...prev.members, ...userIds];
+          return { ...prev, members: updatedMembers };
+        }
+        return prev;
+      });
+  
+      // Show success toast message
+      toast.success('Students added to group successfully');
+    } catch (error) {
+      console.error('Failed to add students to the group:', error);
+      toast.error('Failed to add students to the group');
+    } finally {
+      setIsAddModalOpen(false);
+    }
+  }
+  const handleLeaveGroup = () => {
+    showAlert('Leave Group').then((result: any) => {
+      if (result.isConfirmed) {
+        if (socket) {
+          console.log('username in socket', userName);
+          socket.emit('leaveGroup', groupId, userId, userName);
+          dispatch(removeUserFromGroup({ groupId, userId }));
+        }
+      }
+    });
+  };
 
   return (
     <div className="flex h-screen bg-[#e5ddd5]">
@@ -178,8 +227,8 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
             </div>
           </div>
           <div className="flex space-x-4">
-            <UserPlus size={20}  className="cursor-pointer" />
-            <LogOut size={20}className="cursor-pointer" />
+            <UserPlus size={20} className="cursor-pointer" onClick={handleAddStudents} />
+            <LogOut size={20} className="cursor-pointer" onClick={handleLeaveGroup}/>
             <MoreVertical size={20} className="cursor-pointer" />
           </div>
         </div>
@@ -189,6 +238,15 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
           <MessageList currentUserId={userId} messages={groupMessages} key={user?._id} />
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Modal for adding students to group */}
+        {isAddModalOpen && 
+        <AddMembersModal
+          isOpen={isAddModalOpen}
+          users={messagedStudents}
+          onAddUsers={handleOnAddStudents}
+          onClose={() => setIsAddModalOpen(false)} />
+        }
 
         {/* Loading Indicator */}
         {(uploadProgress > 0 || audioProgress > 0) && (

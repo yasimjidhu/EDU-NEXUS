@@ -107,6 +107,34 @@ export const getGroupMessages = createAsyncThunk(
   }
 );
 
+export const addUsersToGroup = createAsyncThunk(
+  'groups/addUsersToGroup',
+  async ({ groupId, userIds }: {groupId:string,userIds:string[]}, { rejectWithValue }) => {
+    try {
+      console.log('add users to group called in slice',userIds)
+      const response = await axiosInstance.post(`/chat/addToGroup/${groupId}`, { userIds });
+      return response.data;
+    } catch (error:any) {
+      return rejectWithValue(error.response?.data || 'Failed to add users');
+    }
+  }
+);
+
+export const removeUserFromGroup = createAsyncThunk(
+  'groups/removeUserFromGroup',
+  async ({ groupId, userId }: { groupId: string, userId: string }, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`/chat/group/leave`,{
+        params:{groupId,userId}
+      });
+      return { groupId, userId };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'Failed to remove user');
+    }
+  }
+);
+
+
 const chatSlice = createSlice({
   name: 'chat',
   initialState,
@@ -126,6 +154,11 @@ const chatSlice = createSlice({
     clearGroup: (state) => {
       state.group = null;
     },
+    removeUser: (state, action: PayloadAction<{ groupId: string; userId: string }>) => {
+      if (state.group && state.group._id === action.payload.groupId) {
+        state.group.members = state.group.members.filter(id => id !== action.payload.userId);
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -173,7 +206,6 @@ const chatSlice = createSlice({
         state.loading = false;  
         state.error = action.payload || 'Failed to create group';
       })
-      // Handle pending state for getting a group
       .addCase(getGroup.pending, (state) => {
         state.loading = true;
       })
@@ -184,8 +216,22 @@ const chatSlice = createSlice({
       .addCase(getGroup.rejected, (state, action: PayloadAction<string | undefined>) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch group';
+      })
+      .addCase(removeUserFromGroup.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(removeUserFromGroup.fulfilled, (state, action) => {
+        state.loading = false;
+        const { groupId, userId } = action.payload;
+
+        if (state.group && state.group._id === groupId) {
+          state.group.members = state.group.members ? state.group.members.filter(id => id !== userId) : [];
+        }
+      })
+      .addCase(removeUserFromGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
-      
   },
 });
 

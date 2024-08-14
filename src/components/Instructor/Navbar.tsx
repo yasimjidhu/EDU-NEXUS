@@ -45,22 +45,6 @@ const Navbar: React.FC = () => {
         <div className="flex items-center space-x-4 ">
           <h3 className="text-medium-rose font-bold text-3xl">Edu-Nexus</h3>
           </div>
-            {/* <div className="relative w-80 ">
-              <form className="max-w-md ">
-              <input
-                type="search"
-                id="default-search"
-                className="block w-full p-3 rounded-lg bg-gray-100 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                placeholder="Search Mockups, Logos..."
-              />
-              <button
-                type="submit"
-                className="absolute inset-y-0 right-0 px-2 bg-medium-rose text-white rounded-lg text-sm hover:bg-strong-rose focus:outline-none focus:ring-2 focus:ring-blue-300"
-              >
-                Search
-              </button>
-          </form>
-            </div> */}
         <div className="flex items-center space-x-4 ">
           <div className="relative">
             <div className="cursor-pointer w-11 h-11 shadow-sm border-2 border-gray-300 rounded-full overflow-hidden" onClick={toggleDropdown}>
