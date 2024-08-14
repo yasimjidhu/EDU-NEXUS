@@ -207,6 +207,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
           console.log('username in socket', userName);
           socket.emit('leaveGroup', groupId, userId, userName);
           dispatch(removeUserFromGroup({ groupId, userId }));
+          fetchGroupData(groupId)
         }
       }
     });

@@ -44,7 +44,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
 
 
   const { user } = useSelector((state: RootState) => state.user);
-  const { messages, loading, error } = useSelector((state: RootState) => state.chat);
+  const { messages, loading, error,groups } = useSelector((state: RootState) => state.chat);
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()
@@ -270,7 +270,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           onlineUsers={onlineUsers}
           onSelectStudent={handleSelectStudent}
           selectedStudent={selectedStudent}
-          joinedGroups={joinedGroups}
+          joinedGroups={groups!}
           onSelectGroup={handleSelectGroup}
           selectedGroup={selectedGroup}
           onClickEntity={handleClickEntity}

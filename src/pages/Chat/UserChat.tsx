@@ -45,7 +45,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const audioRef = useRef(new Audio());
 
   const { user } = useSelector((state: RootState) => state.user);
-  const { messages } = useSelector((state: RootState) => state.chat);
+  const { messages,groups } = useSelector((state: RootState) => state.chat);
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()
@@ -277,7 +277,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
           selectedStudent={selectedInstructor}
           onSelectGroup={handleSelectGroup}
           selectedGroup={selectedGroup}
-          joinedGroups={joinedGroups}
+          joinedGroups={groups!}
           onClickEntity={handleClickEntity}
           user={'student'}
         />

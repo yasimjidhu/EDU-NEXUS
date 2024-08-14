@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { User } from '../redux/slices/studentSlice';
 import { Group } from '../../types/chat'; // Assuming you have a Group type defined
+import { AppDispatch, RootState } from '../redux/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserJoinedGroups } from '../redux/slices/chatSlice';
 
 interface ChatSidebarProps {
   messagedStudents: User[];
@@ -26,6 +29,17 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   user
 }) => {
   const [showGroups, setShowGroups] = useState(false);
+
+  const dispatch: AppDispatch = useDispatch();
+
+  const { messages,groups } = useSelector((state: RootState) => state.chat);
+  const userData = useSelector((state:RootState)=>state.user)
+
+  useEffect(() => {
+    if (userData.user?._id) {
+      dispatch(getUserJoinedGroups(userData.user._id))
+    }
+  }, [dispatch, userData.user?._id])
 
   const handleClickEntity = (item: 'students' | 'group') => {
       if (item === 'students') {
@@ -57,8 +71,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       </div>
       <div className="overflow-y-auto flex-grow">
         {showGroups ? (
-          joinedGroups && joinedGroups.length > 0 ? (
-            joinedGroups.map((group) => (
+          groups && groups.length > 0 ? (
+            groups.map((group) => (
               <div
                 key={group._id}
                 className={`flex items-center p-3 border-b border-gray-200 cursor-pointer transition-colors duration-200 ease-in-out

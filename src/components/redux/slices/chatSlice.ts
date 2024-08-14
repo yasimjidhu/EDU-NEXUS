@@ -1,28 +1,30 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '../../../constants/axiosInstance';
-import {Group, TStudent} from '../../../types/chat'
+import { Group, TStudent } from '../../../types/chat'
 import { Message } from '../../../types/chat';
 
 
 export interface ChatState {
   messages: Message[];
-  messagedStudents:TStudent[];
-  group?:Group | null;
+  messagedStudents: TStudent[];
+  group?: Group | null;
+  groups?: Group[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: ChatState = {
   messages: [],
-  messagedStudents:[],
-  group:null,
+  messagedStudents: [],
+  group: null,
+  groups: [],
   loading: false,
   error: null,
 };
 
 export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
-  async (message:Message, { rejectWithValue }) => {
+  async (message: Message, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/chat/message', message);
       return response.data;
@@ -49,7 +51,7 @@ export const getMessagedStudents = createAsyncThunk(
   async (instructorId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/messaged-students/${instructorId}`);
-      console.log('messaged students are',response)
+      console.log('messaged students are', response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -83,7 +85,7 @@ export const getGroup = createAsyncThunk(
 );
 
 export const getUserJoinedGroups = createAsyncThunk(
-  'chat/getGroup',
+  'chat/getJoinedGroups',
   async (userId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/joined-groups/${userId}`);
@@ -99,7 +101,7 @@ export const getGroupMessages = createAsyncThunk(
   async (groupId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/group-messages/${groupId}`);
-      console.log('response of getGroupMessages in slice',response)
+      console.log('response of getGroupMessages in slice', response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -109,12 +111,11 @@ export const getGroupMessages = createAsyncThunk(
 
 export const addUsersToGroup = createAsyncThunk(
   'groups/addUsersToGroup',
-  async ({ groupId, userIds }: {groupId:string,userIds:string[]}, { rejectWithValue }) => {
+  async ({ groupId, userIds }: { groupId: string, userIds: string[] }, { rejectWithValue }) => {
     try {
-      console.log('add users to group called in slice',userIds)
       const response = await axiosInstance.post(`/chat/addToGroup/${groupId}`, { userIds });
       return response.data;
-    } catch (error:any) {
+    } catch (error: any) {
       return rejectWithValue(error.response?.data || 'Failed to add users');
     }
   }
@@ -124,8 +125,8 @@ export const removeUserFromGroup = createAsyncThunk(
   'groups/removeUserFromGroup',
   async ({ groupId, userId }: { groupId: string, userId: string }, { rejectWithValue }) => {
     try {
-      await axiosInstance.delete(`/chat/group/leave`,{
-        params:{groupId,userId}
+      await axiosInstance.delete(`/chat/group/leave`, {
+        params: { groupId, userId }
       });
       return { groupId, userId };
     } catch (error: any) {
@@ -142,9 +143,9 @@ const chatSlice = createSlice({
     addMessage: (state, action: PayloadAction<Message>) => {
       state.messages.push(action.payload);
     },
-    updateMessageStatus:(state,action:PayloadAction<Message>)=>{
-      const index = state.messages.findIndex((msg:any)=>msg._id == action.payload._id)
-      if(index !== -1){
+    updateMessageStatus: (state, action: PayloadAction<Message>) => {
+      const index = state.messages.findIndex((msg: any) => msg._id == action.payload._id)
+      if (index !== -1) {
         state.messages[index] = action.payload
       }
     },
@@ -157,6 +158,18 @@ const chatSlice = createSlice({
     removeUser: (state, action: PayloadAction<{ groupId: string; userId: string }>) => {
       if (state.group && state.group._id === action.payload.groupId) {
         state.group.members = state.group.members.filter(id => id !== action.payload.userId);
+      }
+    },
+    // action to set the list of user joined groups
+    setGroups: (state, action: PayloadAction<Group[]>) => {
+      state.groups = action.payload
+    },
+    removeGroup: (state, action: PayloadAction<string>) => {
+      state.groups = state.groups?.filter(group => group._id !== action.payload)
+
+      if (state.group && state.group._id == action.payload) {
+        state.group = null;
+        state.messages = []
       }
     }
   },
@@ -198,12 +211,42 @@ const chatSlice = createSlice({
       .addCase(createGroup.pending, (state) => {
         state.loading = true;
       })
-      .addCase(createGroup.fulfilled, (state, action: PayloadAction<Group>) => {
+      .addCase(createGroup.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
-        state.group = action.payload;
+        state.group = action.payload.group;
+        state.groups?.push(action.payload)
       })
-      .addCase(createGroup.rejected, (state, action: PayloadAction<string | undefined>) => {
-        state.loading = false;  
+      .addCase(createGroup.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to create group';
+      })
+      .addCase(addUsersToGroup.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(addUsersToGroup.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+      
+        // Update the specific group in the groups array, if it exists
+        if (state.groups) {
+          const groupIndex = state.groups.findIndex(group => group._id === action.payload.group._id);
+          
+          if (groupIndex !== -1) {
+            // Update the existing group in the array
+            state.groups[groupIndex] = action.payload.group;
+          } else {
+            // Add the new group to the array if it doesn't exist
+            state.groups.push(action.payload.group);
+          }
+        } else {
+          // Initialize groups array with the new group
+          state.groups = [action.payload.group];
+        }
+      
+        // Update the state.group if needed
+        state.group = action.payload.group;
+      })
+      .addCase(addUsersToGroup.rejected, (state, action: any) => {
+        state.loading = false;
         state.error = action.payload || 'Failed to create group';
       })
       .addCase(getGroup.pending, (state) => {
@@ -213,9 +256,20 @@ const chatSlice = createSlice({
         state.loading = false;
         state.group = action.payload;
       })
-      .addCase(getGroup.rejected, (state, action: PayloadAction<string | undefined>) => {
+      .addCase(getGroup.rejected, (state, action: any) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch group';
+      })
+      .addCase(getUserJoinedGroups.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getUserJoinedGroups.fulfilled, (state, action) => {
+        state.loading = false;
+        state.groups = action.payload.groups;
+      })
+      .addCase(getUserJoinedGroups.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       })
       .addCase(removeUserFromGroup.pending, (state) => {
         state.loading = true;
@@ -223,20 +277,28 @@ const chatSlice = createSlice({
       .addCase(removeUserFromGroup.fulfilled, (state, action) => {
         state.loading = false;
         const { groupId, userId } = action.payload;
-
+      
+        // Remove the user from the group's members list
         if (state.group && state.group._id === groupId) {
-          state.group.members = state.group.members ? state.group.members.filter(id => id !== userId) : [];
+          state.group.members = state.group.members.filter(id => id !== userId);
         }
+      
+        // Remove the group from the list of groups
+        state.groups = state.groups?.filter(group => group._id !== groupId);
+      
+        console.log('Updated groups:', state.groups);
       })
+      
       .addCase(removeUserFromGroup.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+      
   },
 });
 
 
 
-export const { addMessage, clearMessages,updateMessageStatus,clearGroup } = chatSlice.actions;
+export const { addMessage, clearMessages, updateMessageStatus, clearGroup } = chatSlice.actions;
 
 export default chatSlice.reducer;
