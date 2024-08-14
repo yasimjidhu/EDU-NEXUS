@@ -55,23 +55,21 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
   }, [audioBlob, selectedFile, inputMessage.trim()])
 
   useEffect(() => {
-    if (!socket) return;
-
-    console.log('joining to group',groupId)
-    socket.emit('joinGroup',groupData?._id)
-
-    socket.on('group-message', (msg: Message) => {
-      console.log('group message got from socket',msg)
-      setMessages((prev) => [...prev, msg]);
+    if (!socket || !groupId) return;
+  
+    console.log('joining group', groupId);
+    socket.emit('joinGroup', groupId);
+  
+    socket.on('groupMessage', (msg: Message) => {
+      console.log('group message received from socket', msg);
+      setGroupMessages((prev) => [...prev, msg]);
     });
-
+  
     return () => {
-        socket.off('group-message');
-        socket.off('groupMessage'); 
-        socket.off('typing');
-        socket.off('messageStatusUpdated');
+      socket.off('groupMessage');
+      socket.emit('leaveGroup', groupId);
     };
-  }, [socket,groupData]);
+  }, [socket, groupId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -95,18 +93,6 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
     }
   };
 
-  // const joinGroup = () => {
-  //   if (!socket) return;
-  //   socket.emit('joinGroup', groupData?.name);
-  //   showAlertMessage(`Joined group: ${groupData?.name}`);
-  // };
-
-  // const leaveGroup = () => {
-  //   if (!socket) return;
-  //   socket.emit('leaveGroup', groupData?.name);
-  //   showAlertMessage(`Left group: ${groupData?.name}`);
-  // };
-
   const showAlertMessage = (message: string) => {
     setAlertMessage(message);
     setTimeout(() => setAlertMessage(''), 3000);
@@ -128,6 +114,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
         conversationId: groupData?._id!,
         senderId: user?._id || '',
         senderProfile:user?.profile.avatar,
+        senderName:`${user?.firstName} ${user?.lastName}`,
         text: inputMessage.trim() || undefined,
         fileUrl: fileData?.fileUrl || undefined,
         fileType: fileData?.fileType as 'audio' | 'image' | 'video' | undefined,
@@ -139,23 +126,21 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
   
       try {
         const response = await dispatch(sendMessage(messageData));
-        console.log('response of group chat message sent', response);
         const savedMessage = response.payload;
   
         socket.emit('groupMessage', groupData?._id, savedMessage);
-        setGroupMessages((prev) => [...prev, savedMessage]);
-  
+
         // Reset input and file states
         setInputMessage('');
         handleFileSelect(null);
         setAudioBlob(null)
         handleRecordedAudio(null);
-        setAudioProgress(0);  // Reset audio progress
-        setUploadProgress(0);  // Reset file upload progress
+        setAudioProgress(0);  
+        setUploadProgress(0); 
         setAudioDuration(0);
         setSelectedFile(null)
   
-        handleTyping(); // Clear typing status
+        handleTyping(); 
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -189,7 +174,6 @@ const GroupChat: React.FC<GroupChatProps> = ({ id,userId }) => {
             </div>
             <div>
               <h2 className="text-lg font-semibold">{groupData?.name}</h2>
-              <h2 className="text-lg font-semibold">{groupData?._id}</h2>
               <p className="text-sm">{groupData?.members.length} participants</p>
             </div>
           </div>

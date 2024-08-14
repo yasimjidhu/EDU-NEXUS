@@ -45,7 +45,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) =>
     <div className="flex-grow overflow-y-auto p-4 space-y-2">
       {messages && messages.length > 0 ? (
         messages.map((msg, index) => {
-          const onlyEmojis = isOnlyEmojis(msg.text!)
+          const onlyEmojis = isOnlyEmojis(msg.text!);
           const isCurrentUser = msg.senderId === currentUserId;
 
           return (
@@ -62,10 +62,17 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) =>
               <div
                 data-message-id={msg._id}
                 ref={(el) => el && messageObserver.current?.observe(el)}
-                className={`max-w-xs p-2 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg ${isCurrentUser
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                  : 'bg-white text-gray-800'
-                  }`}>
+                className={`max-w-xs p-2 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg ${
+                  isCurrentUser
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                    : 'bg-white text-gray-800'
+                }`}
+              >
+                {!isCurrentUser && (
+                  <span className="text-xs font-semibold text-blue-600 mb-1 block">
+                    {msg.senderName}
+                  </span>
+                )}
                 {msg.fileUrl ? (
                   msg.fileType === 'audio' ? (
                     <AudioPlayer src={msg.fileUrl} />
@@ -124,6 +131,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) =>
       <div ref={messagesEndRef} />
     </div>
   );
+
 };
 
 export default MessageList;

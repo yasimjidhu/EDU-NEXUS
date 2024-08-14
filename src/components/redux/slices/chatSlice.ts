@@ -49,6 +49,7 @@ export const getMessagedStudents = createAsyncThunk(
   async (instructorId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/messaged-students/${instructorId}`);
+      console.log('messaged students are',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
