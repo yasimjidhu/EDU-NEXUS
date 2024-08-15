@@ -231,14 +231,12 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     setSelectedStudent(student)
     setSelectedGroup(null)
     setShowMessages("user")
-    console.log('showMessage is',showMessages)
   }
 
   const handleSelectGroup = (group: Group) => {
     setSelectedGroup(group)
     setSelectedStudent(null);
     setShowMessages("group");
-    console.log('showMessage is',showMessages)
   }
 
   const handleRecordedAudio = (blob: Blob) => {
@@ -270,11 +268,11 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           onlineUsers={onlineUsers}
           onSelectStudent={handleSelectStudent}
           selectedStudent={selectedStudent}
-          joinedGroups={groups!}
           onSelectGroup={handleSelectGroup}
           selectedGroup={selectedGroup}
           onClickEntity={handleClickEntity}
           user={'instructor'}
+          conversationId={conversationId}
         />
       </div>
 

@@ -3,10 +3,11 @@ import AudioPlayer from './AudioPlayer';
 import Lightbox from './LightBox';
 import { Message } from '../../types/chat';
 import { isOnlyEmojis } from '../../utils/CheckIsEmojis';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store/store';
 import { useSocket } from '../../contexts/SocketContext';
 import { useMessageObserver } from '../../hooks/useMessageObserver';
+import { updateMessageStatus } from '../redux/slices/chatSlice';
 
 interface DisplayMessagesProps {
     messages: Message[];
@@ -14,37 +15,91 @@ interface DisplayMessagesProps {
 export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) => {
     const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false)
     const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
+    const [readMessages, setReadMessages] = useState<Set<string>>(new Set());
+
+    const messageObserver = useRef<IntersectionObserver | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    
+
+    const dispatch: AppDispatch = useDispatch();
+
     const { user } = useSelector((state: RootState) => state.user)
     const { socket } = useSocket()
 
-    useEffect(()=>{
-        scrollToBottom()
-    },[messages])
-
     const handleMessageRead = (messageId: string) => {
-        if (socket) {
-            socket.emit('messageRead', messageId);
+        if (!readMessages.has(messageId)) {
+            setReadMessages((prevReadMessages) => {
+                const updatedReadMessages = new Set(prevReadMessages);
+                updatedReadMessages.add(messageId);
+                return updatedReadMessages;
+            });
+            if (socket) {
+                socket.emit('messageRead', messageId);
+            }
         }
     };
 
+    useEffect(() => {
+        const options: IntersectionObserverInit = {
+            root: null,
+            threshold: 0.5,
+        };
+
+        messageObserver.current = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const messageId = entry.target.getAttribute('data-message-id');
+                    const senderId = entry.target.getAttribute('data-sender-id');
+                    console.log('sendre id',senderId)
+                    console.log(`message id ${messageId} entry is intersecting`, entry)
+                    if (messageId && senderId !== user?._id) {
+                        handleMessageRead(messageId);
+                    }
+                }
+            });
+        }, options);
+
+        const messageElements = document.querySelectorAll('.chat-message');
+        messageElements.forEach((element) => {
+            messageObserver.current?.observe(element);
+        });
+
+        return () => {
+            messageObserver.current?.disconnect();
+        };
+    }, [messages, readMessages]);
+
+
+
+    useEffect(() => {
+        scrollToBottom()
+    }, [messages])
+
+
+    useEffect(() => {
+        if (socket) {
+            socket.on('messageStatusUpdated', (updatedMessage: Message) => {
+                console.log('updateMessageStatus event got in frontend', updatedMessage)
+                dispatch(updateMessageStatus(updatedMessage));
+            });
+        }
+
+        return () => {
+            socket?.off('messageStatusUpdated');
+        };
+    }, [socket, dispatch]);
     const handleImageClick = (url: string) => {
         setCurrentImageUrl(url)
         setIsLightboxOpen(true);
     };
-    
+
     const handleCloseLightbox = () => {
         setIsLightboxOpen(false);
         setCurrentImageUrl('')
     };
-    
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
-    
-
-    const messageObserver = useMessageObserver(handleMessageRead);
 
     return (
         <div className="flex-1 overflow-y-auto p-3 bg-gradient-to-b from-gray-100 to-gray-200">
@@ -53,12 +108,12 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
                 return (
                     <div
                         key={message._id}
-                        className={`flex ${message.senderId === user?._id ? 'justify-end' : 'justify-start'}`}
+                        className={` flex ${message.senderId === user?._id ? 'justify-end' : 'justify-start'}`}
                     >
                         <div
                             data-message-id={message._id}
-                            ref={(el) => el && messageObserver.current?.observe(el)}
-                            className={`max-w-xs p-3 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${message.senderId === user?._id
+                            data-sender-id={message.senderId}
+                            className={`chat-message max-w-xs p-3 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${message.senderId === user?._id
                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
                                 : 'bg-white text-gray-800'
                                 }`}
@@ -81,9 +136,9 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
                                     <video controls src={message.fileUrl} className="w-full rounded" />
                                 ) : null
                             ) : (
-                                <p className={`inter ${onlyEmojis ? 'text-4xl' : 'text-sm md:text-base'}`}>
+                                <div className={`inter ${onlyEmojis ? 'text-4xl' : 'text-sm md:text-base'}`}>
                                     {message.text}
-                                </p>
+                                </div>
                             )}
                             <div className="text-xs mt-2 flex items-center justify-between">
                                 <span className={`${message.senderId === user?._id ? 'text-blue-100' : 'text-gray-500'}`}>
@@ -91,10 +146,10 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
                                 </span>
                                 {message.senderId === user?._id && (
                                     <span className="ml-2 flex items-center">
-                                        {message.status === 'sent' && <span className="text-xs text-blue-100">✓</span>}
-                                        {message.status === 'delivered' && <span className="text-xs text-blue-100">✓✓</span>}
+                                        {message.status === 'sent' && <span className="text-xs text-gray-400">✓</span>}
+                                        {message.status === 'delivered' && <span className="text-xs text-gray-400">✓✓</span>}
                                         {message.status === 'read' && (
-                                            <span className="text-xl text-medium-rose">✓✓</span>
+                                            <span className="text-xs text-white">✓✓</span>
                                         )}
                                     </span>
                                 )}

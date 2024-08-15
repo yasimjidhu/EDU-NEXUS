@@ -2,17 +2,17 @@ export interface Message {
     id?: string;
     conversationId: string;
     senderId: string;
-    senderName?:string;
-    senderProfile?:string;
+    senderName?: string;
+    senderProfile?: string;
     text?: string;
     fileUrl?: string;
     fileType?: 'audio' | 'image' | 'video';
     status: string;
     createdAt?: Date;
-    updatedAt?:Date;
+    updatedAt?: Date;
     _id?: string;
-    isGroup?:boolean;
-  }
+    isGroup?: boolean;
+}
 
 export interface TStudent {
     contact: {
@@ -44,10 +44,26 @@ export interface TStudent {
 export interface Group {
     _id?: string;
     name: string;
-    image:string;
-    description:string;
+    image: string;
+    description: string;
     members: string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
-  
+
+interface LatestMessage {
+    _id: string;
+    senderId: string;
+    senderName: string;
+    text: string | null;
+    fileUrl: string | null;
+    fileType: string | null;
+    createdAt: string;
+}
+
+export interface UnreadMessage {
+    conversationId: string;
+    unreadCount: number;
+    latestMessage: LatestMessage;
+}
+

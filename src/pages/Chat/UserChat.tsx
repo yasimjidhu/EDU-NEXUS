@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
 import { User } from '../../components/redux/slices/studentSlice';
-import { addMessage, createGroup, getMessages, getUserJoinedGroups, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import { addMessage, createGroup, getMessages, getUserJoinedGroups, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useSocket } from '../../contexts/SocketContext';
 import Picker from 'emoji-picker-react'
 import { uploadToCloudinary } from '../../utils/cloudinary';
@@ -32,6 +32,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [inputMessage, setInputMessage] = useState('');
   const [conversationId, setConversationId] = useState<string>('');
+  const [selectedConversationId,setSelectedConversationId] = useState<string>('')
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<NodeJS.Timeout | null>(null);
@@ -112,6 +113,13 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
       }
     };
   }, []);
+
+  useEffect(()=>{
+    if(showMessages.trim() !== '' && selectedConversationId.trim() !== ''){
+      console.log('mark conversation as read called in useefffect')
+      dispatch(markConversationAsRead({conversationId:selectedConversationId,item:showMessages}))
+    }
+  },[showMessages,selectedConversationId])
 
   useEffect(() => {
     if (selectedInstructor && socket) {
@@ -235,17 +243,19 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   }
 
   const handleSelectStudent = (instructor: User) => {
+    console.log('selected student',instructor)
+    setSelectedConversationId(instructor._id)
     setSelectedInstructor(instructor)
     setSelectedGroup(null)
     setShowMessages("user")
-    console.log('showMessage is', showMessages)
   }
 
   const handleSelectGroup = (group: Group) => {
+    setSelectedConversationId(group._id!)
+    console.log('selected group',group)
     setSelectedGroup(group)
     setSelectedInstructor(null);
     setShowMessages("group");
-    console.log('showMessage is', showMessages)
   }
 
   const handleRecordedAudio = (blob: Blob) => {
@@ -277,9 +287,9 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
           selectedStudent={selectedInstructor}
           onSelectGroup={handleSelectGroup}
           selectedGroup={selectedGroup}
-          joinedGroups={groups!}
           onClickEntity={handleClickEntity}
           user={'student'}
+          conversationId={conversationId}
         />
 
       </div>

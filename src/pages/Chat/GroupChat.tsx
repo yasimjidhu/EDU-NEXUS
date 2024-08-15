@@ -39,6 +39,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
 
   // store
   const { user } = useSelector((state: RootState) => state.user);
+  const { group } = useSelector((state: RootState) => state.chat);
 
   const dispatch: AppDispatch = useDispatch();
   const location = useLocation();
@@ -73,7 +74,6 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
     socket.emit('joinGroup', groupId);
 
     socket.on('groupMessage', (msg: Message) => {
-      console.log('group message received from socket', msg);
       setGroupMessages((prev) => [...prev, msg]);
     });
 
@@ -204,7 +204,6 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
     showAlert('Leave Group').then((result: any) => {
       if (result.isConfirmed) {
         if (socket) {
-          console.log('username in socket', userName);
           socket.emit('leaveGroup', groupId, userId, userName);
           dispatch(removeUserFromGroup({ groupId, userId }));
           fetchGroupData(groupId)
@@ -224,7 +223,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
             </div>
             <div>
               <h2 className="text-lg font-semibold">{groupData?.name}</h2>
-              <p className="text-sm">{groupData?.members.length} participants</p>
+              <p className="text-sm">{group?.members.length} participants</p>
             </div>
           </div>
           <div className="flex space-x-4">

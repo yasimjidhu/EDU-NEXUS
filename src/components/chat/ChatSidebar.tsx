@@ -3,68 +3,74 @@ import { User } from '../redux/slices/studentSlice';
 import { Group } from '../../types/chat'; // Assuming you have a Group type defined
 import { AppDispatch, RootState } from '../redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserJoinedGroups } from '../redux/slices/chatSlice';
+import { getUnreadMessages, getUserJoinedGroups } from '../redux/slices/chatSlice';
 
 interface ChatSidebarProps {
   messagedStudents: User[];
-  joinedGroups: Group[];
   onlineUsers: { [email: string]: string };
   onSelectStudent: (student: User) => void;
   onSelectGroup: (group: Group) => void;
-  onClickEntity:(item:'students' | 'group' | 'instructor')=>void;
+  onClickEntity: (item: 'students' | 'group' | 'instructor') => void;
   selectedStudent: User | null;
-  selectedGroup: Group | null; 
-  user:'student'|'instructor';
+  selectedGroup: Group | null;
+  user: 'student' | 'instructor';
+  conversationId: string;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   messagedStudents,
-  joinedGroups,
   onlineUsers,
   onSelectStudent,
   onSelectGroup,
   onClickEntity,
   selectedStudent,
   selectedGroup,
-  user
+  user,
+  conversationId
 }) => {
   const [showGroups, setShowGroups] = useState(false);
 
   const dispatch: AppDispatch = useDispatch();
 
-  const { messages,groups } = useSelector((state: RootState) => state.chat);
-  const userData = useSelector((state:RootState)=>state.user)
+  const { messages, groups, unreadMessages } = useSelector((state: RootState) => state.chat);
+  const userData = useSelector((state: RootState) => state.user)
 
   useEffect(() => {
     if (userData.user?._id) {
       dispatch(getUserJoinedGroups(userData.user._id))
+      dispatch(getUnreadMessages(userData.user._id))
     }
   }, [dispatch, userData.user?._id])
 
   const handleClickEntity = (item: 'students' | 'group') => {
-      if (item === 'students') {
-        setShowGroups(false);
-        onClickEntity(item)
-      } else if (item === 'group') {
-        setShowGroups(true);
-        onClickEntity(item)
-      }
+    if (item === 'students') {
+      setShowGroups(false);
+      onClickEntity(item)
+    } else if (item === 'group') {
+      setShowGroups(true);
+      onClickEntity(item)
+    }
   };
-  
+
+  const getUnreadCount = (conversationId: string) => {
+    const unread = unreadMessages.find((msg) => msg.conversationId == conversationId)
+    return unread ? unread.unreadCount : 0
+  }
+
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
       <div className="flex border-b border-gray-200">
         <button
           className={`flex-1 py-2 px-4 font-semibold ${!showGroups ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
-          onClick={()=>handleClickEntity('students')}
+          onClick={() => handleClickEntity('students')}
         >
           {user == 'student' ? 'Instructors' : 'Students'}
-          
+
         </button>
         <button
           className={`flex-1 py-2 px-4 font-semibold ${showGroups ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
-          onClick={()=>handleClickEntity('group')}
+          onClick={() => handleClickEntity('group')}
         >
           Groups
         </button>
@@ -90,6 +96,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   <p className="font-semibold text-gray-800">{group.name}</p>
                   <p className="text-sm text-gray-500">{group.members.length} members</p>
                 </div>
+                {getUnreadCount(group._id!) > 0 && (
+                  <span className="relative inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-white bg-green-500 rounded-full shadow-md hover:scale-105 transition-transform duration-200">
+                    {getUnreadCount(group._id!)}
+                   
+                  </span>
+                )}
               </div>
             ))
           ) : (
@@ -124,6 +136,11 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     )}
                   </p>
                 </div>
+                {getUnreadCount(conversationId) > 0 && (
+                  <span className="ml-2 inline-flex items-center justify-center w-4 h-4 text-sm p-2 font-medium text-white bg-green-500 rounded-full">
+                    {getUnreadCount(conversationId)}
+                  </span>
+                )}
               </div>
             ))
           ) : (

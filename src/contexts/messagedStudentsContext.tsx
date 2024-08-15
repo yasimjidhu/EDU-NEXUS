@@ -36,7 +36,6 @@ export const MessagedStudentsProvider: React.FC<{ children: React.ReactNode }> =
       fetchMessagedStudents();
     }
   }, [dispatch, user?._id]);
-  console.log('messaged students in context',messagedStudents)
   return (
     <MessagedStudentsContext.Provider value={{ messagedStudents, loading }}>
       {children}
