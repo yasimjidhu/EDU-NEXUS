@@ -235,7 +235,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const handleCreateGroup = async (data: any) => {
     try {
       const response = await dispatch(createGroup(data))
-      console.log('response of create group', response)
       navigate('/instructor/group', { state: response.payload.group._id })
     } catch (error: any) {
       toast.error(error.message)
@@ -243,7 +242,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   }
 
   const handleSelectStudent = (instructor: User) => {
-    console.log('selected student',instructor)
     const conversationid = [user?._id, instructor._id].sort().join('-');
     setSelectedConversationId(conversationid)
     setSelectedInstructor(instructor)
@@ -253,7 +251,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
 
   const handleSelectGroup = (group: Group) => {
     setSelectedConversationId(group._id!)
-    console.log('selected group',group)
     setSelectedGroup(group)
     setSelectedInstructor(null);
     setShowMessages("group");

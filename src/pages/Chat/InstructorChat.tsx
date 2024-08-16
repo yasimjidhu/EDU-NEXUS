@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { User } from '../../components/redux/slices/studentSlice';
 import { useSocket } from '../../contexts/SocketContext';
-import { addMessage, createGroup, getMessagedStudents, getMessages, getUserJoinedGroups, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import { addMessage, createGroup, getMessagedStudents, getMessages, getUserJoinedGroups, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import Picker from 'emoji-picker-react'
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { Group, Message } from '../../types/chat';
@@ -39,6 +39,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   const [audioDuration, setAudioDuration] = useState(0);
   const [joinedGroups, setJoinedGroups] = useState<Group[]>([])
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
+  const [selectedConversationId,setSelectedConversationId] = useState<string>('')
   const [showMessages, setShowMessages] = useState<"user" | "group" | ''>('')
   const [clickedItem,setClickedItem] = useState<'students'|'group'|''|'instructor'>('')
 
@@ -106,6 +107,13 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       }
     };
   }, []);
+
+  
+  useEffect(()=>{
+    if(showMessages.trim() !== '' && selectedConversationId.trim() !== ''){
+      dispatch(markConversationAsRead({conversationId:selectedConversationId,item:showMessages}))
+    }
+  },[showMessages,selectedConversationId])
 
   useEffect(() => {
     if (selectedStudent && socket) {
@@ -228,12 +236,16 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   }
 
   const handleSelectStudent = (student: User) => {
+    console.log('selected student',student)
+    const conversationid = [user?._id, student._id].sort().join('-');
+    setSelectedConversationId(conversationid)
     setSelectedStudent(student)
     setSelectedGroup(null)
     setShowMessages("user")
   }
 
   const handleSelectGroup = (group: Group) => {
+    setSelectedConversationId(group._id!)
     setSelectedGroup(group)
     setSelectedStudent(null);
     setShowMessages("group");
