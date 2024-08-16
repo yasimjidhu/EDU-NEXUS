@@ -65,5 +65,6 @@ export interface UnreadMessage {
     conversationId: string;
     unreadCount: number;
     latestMessage: LatestMessage;
+    _id?:string;
 }
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, MutableRefObject } from 'react';
 
-export const useMessageObserver = (onMessageRead: (messageId: string) => void): MutableRefObject<IntersectionObserver | null> => {
+export const useMessageObserver = (onMessageRead: (messageId: string,userId:string) => void): MutableRefObject<IntersectionObserver | null> => {
   const observedMessages = useRef<Set<string>>(new Set());
   const messageObserver = useRef<IntersectionObserver | null>(null);
 
@@ -12,9 +12,10 @@ export const useMessageObserver = (onMessageRead: (messageId: string) => void): 
           if (entry.isIntersecting) {
             console.log('intersecting')
             const messageId = entry.target.getAttribute('data-message-id');
-            if (messageId && !observedMessages.current.has(messageId)) {
+            const userId = entry.target.getAttribute('data-user-id');
+            if (messageId) {
               console.log('on message read and observed',messageId)
-              onMessageRead(messageId);
+              onMessageRead(messageId,userId!);
               observedMessages.current.add(messageId); // Update the ref directly
             }
           }

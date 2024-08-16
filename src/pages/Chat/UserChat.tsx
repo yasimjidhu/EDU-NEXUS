@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
 import { User } from '../../components/redux/slices/studentSlice';
-import { addMessage, createGroup, getMessages, getUserJoinedGroups, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import { addMessage, createGroup, getMessages, getUnreadMessages, getUserJoinedGroups, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useSocket } from '../../contexts/SocketContext';
 import Picker from 'emoji-picker-react'
 import { uploadToCloudinary } from '../../utils/cloudinary';
@@ -67,6 +67,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
     }
   }, [dispatch, user?._id]);
 
+
   useEffect(() => {
     if (user?._id) {
       dispatch(getUserJoinedGroups(user._id)).then((res: any) => {
@@ -116,7 +117,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
 
   useEffect(()=>{
     if(showMessages.trim() !== '' && selectedConversationId.trim() !== ''){
-      console.log('mark conversation as read called in useefffect')
       dispatch(markConversationAsRead({conversationId:selectedConversationId,item:showMessages}))
     }
   },[showMessages,selectedConversationId])
@@ -244,7 +244,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
 
   const handleSelectStudent = (instructor: User) => {
     console.log('selected student',instructor)
-    setSelectedConversationId(instructor._id)
+    const conversationid = [user?._id, instructor._id].sort().join('-');
+    setSelectedConversationId(conversationid)
     setSelectedInstructor(instructor)
     setSelectedGroup(null)
     setShowMessages("user")
@@ -289,7 +290,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
           selectedGroup={selectedGroup}
           onClickEntity={handleClickEntity}
           user={'student'}
-          conversationId={conversationId}
         />
 
       </div>

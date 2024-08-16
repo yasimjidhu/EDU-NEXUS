@@ -6,7 +6,6 @@ import { isOnlyEmojis } from '../../utils/CheckIsEmojis';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store/store';
 import { useSocket } from '../../contexts/SocketContext';
-import { useMessageObserver } from '../../hooks/useMessageObserver';
 import { updateMessageStatus } from '../redux/slices/chatSlice';
 
 interface DisplayMessagesProps {
@@ -25,15 +24,17 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
     const { user } = useSelector((state: RootState) => state.user)
     const { socket } = useSocket()
 
-    const handleMessageRead = (messageId: string) => {
+    const handleMessageRead = (messageId: string,userId:string) => {
         if (!readMessages.has(messageId)) {
             setReadMessages((prevReadMessages) => {
                 const updatedReadMessages = new Set(prevReadMessages);
                 updatedReadMessages.add(messageId);
                 return updatedReadMessages;
             });
+
             if (socket) {
-                socket.emit('messageRead', messageId);
+                console.log('message read socket emited',messageId,userId)
+                socket.emit('messageRead', {messageId,userId});
             }
         }
     };
@@ -49,10 +50,9 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
                 if (entry.isIntersecting) {
                     const messageId = entry.target.getAttribute('data-message-id');
                     const senderId = entry.target.getAttribute('data-sender-id');
-                    console.log('sendre id',senderId)
-                    console.log(`message id ${messageId} entry is intersecting`, entry)
                     if (messageId && senderId !== user?._id) {
-                        handleMessageRead(messageId);
+                        console.log('handle message read called')
+                        handleMessageRead(messageId,user?._id!);
                     }
                 }
             });
@@ -78,7 +78,6 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
     useEffect(() => {
         if (socket) {
             socket.on('messageStatusUpdated', (updatedMessage: Message) => {
-                console.log('updateMessageStatus event got in frontend', updatedMessage)
                 dispatch(updateMessageStatus(updatedMessage));
             });
         }
@@ -87,6 +86,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
             socket?.off('messageStatusUpdated');
         };
     }, [socket, dispatch]);
+
     const handleImageClick = (url: string) => {
         setCurrentImageUrl(url)
         setIsLightboxOpen(true);

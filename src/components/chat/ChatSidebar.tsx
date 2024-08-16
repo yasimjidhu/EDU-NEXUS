@@ -14,7 +14,6 @@ interface ChatSidebarProps {
   selectedStudent: User | null;
   selectedGroup: Group | null;
   user: 'student' | 'instructor';
-  conversationId: string;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
@@ -26,7 +25,6 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   selectedStudent,
   selectedGroup,
   user,
-  conversationId
 }) => {
   const [showGroups, setShowGroups] = useState(false);
 
@@ -38,7 +36,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   useEffect(() => {
     if (userData.user?._id) {
       dispatch(getUserJoinedGroups(userData.user._id))
-      dispatch(getUnreadMessages(userData.user._id))
+      dispatch(getUnreadMessages(userData.user?._id!))
     }
   }, [dispatch, userData.user?._id])
 
@@ -52,10 +50,23 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     }
   };
 
-  const getUnreadCount = (conversationId: string) => {
-    const unread = unreadMessages.find((msg) => msg.conversationId == conversationId)
-    return unread ? unread.unreadCount : 0
-  }
+  const getUnreadCount = (studentId?: string,groupId?:string) => {
+    if(studentId){
+      const conversationId = `${userData.user?._id}-${studentId}`;
+      const reverseConversationId = `${studentId}-${userData.user?._id}`;
+      const unread = unreadMessages.find((msg) => 
+        msg.conversationId === conversationId || msg.conversationId === reverseConversationId
+      );
+      return unread ? unread.unreadCount : 0;
+    }else if(groupId){
+      const unread = unreadMessages.find(msg => 
+        msg._id == groupId
+      )
+      return unread ? unread.unreadCount : 0
+    }
+    return 0
+  };
+  
 
 
   return (
@@ -96,9 +107,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   <p className="font-semibold text-gray-800">{group.name}</p>
                   <p className="text-sm text-gray-500">{group.members.length} members</p>
                 </div>
-                {getUnreadCount(group._id!) > 0 && (
+                {getUnreadCount(undefined,group._id!) > 0 && (
                   <span className="relative inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-white bg-green-500 rounded-full shadow-md hover:scale-105 transition-transform duration-200">
-                    {getUnreadCount(group._id!)}
+                    {getUnreadCount(undefined,group._id!)}
                    
                   </span>
                 )}
@@ -136,9 +147,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     )}
                   </p>
                 </div>
-                {getUnreadCount(conversationId) > 0 && (
+                {getUnreadCount(student._id) > 0 && (
                   <span className="ml-2 inline-flex items-center justify-center w-4 h-4 text-sm p-2 font-medium text-white bg-green-500 rounded-full">
-                    {getUnreadCount(conversationId)}
+                    {getUnreadCount(student._id)}
                   </span>
                 )}
               </div>

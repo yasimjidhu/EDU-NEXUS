@@ -272,7 +272,6 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           selectedGroup={selectedGroup}
           onClickEntity={handleClickEntity}
           user={'instructor'}
-          conversationId={conversationId}
         />
       </div>
 

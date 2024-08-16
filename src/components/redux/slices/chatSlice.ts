@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '../../../constants/axiosInstance';
-import { Group, TStudent, UnreadMessage, UnreadMessagesState } from '../../../types/chat'
+import { Group, TStudent, UnreadMessage } from '../../../types/chat'
 import { Message } from '../../../types/chat';
 
 
@@ -67,7 +67,7 @@ export const getMessagedStudents = createAsyncThunk(
   async (instructorId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/messaged-students/${instructorId}`);
-      console.log('messaged students are', response)
+
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -117,7 +117,6 @@ export const getGroupMessages = createAsyncThunk(
   async (groupId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/group-messages/${groupId}`);
-      console.log('response of getGroupMessages in slice', response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -160,7 +159,7 @@ const chatSlice = createSlice({
       state.messages.push(action.payload);
     },
     updateMessageStatus: (state, action: PayloadAction<Message>) => {
-      console.log('update message status reached in rducer',action.payload)
+      console.log('update message status reached',action.payload)
       const index = state.messages.findIndex((msg: any) => msg._id == action.payload._id)
       if (index !== -1) {
         state.messages[index].status = action.payload.status
@@ -188,27 +187,27 @@ const chatSlice = createSlice({
         state.messages = []
       }
     },
-    markConversationAsRead: (state, action: PayloadAction<{ conversationId: string,item:'user'|'group'|'' }>) => {
-      console.log('mark conversatin as read data',action.payload)
-      const { conversationId,item} = action.payload;
-      if(item == 'group'){
-        const conversation = state.unreadMessages.find((msg)=>msg.conversationId == conversationId)
-        if(conversation){
-          conversation.unreadCount = 0
-        }
-      }else if(item == 'user'){
-        const [currentUserId,recipientId] = conversationId.split('-')
-        state.unreadMessages = state.unreadMessages.map(msg =>{
-          const [msgUserId,msgRecipientId] = msg.conversationId.split('-');
-          if((msgUserId === currentUserId && msgRecipientId === recipientId) || 
-            (msgUserId === recipientId && msgRecipientId === currentUserId)
-          ){
-            return {...msg,unreadCount:0}
-          }
-          return msg
-        })
+    markConversationAsRead: (state, action: PayloadAction<{ conversationId: string, item: 'user' | 'group' | '' }>) => {
+      const { conversationId, item } = action.payload;
+      console.log('conversation id in mark as read',conversationId)
+      console.log('item id in mark as read',item)
+      
+      console.log('unread messages',JSON.stringify(state.unreadMessages))
+      
+      // Find the conversation based on the item type
+      let conversation;
+      if (item === 'group') {
+         conversation = state.unreadMessages.find((msg)=>msg._id == conversationId)
+      } else if (item === 'user') {
+         conversation = state.unreadMessages.find((msg)=>msg._id == conversationId)
+      }
+      
+      if(conversation){
+        conversation.unreadCount = 0
       }
     },
+    
+    
     clearUnreadMessages: (state) => {
       state.unreadMessages = [];
     },
