@@ -37,13 +37,13 @@ const Assessments: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    dispatch(getAssessments(user._id))
+    dispatch(getAssessments(user?._id!))
       .then((res) => {
         if (res.payload && res.payload.assessments) {
           setAssessments(res.payload.assessments);
         }
       });
-  }, [dispatch, user._id]);
+  }, [dispatch, user?._id!]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -86,13 +86,13 @@ const Assessments: React.FC = () => {
           setIsDeleteModalOpen(false);
           setCurrentAssessment(null);
           // Refresh the assessments list
-          dispatch(getAssessments(user._id));
+          dispatch(getAssessments(user?._id!));
         });
     }
   };
 
   return (
-    <div className="mx-auto px-4 py-8 bg-gray-50 min-h-screen ml-52">     
+    <div className="mx-auto px-4 py-8 bg-gray-50 min-h-screen ">     
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
         <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
           <Plus size={20} className="inline mr-2" />

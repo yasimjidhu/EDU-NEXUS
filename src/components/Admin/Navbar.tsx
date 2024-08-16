@@ -1,9 +1,10 @@
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutUser } from "../redux/slices/authSlice";
+import { RootState } from "../redux/store/store";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,8 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   type AppDispatch = ThunkDispatch<any, any, any>;
+
+  const { unreadMessages } = useSelector((state: RootState) => state.chat)
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -30,6 +33,8 @@ const Navbar: React.FC = () => {
   const handleProfile = () => {
     console.log("viewing profile");
   };
+
+  const totalUnreadMessages = unreadMessages.reduce((total,msg)=>total + msg.unreadCount,0)
 
   return (
     <div className="bg-white border-b border-gray-200 ml-52">
@@ -82,12 +87,17 @@ const Navbar: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="cursor-pointer p-2 bg-purple-500 rounded-xl">
+          <div className="relative cursor-pointer p-2 bg-purple-500 rounded-xl">
             <img
               src="/assets/png/bell.png"
               className="w-8 h-8"
               alt="Notifications"
             />
+             {totalUnreadMessages > 0 && (
+              <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-600 text-white text-xs font-semibold rounded-full px-2 py-1">
+                {totalUnreadMessages}
+              </span>
+            )}
           </div>
         </div>
       </div>

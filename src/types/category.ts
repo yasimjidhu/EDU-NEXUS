@@ -4,4 +4,5 @@ export interface Category{
     description:string | null;
     image: File | string | null;
     coursesCoun?:number;
+    id?:string;
 }

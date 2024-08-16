@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Message } from '../../types/chat';
 import { isOnlyEmojis } from '../../utils/CheckIsEmojis';
-import { useMessageObserver } from '../../hooks/useMessageObserver';
 import { useSocket } from '../../contexts/SocketContext';
 import AudioPlayer from './AudioPlayer';
 import Lightbox from './LightBox';
@@ -39,9 +38,10 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) =>
   useEffect(() => {
     if (socket) {
       socket.on('userLeft', (userName: string) => {
-        console.log('user left message got in messgae list component user is', userName)
-        setUserLeftMessage(`${userName} has left the chat.`);
-        setUserLeftTimestamp(Date.now());
+        if(userName){
+          setUserLeftMessage(`${userName} has left the chat.`);
+          setUserLeftTimestamp(Date.now());
+        }
       });
 
       socket.on('messageStatusUpdated',(updatedMessage:Message)=>{
@@ -167,10 +167,10 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) =>
             </p>
             {isCurrentUser && (
               <span className="ml-2">
-                {msg.status === 'sent' && <span className="text-xs">✓</span>}
-                {msg.status === 'delivered' && <span className="text-xs">✓✓</span>}
+                {msg.status === 'sent' && <span className="text-xs text-gray-400">✓</span>}
+                {msg.status === 'delivered' && <span className="text-xs  text-gray-400">✓✓</span>}
                 {msg.status === 'read' && (
-                  <span className="text-blue-500 text-xs">✓✓</span>
+                  <span className="text-white text-xs">✓✓</span>
                 )}
               </span>
             )}

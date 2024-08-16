@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
 import ReactPlayer from "react-player";
 import Certificate from "../../components/student/Certficate";
+import { Review } from "../../components/student/Review";
 
 interface Attachment {
   title?: string;
@@ -80,7 +81,7 @@ const ViewCourse: React.FC = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await dispatch(getCourse(courseId));
+        const response = await dispatch(getCourse(courseId!));
         setCourse(response.payload.course);
 
         if (response.payload.course.lessons.length > 0) {
@@ -119,7 +120,6 @@ const ViewCourse: React.FC = () => {
     setUserAnswers({});
     setAssessmentResult(null);
   };
-
   const handleStartAssessment = () => {
     if (course && course.assessments && course.assessments.length > 0) {
       setCurrentAssessment(course.assessments[0]);
@@ -137,7 +137,7 @@ const ViewCourse: React.FC = () => {
   };
 
   const handleSubmitAssessment = () => {
-   
+
     if (!currentAssessment) return;
 
     const unansweredQuestions = currentAssessment.questions.filter(
@@ -176,7 +176,7 @@ const ViewCourse: React.FC = () => {
       }
     }
   }, [completedLessons, totalLesson, user, courseId, dispatch]);
-  
+
 
   const handleVideoProgress = useCallback(
     (progress: number) => {
@@ -283,6 +283,8 @@ const ViewCourse: React.FC = () => {
                 </div>
               )}
 
+              <Review courseId={courseId!}/>
+
             {courseCompleted && (
               <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
                 <p className="font-bold">Course Completed!</p>
@@ -362,9 +364,9 @@ const ViewCourse: React.FC = () => {
                                   }
                                   checked={
                                     userAnswers[
-                                      currentAssessment.questions[
-                                        currentQuestionIndex
-                                      ]._id
+                                    currentAssessment.questions[
+                                      currentQuestionIndex
+                                    ]._id
                                     ] === option
                                   }
                                   className="form-radio cursor-pointer"
@@ -377,23 +379,23 @@ const ViewCourse: React.FC = () => {
                       )}
                     {currentQuestionIndex <
                       (currentAssessment?.questions.length || 0) - 1 && (
-                      <button
-                        type="button"
-                        onClick={handleNextQuestion}
-                        className="bg-medium-rose text-white px-4 py-1 rounded-lg transition-colors"
-                      >
-                        Next
-                      </button>
-                    )}
+                        <button
+                          type="button"
+                          onClick={handleNextQuestion}
+                          className="bg-medium-rose text-white px-4 py-1 rounded-lg transition-colors"
+                        >
+                          Next
+                        </button>
+                      )}
                     {currentQuestionIndex ===
                       (currentAssessment?.questions.length || 0) - 1 && (
-                      <button
-                        type="submit"
-                        className="bg-medium-rose text-white px-4 py-2 rounded-lg transition-colors"
-                      >
-                        Submit Assessment
-                      </button>
-                    )}
+                        <button
+                          type="submit"
+                          className="bg-medium-rose text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                          Submit Assessment
+                        </button>
+                      )}
                   </form>
                   {assessmentResult !== null && (
                     <div className="mt-4 p-4 bg-gray-100 rounded-lg">
@@ -402,7 +404,7 @@ const ViewCourse: React.FC = () => {
                         {currentAssessment?.total_score}
                       </h3>
                       {assessmentResult >=
-                      (currentAssessment?.passing_score || 0) ? (
+                        (currentAssessment?.passing_score || 0) ? (
                         <p className="text-green-700 inter text-xl text-center mt-2">
                           Congratulations! You passed the assessment.
                         </p>
@@ -416,12 +418,16 @@ const ViewCourse: React.FC = () => {
                   )}
                 </div>
               ))}
-              {courseCompleted && (
-              <Certificate
-                studentName={`${user?.firstName} ${user?.lastName}`}
-                courseName={course.title}
-              />
-            )}
+            {courseCompleted &&
+              assessmentResult !== null &&
+              assessmentResult !== undefined &&
+              currentAssessment?.passing_score !== undefined &&
+              assessmentResult >= currentAssessment.passing_score && (
+                <Certificate
+                  studentName={`${user?.firstName} ${user?.lastName}`}
+                  courseName={course.title}
+                />
+              )}
           </div>
 
           {/* Sidebar - Lesson list */}
@@ -432,11 +438,10 @@ const ViewCourse: React.FC = () => {
                 {course.lessons.map((lesson, index) => (
                   <li
                     key={lesson.lessonNumber}
-                    className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                      currentLesson?._id === lesson._id
-                        ? "bg-gray-100"
-                        : "hover:bg-gray-50"
-                    }`}
+                    className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${currentLesson?._id === lesson._id
+                      ? "bg-gray-100"
+                      : "hover:bg-gray-50"
+                      }`}
                     onClick={() => handleLessonClick(lesson)}
                   >
                     <div className="flex items-center">

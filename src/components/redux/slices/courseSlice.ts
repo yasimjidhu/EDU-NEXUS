@@ -64,7 +64,9 @@ export interface CourseState {
   loading: boolean;
   error: string | null;
   allCourses?:CourseState[]
-  reviews?:Review[]
+  reviews?:Review[];
+  _id?:string;
+  reviewCounts?:number;
 }
 
 export interface UserData{
@@ -93,7 +95,9 @@ const initialState: CourseState = {
   lessons: [],
   loading: false,
   error: null,
-  reviews:[]
+  reviews:[],
+  _id:'',
+  reviewCounts:0
 };
 
 interface UpdateData{
@@ -215,6 +219,7 @@ export const getAllCourses = createAsyncThunk(
       });
 
       const response = await axiosInstance.get(`/course/courses?${queryParams}`);
+      console.log('response of get all courses',response)
       return {
         courses: response.data.courses.allCourses,
         totalPages: Math.ceil(response.data.courses.totalCourses / 6)
@@ -368,6 +373,7 @@ export const addReview= createAsyncThunk(
   async (data:Review, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(`/course/reviews/review`,data);
+      console.log('add review response',response.data)
       return response.data.addedReview
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);

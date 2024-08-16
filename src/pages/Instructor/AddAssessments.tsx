@@ -52,7 +52,7 @@ const AddAssessments = () => {
 
   useEffect(() => {
     if (user._id) {
-      dispatch(getAllCoursesOfInstructor(user._id)).then((res) => {
+      dispatch(getAllCoursesOfInstructor(user?._id!)).then((res) => {
         setInstructorCourses(res.payload.courses);
         setAssessment(prev => ({ ...prev, instructor_id: user._id }));
       });
@@ -345,6 +345,7 @@ const AddAssessments = () => {
             Cancel
           </button>
           <button
+          type="button"
             onClick={submitAssessment}
             className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >

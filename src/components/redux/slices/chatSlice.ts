@@ -7,7 +7,7 @@ import { Message } from '../../../types/chat';
 export interface ChatState {
   messages: Message[];
   messagedStudents: TStudent[];
-  unreadMessages:UnreadMessage[];
+  unreadMessages: UnreadMessage[];
   group?: Group | null;
   groups?: Group[];
   loading: boolean;
@@ -17,7 +17,7 @@ export interface ChatState {
 const initialState: ChatState = {
   messages: [],
   messagedStudents: [],
-  unreadMessages:[],
+  unreadMessages: [],
   group: null,
   groups: [],
   loading: false,
@@ -52,9 +52,9 @@ export const getUnreadMessages = createAsyncThunk(
   'chat/get-unread-messages',
   async (userId: string, { rejectWithValue }) => {
     try {
-      console.log('get unreade messages called in slice',userId)
+      console.log('get unreade messages called in slice', userId)
       const response = await axiosInstance.get(`/chat/unread-messages/${userId}`);
-      console.log('respnose of unread in slice',response)
+      console.log('respnose of unread in slice', response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -159,7 +159,7 @@ const chatSlice = createSlice({
       state.messages.push(action.payload);
     },
     updateMessageStatus: (state, action: PayloadAction<Message>) => {
-      console.log('update message status reached',action.payload)
+      console.log('update message status reached', action.payload)
       const index = state.messages.findIndex((msg: any) => msg._id == action.payload._id)
       if (index !== -1) {
         state.messages[index].status = action.payload.status
@@ -189,25 +189,29 @@ const chatSlice = createSlice({
     },
     markConversationAsRead: (state, action: PayloadAction<{ conversationId: string, item: 'user' | 'group' | '' }>) => {
       const { conversationId, item } = action.payload;
-      console.log('conversation id in mark as read',conversationId)
-      console.log('item id in mark as read',item)
-      
-      console.log('unread messages',JSON.stringify(state.unreadMessages))
-      
+
       // Find the conversation based on the item type
       let conversation;
       if (item === 'group') {
-         conversation = state.unreadMessages.find((msg)=>msg._id == conversationId)
+        conversation = state.unreadMessages.find((msg) => msg._id == conversationId)
       } else if (item === 'user') {
-         conversation = state.unreadMessages.find((msg)=>msg._id == conversationId)
+        conversation = state.unreadMessages.find((msg) => msg._id == conversationId)
       }
-      
-      if(conversation){
+
+      const index = state.unreadMessages.findIndex((msg) => msg._id === conversationId && msg.latestMessage);
+
+      if (index !== -1) {
+        // Remove the unread message from the array
+        state.unreadMessages.splice(index, 1);
+      }
+
+
+      if (conversation) {
         conversation.unreadCount = 0
       }
     },
-    
-    
+
+
     clearUnreadMessages: (state) => {
       state.unreadMessages = [];
     },
@@ -276,12 +280,12 @@ const chatSlice = createSlice({
       })
       .addCase(addUsersToGroup.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
-        console.log('payload of adduser to group in reducer',action.payload)
-      
+        console.log('payload of adduser to group in reducer', action.payload)
+
         // Update the specific group in the groups array, if it exists
         if (state.groups) {
           const groupIndex = state.groups.findIndex(group => group._id === action.payload.group._id);
-          
+
           if (groupIndex !== -1) {
             // Update the existing group in the array
             state.groups[groupIndex] = action.payload.group;
@@ -293,7 +297,7 @@ const chatSlice = createSlice({
           // Initialize groups array with the new group
           state.groups = [action.payload.group];
         }
-      
+
         // Update the state.group if needed
         state.group = action.payload.group;
       })
@@ -329,27 +333,27 @@ const chatSlice = createSlice({
       .addCase(removeUserFromGroup.fulfilled, (state, action) => {
         state.loading = false;
         const { groupId, userId } = action.payload;
-      
+
         // Remove the user from the group's members list
         if (state.group && state.group._id === groupId) {
           state.group.members = state.group.members.filter(id => id !== userId);
         }
-      
+
         // Remove the group from the list of groups
         state.groups = state.groups?.filter(group => group._id !== groupId);
-      
+
         console.log('Updated groups:', state.groups);
       })
       .addCase(removeUserFromGroup.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
   },
 });
 
 
 
-export const { addMessage, clearMessages, updateMessageStatus, clearGroup,markConversationAsRead,clearUnreadMessages } = chatSlice.actions;
+export const { addMessage, clearMessages, updateMessageStatus, clearGroup, markConversationAsRead, clearUnreadMessages } = chatSlice.actions;
 
 export default chatSlice.reducer;

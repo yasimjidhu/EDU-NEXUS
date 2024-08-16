@@ -9,6 +9,7 @@ import { AppDispatch, RootState } from "../../components/redux/store/store";
 import Pagination from "../../components/common/Pagination";
 import { useNavigate } from "react-router-dom";
 import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
+import { budgetWiseCoursesCount } from "../../utils/getBudgetWiseCoursesCount";
 
 // Interfaces for types
 interface Instructor {
@@ -28,8 +29,8 @@ interface FilterState {
 interface Category {
   _id: string;
   name: string;
-  description:string;
-  image:string;
+  description: string;
+  image: string;
 }
 
 const Courses: React.FC = () => {
@@ -58,7 +59,7 @@ const Courses: React.FC = () => {
     dispatch(fetchAllInstructors()).then((res: any) => {
       setAllInstructors(res.payload.instructors);
     });
-    dispatch(getAllCourses({page:currentPage})).then((res: any) => {
+    dispatch(getAllCourses({ page: currentPage })).then((res: any) => {
       setAllCourses(res.payload.courses);
       setTotalPages(res.payload.totalPages);
       setFilteredCourses(res.payload.courses);
@@ -77,7 +78,7 @@ const Courses: React.FC = () => {
       result = result.filter((course) => {
         if (filters.price.includes("Free")) {
           return course.pricing.amount === 0;
-        } 
+        }
         if (filters.price.includes("Paid")) {
           return course.pricing.amount > 0;
         }
@@ -96,7 +97,9 @@ const Courses: React.FC = () => {
     }
 
     if (filters.category.length > 0) {
+      console.log('filtered cate', filters.category)
       result = result.filter((course) => filters.category.includes(course.categoryRef));
+      console.log('result of filterered cateotgy', result)
     }
 
     return result;
@@ -106,20 +109,21 @@ const Courses: React.FC = () => {
   useEffect(() => {
     setFilteredCourses(memoizedFilteredCourses);
   }, [memoizedFilteredCourses]);
-  
-    const handleCategoryClick = (categoryId: string) => {
-      if (selectedCategory === categoryId) {
-        // If the same category is clicked again, clear the filter
-        setSelectedCategory(null);
-        setFilters(prev => ({ ...prev, category: [] }));
-      } else {
-        // Set the new category
-        setSelectedCategory(categoryId);
-        setFilters(prev => ({ ...prev, category: [categoryId] }));
-      }
-      // Reset to the first page when changing categories
-      setCurrentPage(1);
-    };
+
+  const handleCategoryClick = (categoryId: string) => {
+
+    if (selectedCategory === categoryId) {
+      // If the same category is clicked again, clear the filter
+      setSelectedCategory(null);
+      setFilters(prev => ({ ...prev, category: [] }));
+    } else {
+      // Set the new category
+      setSelectedCategory(categoryId);
+      setFilters(prev => ({ ...prev, category: [categoryId] }));
+    }
+    // Reset to the first page when changing categories
+    setCurrentPage(1);
+  };
 
   // Function to handle filter changes
   const handleFilterChange = (filterType: keyof FilterState, value: string | number) => {
@@ -150,17 +154,18 @@ const Courses: React.FC = () => {
     return instructor ? `${instructor.firstName} ${instructor.lastName}` : "Unknown Instructor";
   };
 
+  const budgetWiseCount = budgetWiseCoursesCount(allCourses)
+
   return (
     <div className="ml-52 px-8 bg-gray-50 min-h-screen">
-       <ul className="flex flex-wrap justify-start gap-4 mb-8 pt-6">
+      <ul className="flex flex-wrap justify-start gap-4 mb-8 pt-6">
         {categories && categories.length > 0 ? (
-          categories.map((category: Category) => (
+          categories.map((category) => (
             <li
-              key={category._id}
-              className={`text-gray-700 bg-white hover:bg-medium-rose hover:text-white transition duration-300 px-4 py-2 rounded-full cursor-pointer shadow-md ${
-                selectedCategory === category._id ? 'bg-medium-rose text-white' : ''
-              }`}
-              onClick={() => handleCategoryClick(category._id)}
+              key={category.id}
+              className={`text-gray-700 bg-white hover:bg-medium-rose hover:text-white transition duration-300 px-4 py-2 rounded-full cursor-pointer shadow-md ${selectedCategory === category._id ? 'bg-medium-rose text-white' : ''
+                }`}
+              onClick={() => handleCategoryClick(category.id!)}
             >
               {category.name}
             </li>
@@ -195,7 +200,7 @@ const Courses: React.FC = () => {
                       </li>
                       <li className="flex items-center">
                         <img src="/assets/icon/students.png" alt="Students icon" className="w-5 h-5 mr-2" />
-                        <span>156 students</span>
+                        <span>{course.enrolledStudentsCount} students</span>
                       </li>
                       <li className="flex items-center">
                         <img src="/assets/icon/levels.png" alt="Levels icon" className="w-5 h-5 mr-2" />
@@ -222,7 +227,12 @@ const Courses: React.FC = () => {
               </div>
             ))
           ) : (
-            <p className="text-center text-gray-700 text-lg">No courses available.</p>
+            <div className="w-full flex justify-center items-center">
+              <div className="w-[35%] text-center">
+                <img src="/assets/images/nothing.jpg" alt="No Courses" className="mb-4 w-full" />
+                <h4 className="text-xl">No Courses Available</h4>
+              </div>
+            </div>
           )}
         </div>
         <div className="col-span-1 space-y-8 sticky top-0 right-6 w-64 h-screen bg-white shadow-lg rounded-lg overflow-y-auto p-6">
@@ -255,7 +265,7 @@ const Courses: React.FC = () => {
                   />
                   <label htmlFor={`price-${priceOption}`} className="ml-2 text-gray-700">{priceOption}</label>
                 </div>
-                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">15</span>
+                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{budgetWiseCount[priceOption]}</span>
               </div>
             ))}
           </div>
@@ -277,9 +287,12 @@ const Courses: React.FC = () => {
                     ))}
                   </label>
                 </div>
-                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">(1,234)</span>
+                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  ({allCourses.reduce((total, course) => total + (course.reviewCounts[rating] || 0), 0)})
+                </span>
               </div>
             ))}
+
           </div>
           <div>
             <h1 className="text-xl font-bold mb-4 text-gray-800">Level</h1>

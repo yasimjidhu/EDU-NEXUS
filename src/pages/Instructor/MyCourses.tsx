@@ -28,7 +28,7 @@ const MyCourses = () => {
   };
 
   return (
-    <div className="ml-52 space-y-4">
+    <div className=" space-y-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="inter text-2xl font-bold">My Courses</h1>
         <Link to="/instructor/add-course">
