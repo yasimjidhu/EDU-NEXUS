@@ -97,9 +97,7 @@ const Courses: React.FC = () => {
     }
 
     if (filters.category.length > 0) {
-      console.log('filtered cate', filters.category)
       result = result.filter((course) => filters.category.includes(course.categoryRef));
-      console.log('result of filterered cateotgy', result)
     }
 
     return result;

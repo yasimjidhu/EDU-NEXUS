@@ -144,7 +144,7 @@ const AddAssessments = () => {
         await dispatch(addAssessment(assessment));
         toast.success('Assessment created successfully');
       } else {
-        await dispatch(editAssessment(assessment));
+        await dispatch(editAssessment({updateData:assessment}));
         toast.success('Assessment updated successfully');
       }
       navigate('/instructor/assessments');

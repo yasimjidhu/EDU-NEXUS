@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, Book, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getAssessments, editAssessment, deleteAssessment } from '../../components/redux/slices/courseSlice';
+import { getAssessments, deleteAssessment } from '../../components/redux/slices/courseSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import Modal from 'react-modal';
+import DeleteConfirmationModal from '../../components/content/DeleteConfirmationModal';
 
 interface Question {
   answer: string;
@@ -28,7 +28,6 @@ const Assessments: React.FC = () => {
   const [assessments, setAssessments] = useState<IAssessment[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentAssessment, setCurrentAssessment] = useState<IAssessment | null>(null);
 
@@ -67,7 +66,6 @@ const Assessments: React.FC = () => {
     }
   };
 
-
   const handleDelete = (assessment: IAssessment) => {
     setCurrentAssessment(assessment);
     setIsDeleteModalOpen(true);
@@ -76,17 +74,21 @@ const Assessments: React.FC = () => {
   const handleEditClick = (e: React.MouseEvent, assessmentId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate(`/instructor/add-assessments`,{state:assessmentId});
+    navigate(`/instructor/add-assessments`, { state: assessmentId });
   };
 
   const handleDeleteConfirm = () => {
-    if (currentAssessment && currentAssessment._id) {
+    if (currentAssessment && currentAssessment._id && user?._id) {
       dispatch(deleteAssessment(currentAssessment._id))
         .then(() => {
           setIsDeleteModalOpen(false);
           setCurrentAssessment(null);
-          // Refresh the assessments list
-          dispatch(getAssessments(user?._id!));
+          dispatch(getAssessments(user._id))
+          .then((res) => {
+            if (res.payload && res.payload.assessments) {
+              setAssessments(res.payload.assessments);
+            }
+          });
         });
     }
   };
@@ -150,7 +152,7 @@ const Assessments: React.FC = () => {
               <div className="flex justify-end space-x-2">
                 <button 
                   className="text-blue-600 hover:text-blue-800 transition duration-300"
-                  onClick={(e) => handleEditClick(e,assessment._id)}
+                  onClick={(e) => handleEditClick(e, assessment._id!)}
                 >
                   <Edit size={20} />
                 </button>
@@ -173,37 +175,13 @@ const Assessments: React.FC = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
-      
-
       {/* Delete Confirmation Modal */}
-      <Modal
+      <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
-        onRequestClose={() => setIsDeleteModalOpen(false)}
-        className="modal-content"
-        overlayClassName="modal-overlay"
-      >
-        <div className="bg-white rounded-lg p-8 max-w-md w-full mx-auto">
-          <h2 className="text-lg font-medium mb-4">Confirm Deletion</h2>
-          <p>Are you sure you want to delete this assessment? This action cannot be undone.</p>
-          <div className="mt-4 flex justify-end">
-            <button
-              type="button"
-              className="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-              onClick={() => setIsDeleteModalOpen(false)}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500"
-              onClick={handleDeleteConfirm}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </Modal>
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        itemName={currentAssessment?.title || 'this assessment'}
+      />
     </div>
   );
 };

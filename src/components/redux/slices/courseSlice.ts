@@ -219,7 +219,6 @@ export const getAllCourses = createAsyncThunk(
       });
 
       const response = await axiosInstance.get(`/course/courses?${queryParams}`);
-      console.log('response of get all courses',response)
       return {
         courses: response.data.courses.allCourses,
         totalPages: Math.ceil(response.data.courses.totalCourses / 6)
@@ -259,7 +258,6 @@ export const fetchCourseRequests= createAsyncThunk(
   async (page:number, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/course/courses/courseRequests?page=${page}`);
-      console.log('response of courserequests',response)
       return {
         courses: response.data.allCourses,
         totalPages: Math.ceil(response.data.totalCourses / 10),
@@ -398,7 +396,7 @@ export const addAssessment= createAsyncThunk(
   'course/add-assessment',
   async (data:IAssessment, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/course/assessments/assessment`,data);
+      const response = await axiosInstance.post(`/course/assessments`,data);
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -410,7 +408,8 @@ export const getAssessments= createAsyncThunk(
   'course/get-assessments',
   async (instructorId:string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/course/assessments/assessment/${instructorId}`);
+      const response = await axiosInstance.get(`/course/assessments/${instructorId}`);
+      console.log('rsponse of get assessments after detletion',response)
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -422,7 +421,7 @@ export const editAssessment = createAsyncThunk(
   'course/edit-assessments',
   async ({ updateData }: { updateData: Partial<IAssessment> }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.put(`/course/assessments/assessment`, updateData);
+      const response = await axiosInstance.put(`/course/assessments/${updateData._id}`, updateData);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -431,10 +430,10 @@ export const editAssessment = createAsyncThunk(
 );
 
 export const deleteAssessment= createAsyncThunk(
-  'course/delete-assessments',
+  'course/delete-assessment',
   async (assessmentId:string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.delete(`/course/assessments/assessment/${assessmentId}`);
+      const response = await axiosInstance.delete(`/course/assessments/${assessmentId}`);
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -448,8 +447,10 @@ export const getAssessment= createAsyncThunk(
     try {
       console.log('request reached in slice',assessmentId)
       const response = await axiosInstance.get(`/course/assessments/assessment/${assessmentId}`);
+      console.log('response of get assessments in sice',response)
       return response.data
     } catch (error: any) {
+      console.log('error in get assessment',error)
       return rejectWithValue(error.response?.data || error.message);
     }
   }
