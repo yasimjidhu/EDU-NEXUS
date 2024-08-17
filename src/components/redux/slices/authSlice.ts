@@ -126,7 +126,7 @@ export const userLogin = createAsyncThunk<
       return response.data;
     } catch (error: any) {
         console.log('login error in slice',error)
-        return rejectWithValue({error:error.response.data.message})
+        return rejectWithValue({error:error.response.data.error})
     }
   }
 )
@@ -199,6 +199,7 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
       }
     }
   );
+
 
   
 

@@ -7,7 +7,7 @@ import { User } from '../../types/user';
 import { getAllUsers } from '../../components/redux/slices/studentSlice';
 
 
-const AdminTransaction = () => {   
+const AdminTransaction = () => {
     const dispatch: AppDispatch = useDispatch();
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
@@ -21,9 +21,9 @@ const AdminTransaction = () => {
     const [allUsers, setAllUsers] = useState<User[]>([])
 
     useEffect(() => {
-        if (allUsers.length <=0 ) {
+        if (allUsers.length <= 0) {
             dispatch(getAllUsers()).then((res) => {
-                console.log('response payload of allusers',res.payload)
+                console.log('response payload of allusers', res.payload)
                 setAllUsers(res.payload)
             })
         }
@@ -91,7 +91,7 @@ const AdminTransaction = () => {
         const user = allUsers.find((user) => user._id === userId);
         return user ? `${user.firstName} ${user.lastName}` : null;
     };
-    
+
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-6">Transaction History</h1>

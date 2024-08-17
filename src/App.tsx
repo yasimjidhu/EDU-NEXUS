@@ -44,7 +44,7 @@ import { SocketProvider } from "./contexts/SocketContext";
 import GroupChat from "./pages/Chat/GroupChat";
 import { MessagedStudentsProvider } from "./contexts/messagedStudentsContext";
 import AdminTransaction from "./pages/Admin/Transactions";
-
+import Settings from "./pages/UserPages/Settings";
 
 function App() {
   return (
@@ -102,6 +102,7 @@ function App() {
               <Route path={routes.PUBLIC.VIEW_COURSE} element={<ViewCourse />} />
               <Route path={routes.PUBLIC.VIEW_CATEGORY} element={<ViewCategory />} />
               <Route path={routes.PUBLIC.COURSE_DETAIL} element={<CourseDetail />} />
+              <Route path={routes.PUBLIC.SETTINGS} element={<Settings />} />
               <Route path={routes.PUBLIC.SUCCESS} element={<PaymentSuccess />} />
             </Route>
 

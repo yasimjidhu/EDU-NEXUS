@@ -145,6 +145,19 @@ export const RejectInstructor = createAsyncThunk(
   }
 );
 
+export const updateUserDetails = createAsyncThunk(
+  'student/update',
+  async ({email,updateData}:{email:string,updateData:Partial<User>}, { rejectWithValue }) => {
+    try {
+      console.log('update user detils called',updateData)
+      const response = await axiosInstance.put(`/user/update/${email}`,{updateData});
+      console.log('response of update user details',response)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 
 const studentSlice = createSlice({

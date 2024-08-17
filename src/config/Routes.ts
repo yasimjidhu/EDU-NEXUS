@@ -35,7 +35,6 @@ const routes = {
       COURSE_DETAIL: "/instructor/course-detail/:id",
       CHAT: "/instructor/chat",
       CHATGROUP:"/instructor/group",
-      SETTINGS: "/instructor/settings",
     },
     STUDENT: {
       ROOT: "/student",
@@ -51,6 +50,7 @@ const routes = {
       VIEW_COURSE: "/view-course/:courseId",
       VIEW_CATEGORY: "/viewcategory/:categoryId",
       COURSE_DETAIL: "/course-detail/:id",
+      SETTINGS: "/settings",
       SUCCESS:"/success",
       CANCELLED:"/cancel",
       FAILED:"/failure"

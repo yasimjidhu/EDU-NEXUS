@@ -52,7 +52,7 @@ const LoginPage: React.FC = () => {
       }
     } catch (error: any) {
       toast.error(error.message || "An unexpected error occurred");
-      console.error("Login failed:", error); 
+      console.error("Login failed:", error.message)
     } finally {
       setSubmitting(false);
     }
