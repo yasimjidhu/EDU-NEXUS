@@ -15,7 +15,6 @@ const publishable_key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ""
 const stripePromise = loadStripe(publishable_key);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ToastContainer/>
@@ -26,5 +25,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           </Elements>
         </PersistGate>
     </Provider>
-  </React.StrictMode>,
 )

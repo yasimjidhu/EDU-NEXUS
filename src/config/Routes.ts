@@ -17,6 +17,7 @@ const routes = {
       COURSE_DETAIL: "/admin/course-detail/:id",
       ASSESSMENTS: "/admin/assessments",
       CATEGORIES: "/admin/categories",
+      TRANSACTIONS: "/admin/transactions",
       REQUESTS: "/admin/requests",
       USERS: "/admin/users",
     },

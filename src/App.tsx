@@ -43,6 +43,7 @@ import InstructorChat from "./pages/Chat/InstructorChat";
 import { SocketProvider } from "./contexts/SocketContext";
 import GroupChat from "./pages/Chat/GroupChat";
 import { MessagedStudentsProvider } from "./contexts/messagedStudentsContext";
+import AdminTransaction from "./pages/Admin/Transactions";
 
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
               <Route path={routes.ADMIN.COURSE_DETAIL} element={<CourseDetails />} />
               <Route path={routes.ADMIN.ASSESSMENTS} element={<Assessments />} />
               <Route path={routes.ADMIN.CATEGORIES} element={<Categories />} />
+              <Route path={routes.ADMIN.TRANSACTIONS} element={<AdminTransaction />} />
               <Route path={routes.ADMIN.REQUESTS} element={<Requests />} />
               <Route path={routes.ADMIN.USERS} element={<Users />} />
             </Route>

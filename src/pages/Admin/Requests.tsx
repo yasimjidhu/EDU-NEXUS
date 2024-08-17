@@ -160,7 +160,7 @@ const Requests: React.FC = () => {
           {show === "users" ? "Switch to Courses" : "Switch to Users"}
         </button>
       </div>
-      <div className="rounded-xl shadow-md p-4 bg-pure-white max-w-6xl mx-auto ml-52">
+      <div className="rounded-xl shadow-md p-4 bg-pure-white max-w-6xl mx-auto ">
         {show === "users" ? (
           <>
             <div className="grid grid-cols-12 justify-between gap-4 text-sm">

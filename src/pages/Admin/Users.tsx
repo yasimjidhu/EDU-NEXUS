@@ -74,7 +74,7 @@ const Users: React.FC = () => {
           </button>
         </div>
 
-        <div className="rounded-xl shadow-md p-4 bg-white ml-36">
+        <div className="rounded-xl shadow-md p-4 bg-white ">
           <div className="grid grid-cols-12 justify-between gap-4 text-sm">
             <div className="col-span-3">
               <h2 className="font-semibold">User</h2>

@@ -87,6 +87,7 @@ export const getAllUsers = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get('/user/getAllUsers');
+      console.log('response of allusers in slice',response)
       return response.data.allUsers;
     } catch (error: any) {
       return rejectWithValue(error.response.data);

@@ -9,7 +9,7 @@ const Admin = () => {
       <Sidebar isActive={true} />
       <div className="flex flex-col flex-grow">
         <Navbar />
-        <main className="flex-grow p-4 overflow-auto bg-gray-100">
+        <main className="flex-grow p-4 overflow-auto bg-gray-100 ml-52">
           <Outlet />
         </main>
         {/* <footer className="p-4 bg-white shadow-md">

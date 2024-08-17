@@ -1,31 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { completePurchase } from '../../components/redux/slices/paymentSlice';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { AppDispatch } from '../../components/redux/store/store';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch:AppDispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isActionDispatched, setIsActionDispatched] = useState(false); // Add a flag
 
   useEffect(() => {
     const sessionId = searchParams.get('session_id');
 
-    if (sessionId) {
+    if (sessionId && !isActionDispatched) { // Check the flag
       console.log('session id in the query params', sessionId);
       handlePaymentSuccess(sessionId);
-    } else {
+      setIsActionDispatched(true); // Set flag to true
+    } else if (!sessionId) {
       toast.error('No session ID found. Cannot verify payment.');
       setIsLoading(false);
       setIsSuccess(false);
     }
-  }, [searchParams]);
+  }, [searchParams, isActionDispatched]); // Dependency array
 
-  const handlePaymentSuccess = async (sessionId: string) => {
+  const handlePaymentSuccess =  useCallback(async(sessionId: string) => { 
     try {
       const response = await dispatch(completePurchase({ sessionId }));
       console.log('response of handlepayment', response);
@@ -46,7 +49,7 @@ const PaymentSuccess = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  },[dispatch,navigate])
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100">

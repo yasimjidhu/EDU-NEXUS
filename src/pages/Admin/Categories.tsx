@@ -98,7 +98,7 @@ const Categories: React.FC = () => {
         />
       )}
       {categories && categories.length > 0 ? (
-        <div className="grid grid-cols-2 gap-8 md:ml-64 py-4 ">
+        <div className="grid grid-cols-2 gap-8  py-4 ">
           {categories.map((category) => (
             <div
               key={category._id}
@@ -145,7 +145,7 @@ const Categories: React.FC = () => {
           <p className="mt-4 text-gray-600">No categories available</p>
         </div>
       )}
-       <div className='mt-10 ml-52'>
+       <div className='mt-10 '>
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
       </div>
     </>

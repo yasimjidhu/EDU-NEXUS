@@ -43,7 +43,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center space-x-4 ">
           <h3 className="text-medium-rose font-bold text-3xl">Edu-Nexus</h3>
           </div>
-            <div className="relative w-80 ">
+            {/* <div className="relative w-80 ">
               <form className="max-w-md ">
               <input
                 type="search"
@@ -58,7 +58,7 @@ const Navbar: React.FC = () => {
                 Search
               </button>
           </form>
-            </div>
+            </div> */}
         <div className="flex items-center space-x-4 z-50">
           <div className="relative">
             <div className="cursor-pointer p-2" onClick={toggleDropdown}>

@@ -155,7 +155,7 @@ const Courses: React.FC = () => {
   const budgetWiseCount = budgetWiseCoursesCount(allCourses)
 
   return (
-    <div className="ml-52 px-8 bg-gray-50 min-h-screen">
+    <div className=" px-8 bg-gray-50 min-h-screen">
       <ul className="flex flex-wrap justify-start gap-4 mb-8 pt-6">
         {categories && categories.length > 0 ? (
           categories.map((category) => (
