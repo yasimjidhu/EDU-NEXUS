@@ -22,7 +22,7 @@ const Settings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { uploadFile, uploadProgress, setUploadProgress, setSelectedFile } = useFileUpload();
+  const { uploadFile, uploadProgress,handleFileSelect,selectedFile } = useFileUpload();
 
   useEffect(() => {
     if (user) {
@@ -53,37 +53,56 @@ const Settings: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     const userUpdateData: Partial<User> = {};
-
+  
+    // Prepare user data for update
     if (formData?.firstName !== user?.firstName) userUpdateData.firstName = formData?.firstName;
     if (formData?.lastName !== user?.lastName) userUpdateData.lastName = formData?.lastName;
     if (formData?.email !== user?.email) userUpdateData.email = formData?.email;
-
-    // Initialize profile object if necessary
-    if (profileImage !== user?.profile?.avatar && userUpdateData.profile) {
-      userUpdateData.profile = userUpdateData.profile || {};
-      userUpdateData.profile.avatar = profileImage!;
+  
+    // Handle profile image update
+    if (profileImage !== user?.profile?.avatar) {
+      try {
+        const uploadResult = await uploadFile();
+        if (uploadResult) {
+          const { fileUrl } = uploadResult;
+  
+          // Ensure dateOfBirth and gender are defined
+          const dateOfBirth = user?.profile?.dateOfBirth ?? "";
+          const gender = user?.profile?.gender ?? "";
+  
+          userUpdateData.profile = {
+            avatar: fileUrl,
+            dateOfBirth, // Default to empty string if undefined
+            gender, // Default to empty string if undefined
+          };
+        }
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        toast.error("Failed to upload profile image.");
+      }
     }
-
-    const updatePromises: Promise<any>[] = [];
+  
+    // Dispatch the update if there are changes
     if (Object.keys(userUpdateData).length > 0 && user) {
-      updatePromises.push(dispatch(updateUserDetails({email:user?.email, updateData: userUpdateData })));
-    }
-
-    try {
-      await Promise.all(updatePromises);
-      toast.success('Details updated successfully');
-      setSaveSuccess(true);
-    } catch (error) {
-      console.error('Error updating profile:', error);
-    } finally {
+      try {
+        await dispatch(updateUserDetails({ email: user.email, updateData: userUpdateData }));
+        setSaveSuccess(true);
+        toast.success("Profile updated successfully.");
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        toast.error("Failed to update profile.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
       setIsLoading(false);
+      toast.info("No changes to save.");
     }
   };
-
-
-  const handlePasswordReset = async(e: React.FormEvent) => {
+  
+  const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
@@ -91,9 +110,7 @@ const Settings: React.FC = () => {
       return;
     }
     if (!user) return; // Guard clause for undefined user
-    console.log('reset password called')
     const response = await dispatch(resetPassword({ email: user.email, newPassword }));
-    console.log('response of password reset',response)
     toast.success(response.payload.message)
     setPasswordError('');
     setNewPassword('');
@@ -107,17 +124,18 @@ const Settings: React.FC = () => {
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log('handle file image change',file)
     if (file) {
       const reader = new FileReader();
       reader.onloadend = async () => {
         setProfileImage(reader.result as string);
-        setSelectedFile(file);
-
+        handleFileSelect(file)
         try {
+          console.log('upload file called',selectedFile)
           const uploadResult = await uploadFile();
           if (uploadResult) {
             const { fileUrl } = uploadResult;
-            console.log('fileurl is ',fileUrl)
+            console.log('fileurl is ', fileUrl)
             setProfileImage(fileUrl);
           }
         } catch (error) {

@@ -6,12 +6,14 @@ export const useFileUpload = () => {
     const [uploadProgress, setUploadProgress] = useState(0);
   
     const handleFileSelect = (file: File |null) => {
+      console.log('handle file selected',file)
       if (file) {
         setSelectedFile(file);
       }
     };
   
     const uploadFile = async () => {
+      console.log('upload file in useupload file',selectedFile)
       if (selectedFile) {
         try {
           const fileUrl = await uploadToCloudinary(selectedFile, setUploadProgress);

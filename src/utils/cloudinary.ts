@@ -22,6 +22,7 @@ export const uploadToCloudinary = async (file: File, setUploadProgress: (progres
               try {
                   const response = JSON.parse(xhr.responseText);
                   setUploadProgress(0);  
+                  console.log('uploaded url',response.secure_url)
                   resolve(response.secure_url);
               } catch (error) {
                   console.error('Error parsing response:', error);

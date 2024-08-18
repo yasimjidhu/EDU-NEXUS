@@ -185,6 +185,20 @@ const studentSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(updateUserDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUserDetails.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        console.log('updated user in thunk',action.payload)
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(updateUserDetails.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       .addCase(fetchUserData.pending, (state) => {
         state.loading = true;
         state.error = null;
