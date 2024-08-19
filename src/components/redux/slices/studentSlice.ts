@@ -76,18 +76,18 @@ export const fetchUserData = createAsyncThunk(
       const response = await axiosInstance.get('/user/getUser');
       return response.data.user;
     } catch (error: any) {
-      console.log('this is the get user error',error)
+      console.log('this is the get user error', error)
       return rejectWithValue(error.response.data);
     }
   }
 );
-  
+
 export const getAllUsers = createAsyncThunk(
   'student/getAllUsers',
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get('/user/getAllUsers');
-      console.log('response of allusers in slice',response)
+      console.log('response of allusers in slice', response)
       return response.data.allUsers;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -100,7 +100,7 @@ export const blockUser = createAsyncThunk(
   async (email: string, { rejectWithValue }) => {
     try {
       await axiosInstance.post('/user/block', { email });
-      return {email,isBlocked:true}
+      return { email, isBlocked: true }
 
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -113,7 +113,7 @@ export const unblockUser = createAsyncThunk(
   async (email: string, { rejectWithValue }) => {
     try {
       await axiosInstance.post('/user/unblock', { email });
-      return {email,isBlocked:false}
+      return { email, isBlocked: false }
 
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -123,9 +123,9 @@ export const unblockUser = createAsyncThunk(
 
 export const ApproveInstructor = createAsyncThunk(
   'student/approve',
-  async (email:string, { rejectWithValue }) => {
+  async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/user/approve',email);
+      const response = await axiosInstance.post('/user/approve', email);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -135,9 +135,9 @@ export const ApproveInstructor = createAsyncThunk(
 
 export const RejectInstructor = createAsyncThunk(
   'student/reject',
-  async (email:string, { rejectWithValue }) => {
+  async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/user/reject',email);
+      const response = await axiosInstance.post('/user/reject', email);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -147,11 +147,11 @@ export const RejectInstructor = createAsyncThunk(
 
 export const updateUserDetails = createAsyncThunk(
   'student/update',
-  async ({email,updateData}:{email:string,updateData:Partial<User>}, { rejectWithValue }) => {
+  async ({ email, updateData }: { email: string, updateData: Partial<User> }, { rejectWithValue }) => {
     try {
-      console.log('update user detils called',updateData)
-      const response = await axiosInstance.put(`/user/update/${email}`,{updateData});
-      console.log('response of update user details',response)
+      console.log('update user detils called', updateData)
+      const response = await axiosInstance.put(`/user/update/${email}`, { updateData });
+      console.log('response of update user details', response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -191,7 +191,7 @@ const studentSlice = createSlice({
       })
       .addCase(updateUserDetails.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
-        console.log('updated user in thunk',action.payload)
+        console.log('updated user in thunk', action.payload)
         state.user = action.payload;
         state.error = null;
       })
@@ -228,15 +228,15 @@ const studentSlice = createSlice({
       .addCase(blockUser.fulfilled, (state, action: PayloadAction<{ email: string; isBlocked: boolean }>) => {
         const user = state.user;
         const allUsers = state.allUsers;
-      
-        if (allUsers) { 
+
+        if (allUsers) {
           const index = allUsers.findIndex(u => u.email === action.payload.email);
-      
+
           if (index !== -1 && state.allUsers?.length) {
             state.allUsers[index].isBlocked = action.payload.isBlocked;
           }
         }
-      
+
         if (user && user.email === action.payload.email) {
           state.user!.isBlocked = action.payload.isBlocked;
         }
@@ -244,15 +244,15 @@ const studentSlice = createSlice({
       .addCase(unblockUser.fulfilled, (state, action: PayloadAction<{ email: string; isBlocked: boolean }>) => {
         const user = state.user;
         const allUsers = state.allUsers;
-      
-        if (allUsers) { 
+
+        if (allUsers) {
           const index = allUsers.findIndex(user => user.email === action.payload.email);
-      
-          if (index !== -1) { 
+
+          if (index !== -1) {
             allUsers[index].isBlocked = action.payload.isBlocked;
           }
         }
-      
+
         if (user && user.email === action.payload.email) {
           user.isBlocked = action.payload.isBlocked;
         }
@@ -265,7 +265,7 @@ const studentSlice = createSlice({
         ApproveInstructor.fulfilled,
         (state, action: PayloadAction<any>) => {
           state.loading = false;
-          console.log('approved user is',action.payload)
+          console.log('approved user is', action.payload)
           state.user = action.payload.user;
           state.error = null;
         }
@@ -285,8 +285,8 @@ const studentSlice = createSlice({
         RejectInstructor.fulfilled,
         (state) => {
           state.loading = false;
-          if (state.user) { 
-            state.user.isVerified = false; 
+          if (state.user) {
+            state.user.isVerified = false;
           }
           state.error = null;
         }

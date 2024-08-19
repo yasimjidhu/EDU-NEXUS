@@ -1,22 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useRef } from 'react';
 import { Smile, Plus } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
 import { User } from '../../components/redux/slices/studentSlice';
-import { addMessage, createGroup, getMessages, getUnreadMessages, getUserJoinedGroups, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import { addMessage, createGroup, getMessages, getUserJoinedGroups, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useSocket } from '../../contexts/SocketContext';
-import Picker from 'emoji-picker-react'
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { Group, Message } from '../../types/chat';
-import CreateGroupModal from '../../components/chat/createGroup';
 import { ChatSidebar } from '../../components/chat/ChatSidebar';
-import GroupChat from './GroupChat';
 import { Header } from '../../components/chat/Header';
 import { DisplayMessages } from '../../components/chat/DisplayMessages';
 import { AudioRecord } from '../../components/chat/AudioRecorder';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+
+const CreateGroupModal = lazy(() => import('../../components/chat/createGroup'))
+const GroupChat = lazy(() => import('./GroupChat'))
+const Picker = lazy(() => import('emoji-picker-react'))
 
 interface ChatUIProps {
   currentUser?: { id: string; name: string; avatar: string };
@@ -32,7 +33,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [inputMessage, setInputMessage] = useState('');
   const [conversationId, setConversationId] = useState<string>('');
-  const [selectedConversationId,setSelectedConversationId] = useState<string>('')
+  const [selectedConversationId, setSelectedConversationId] = useState<string>('')
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<NodeJS.Timeout | null>(null);
@@ -46,7 +47,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const audioRef = useRef(new Audio());
 
   const { user } = useSelector((state: RootState) => state.user);
-  const { messages,groups } = useSelector((state: RootState) => state.chat);
+  const { messages, groups } = useSelector((state: RootState) => state.chat);
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()
@@ -115,11 +116,11 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
     };
   }, []);
 
-  useEffect(()=>{
-    if(showMessages.trim() !== '' && selectedConversationId.trim() !== ''){
-      dispatch(markConversationAsRead({conversationId:selectedConversationId,item:showMessages}))
+  useEffect(() => {
+    if (showMessages.trim() !== '' && selectedConversationId.trim() !== '') {
+      dispatch(markConversationAsRead({ conversationId: selectedConversationId, item: showMessages }))
     }
-  },[showMessages,selectedConversationId])
+  }, [showMessages, selectedConversationId])
 
   useEffect(() => {
     if (selectedInstructor && socket) {
@@ -292,24 +293,28 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
-          <div className="relative z-10 bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <CreateGroupModal
-              show={isModalOpen}
-              students={enrolledInstructors}
-              handleClose={() => setIsModalOpen(false)}
-              onCreateGroup={(data: any) => handleCreateGroup(data)}
-            />
+        <Suspense fallback={<div>Loading....</div>}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+            <div className="relative z-10 bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+              <CreateGroupModal
+                show={isModalOpen}
+                students={enrolledInstructors}
+                handleClose={() => setIsModalOpen(false)}
+                onCreateGroup={(data: any) => handleCreateGroup(data)}
+              />
+            </div>
           </div>
-        </div>
+        </Suspense>
       )}
 
       <div className="flex-1 flex flex-col">
         {/* Render Group Chat UI if a group is selected */}
         {showMessages == "group" && selectedGroup ? (
-          <GroupChat id={selectedGroup._id!}
-            userId={user?._id!} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <GroupChat id={selectedGroup._id!}
+              userId={user?._id!} />
+          </Suspense>
         ) : showMessages == "user" && selectedInstructor ? (
           <>
 
@@ -334,9 +339,11 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                 </button>
 
                 {showEmojiPicker && (
-                  <div className="absolute bottom-20 left-2">
-                    <Picker onEmojiClick={handleEmojiClick} />
-                  </div>
+                  <Suspense fallback={<div className='flex justify-center items-center'>Loading...</div>}>
+                    <div className="absolute bottom-20 left-2">
+                      <Picker onEmojiClick={handleEmojiClick} />
+                    </div>
+                  </Suspense>
                 )}
                 <AudioRecord
                   handleInput={handleInput}

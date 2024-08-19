@@ -4,14 +4,16 @@ import "../../index.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
-import { getAllCourses } from "../../components/redux/slices/courseSlice";
+import { CourseState, getAllCourses } from "../../components/redux/slices/courseSlice";
+import { ListCourses } from "../../components/common/ListCourses";
 
 const Home = () => {
   const { user } = useSelector((state: RootState) => state.user);
   const { categories } = useSelector((state: RootState) => state.category);
-  const [allCourses,setAllCourses] = useState([])
+  const [allCourses, setAllCourses] = useState([])
+  const [searchResults, setSearchResults] = useState<CourseState[]>([])
   const dispatch: AppDispatch = useDispatch();
-  
+
   const navigate = useNavigate()
   const page = 1
 
@@ -22,7 +24,7 @@ const Home = () => {
 
   const fetchCourses = async (page: number) => {
     try {
-      const response = await dispatch(getAllCourses({page})).unwrap();
+      const response = await dispatch(getAllCourses({ page })).unwrap();
       if (response.courses.length > 0) {
         setAllCourses(response.courses);
       }
@@ -31,18 +33,22 @@ const Home = () => {
     }
   };
 
-  const handleViewClick = (categoryId:string)=>{
+  const handleSearchResults = (results: CourseState[]) => {
+    setSearchResults(results)
+  }
+
+  const handleViewClick = (categoryId: string) => {
     navigate(`/viewcategory/${categoryId}`)
   }
 
 
-  const handleStartClick = (courseId:string)=>{
+  const handleStartClick = (courseId: string) => {
     navigate(`/course-detail/${courseId}`)
   }
 
   return (
     <>
-      <Navbar isAuthenticated={true} />
+      <Navbar isAuthenticated={true} onSearch={handleSearchResults} />
       <div className="grid bg-pure-white grid-cols-1 md:grid-cols-2 gap-8 p-5 ">
         <div className=" p-5 flex justify-center items-center text-left">
           <div className="">
@@ -56,14 +62,14 @@ const Home = () => {
             </p>
             <div className="flex mt-6 justify-between items-center w-[55%]">
               {user == null && (
-                 <div className="bg-purple-500">
-                 <Link to="/enrollment">
-                   <button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
-                     Join Now
-                   </button>
-                 </Link>
-               </div>
-              )}  
+                <div className="bg-purple-500">
+                  <Link to="/enrollment">
+                    <button className="p-4 bg-medium-rose rounded-3xl font-semibold text-white">
+                      Join Now
+                    </button>
+                  </Link>
+                </div>
+              )}
               <div>
                 <button className="p-4 bg-lite-rose rounded-3xl font-semibold text-black">
                   View Demo
@@ -119,6 +125,14 @@ const Home = () => {
           <p>Courses by our best mentors</p>
         </div>
       </div>
+      {searchResults && searchResults.length > 0 && (
+        <div className="bg-gray-100 py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-semibold text-gray-800 mb-8">Search Results</h2>
+            <ListCourses allCourses={searchResults} />
+          </div>
+        </div>
+      )}
       <div className="container mx-auto p-3">
         <Link to='/allcategories'><button className="float-end mr-10 mt-5 rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">
           All Categories
@@ -129,11 +143,11 @@ const Home = () => {
         <div>
           {categories && categories.length > 0 && (
             <div className="grid md:grid-cols-4  gap-8 sm:grid-cols-2" >
-              {categories.slice(0,4).map((category, index) => (
-             <div
+              {categories.slice(0, 4).map((category, index) => (
+                <div
                   key={index}
                   className="border transform hover:scale-105 transition-transform duration-300 cursor-pointer border-gray-200 shadow-xl rounded-md text-center p-6"
-                  onClick={()=>handleViewClick(category.id)}>
+                  onClick={() => handleViewClick(category.id)}>
                   <div className="rounded-full mx-auto w-36 h-36 shadow-sm border-2 border-gray-100 overflow-hidden">
                     <img
                       src={`${category.image}`}
@@ -148,14 +162,14 @@ const Home = () => {
             </div>
           )}
         </div>
-        <div className="mt-12 flex justify-between p-4">
+        <div className="mt-12 flex justify-between p-4" id="last-course">
           <h1 className="text-xl font-semibold">New Courses</h1>
           <Link to='/allcourses'><button className=" rounded-3xl font-sans bg-medium-rose inter  px-3 py-2 text-white">
             AllCourses
           </button></Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-5 px-4">
-        {allCourses.slice(0, 4).map((course) => (
+          {allCourses.slice(0, 4).map((course) => (
             <div key={course._id} className="bg-white text-start rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="h-44 overflow-hidden rounded-md">
                 <img
@@ -179,15 +193,15 @@ const Home = () => {
                   <p>{course.level}</p>
                 </div>
               </div>
-              <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300" onClick={()=>handleStartClick(course._id)}>
+              <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300" onClick={() => handleStartClick(course._id)}>
                 Start Course
                 <span className="ml-2">
                   <img src="/assets/png/next.png" alt="" className="w-4" />
                 </span>
               </button>
             </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
         <section className="relative ">
           <div className="grid grid-cols-6 gap-4 mt-20">
@@ -208,6 +222,7 @@ const Home = () => {
               <img
                 src="/assets/png/background.png"
                 className="rounded-2xl"
+                loading="lazy"
                 alt=""
               />
               <div className="grid grid-cols-6 gap-6 p-4 absolute top-0 right-16 -mt-16">
@@ -215,6 +230,7 @@ const Home = () => {
                   <img
                     src="/assets/images/person1.png"
                     className="rounded-xl"
+                    loading="lazy"
                     alt=""
                   />
                   <div className="flex justify-between mt-4">
@@ -237,6 +253,7 @@ const Home = () => {
                   <img
                     src="/assets/images/person3.png"
                     className="rounded-xl"
+                    loading="lazy"
                     alt=""
                   />
                   <div className="flex justify-between mt-4">
@@ -248,6 +265,7 @@ const Home = () => {
                   <img
                     src="/assets/images/person4.png"
                     className="rounded-xl"
+                    loading="lazy"
                     alt=""
                   />
                   <div className="flex justify-between mt-4">
@@ -259,6 +277,7 @@ const Home = () => {
                   <img
                     src="/assets/images/person5.png"
                     className="rounded-xl"
+                    loading="lazy"
                     alt=""
                   />
                   <div className="flex justify-between mt-4">
@@ -270,6 +289,7 @@ const Home = () => {
                   <img
                     src="/assets/images/person6.png"
                     className="rounded-xl"
+                    loading="lazy"
                     alt="fdfd"
                   />
                   <div className="flex justify-between mt-4">
@@ -331,6 +351,7 @@ const Home = () => {
                   <img
                     src="/assets/images/point1.png"
                     className="mx-auto"
+                    loading="lazy"
                     alt=""
                   />
                 </div>
@@ -360,14 +381,14 @@ const Home = () => {
               </h4>
             </div>
             <div className="poppins-normal">
-              <img src="/assets/images/feature2.png" width="80%" alt="" />
+              <img src="/assets/images/feature2.png"   loading="lazy" width="80%" alt="" />
             </div>
           </div>
         </section>
         <section>
           <div className="grid grid-cols-2 gap-4">
             <div className="">
-              <img src="/assets/images/feature3.png" alt="" />
+              <img src="/assets/images/feature3.png"   loading="lazy" alt="" />
             </div>
             <div className="">
               <h1 className="poppins-semibold">

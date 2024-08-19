@@ -8,20 +8,40 @@ import { ThunkDispatch } from "@reduxjs/toolkit";
 import { RootState } from "../redux/store/store";
 import { fetchUserData, clearUserState } from "../redux/slices/studentSlice";
 import { clearInstructorState } from "../redux/slices/instructorSlice";
+import useDebounce from "../../hooks/useDebounce";
+import { CourseState, searchCourses } from "../redux/slices/courseSlice";
+import { ArrowDownCircle } from "lucide-react";
 
 interface NavbarProps {
   isAuthenticated: boolean;
+  onSearch: (results: CourseState[]) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
+const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   const { user } = useSelector((state: RootState) => state.user);
   const authData = useSelector((state: RootState) => state.auth);
 
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+  const [showMessage, setShowMessage] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
+  const navigate = useNavigate();
   type AppDispatch = ThunkDispatch<any, any, any>;
   const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setShowMessage(false)
+      }
+    }
+    window.addEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -29,6 +49,16 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
     }
   }, [authData.email, isAuthenticated, dispatch]);
 
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      dispatch(searchCourses(debouncedSearchQuery)).then((result) => {
+        if (searchCourses.fulfilled.match(result)) {
+          onSearch(result.payload)
+          setShowMessage(true)
+        }
+      })
+    }
+  }, [debouncedSearchQuery, dispatch])
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -141,14 +171,16 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated }) => {
                   type="search"
                   id="default-search"
                   className="block w-full p-4 pl-10 text-sm text-gray-900 border rounded-xl focus:border-blue-500"
-                  placeholder="Search courses, mentors..."
+                  placeholder="Search courses...."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button
-                  type="submit"
-                  className="text-white absolute right-2.5 bottom-2.5 bg-medium-rose font-medium rounded-lg text-sm px-4 py-2"
-                >
-                  Search
-                </button>
+                {showMessage && (
+                  <div className="absolute top-16 left-0 right-0 bg-blue-50 text-blue-800 p-4 text-sm rounded-lg shadow-lg flex items-center">
+                    <ArrowDownCircle className="mr-2 h-5 w-5 text-blue-600" />
+                    <strong>Heads Up!</strong> Scroll down to see the results.
+                  </div>
+                )}
               </div>
             </form>
 

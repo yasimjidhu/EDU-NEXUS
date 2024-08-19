@@ -195,6 +195,21 @@ export const getUserEnrolledCourses= createAsyncThunk(
   }
 );
 
+export const searchCourses = createAsyncThunk(
+  'courses/searchCourses',
+  async (searchTerm: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/course/courses/search`, {
+        params: { query: searchTerm },
+      });
+      console.log('response of search course',response.data)
+      return response.data.allCourses;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || 'An error occurred');
+    }
+  }
+);
+
 export const getCourse= createAsyncThunk(
   'course/getCourse',
   async (courseId: string, { rejectWithValue }) => {
