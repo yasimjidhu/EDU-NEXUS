@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import Pagination from '../../components/common/Pagination';
 import { formatDate } from '../../utils/dateFormater';
 import { ApproveInstructor, RejectInstructor } from '../../components/redux/slices/studentSlice';
-import { fetchCourseRequests,approveCourse,rejectCourse } from '../../components/redux/slices/courseSlice';
+import { fetchCourseRequests, approveCourse, rejectCourse } from '../../components/redux/slices/courseSlice';
 import { getAllCategories } from '../../components/redux/slices/adminSlice';
 
 
@@ -17,10 +17,10 @@ const Requests: React.FC = () => {
 
   const [instructorEmail, setInstructorEmail] = useState<string>('');
   const [show, setShow] = useState<"users" | "courses">("users");
-  const [unpublishedCourses,setUnpublishedCourses] = useState([])
-  const [allCategories,setAllCategories] = useState([])
-  const [verifiedInstructors,setVerifiedInstructors]=useState([])
-  const [unVerifiedInstructors,setUnVerifiedInstructors]=useState([])
+  const [unpublishedCourses, setUnpublishedCourses] = useState([])
+  const [allCategories, setAllCategories] = useState([])
+  const [verifiedInstructors, setVerifiedInstructors] = useState([])
+  const [unVerifiedInstructors, setUnVerifiedInstructors] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const [approvedInstructors, setApprovedInstructors] = useState([]);
   const [rejectedInstructors, setRejectedInstructors] = useState([]);
@@ -115,7 +115,7 @@ const Requests: React.FC = () => {
     firstName: string;
     lastName: string;
     profile: string;
-    email:string;
+    email: string;
   }
 
   const getInstructorData = (
@@ -134,7 +134,7 @@ const Requests: React.FC = () => {
       return `${instructor.firstName} ${instructor.lastName}`;
     } else if (need === Need.PROFILE) {
       return instructor.profile.avatar;
-    }else if(need == Need.EMAIL){
+    } else if (need == Need.EMAIL) {
       return instructor.email
     }
 
@@ -150,11 +150,10 @@ const Requests: React.FC = () => {
     <div className="">
       <div className="flex justify-end mb-4">
         <button
-          className={`py-1 px-2 rounded-lg mr-2 ${
-            show === "users"
+          className={`py-1 px-2 rounded-lg mr-2 ${show === "users"
               ? "bg-medium-rose text-white"
               : "bg-strong-rose text-white"
-          }`}
+            }`}
           onClick={switchShow}
         >
           {show === "users" ? "Switch to Courses" : "Switch to Users"}
@@ -203,33 +202,33 @@ const Requests: React.FC = () => {
                   <h3 className="inter">{formatDate(item.profile.dateOfBirth)}</h3>
                 </div>
                 <div className="col-span-3 flex justify-end items-center space-x-2">
-                {!approvedInstructors.includes(item.email) && !item.isVerified ? (
-                  <>
-                    <a href={`${item.cv}`}
-                      className="text-center bg-black text-white inter py-1 px-3 rounded-lg cursor-pointer"
-                    >
-                      View CV
-                    </a>
-                    <button
-                      className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-                      onClick={() => {
-                        setInstructorEmail(item.email);
-                        handleApproval(item.email);
-                      }}
-                    >
-                      Approve
-                    </button>
-                  </>
-                ) : null}
-                <button
-                  className="text-center bg-strong-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-                  onClick={() => {
-                    handleRejection(item.email);
-                  }}
-                >
-                  Reject
-                </button>
-              </div>
+                  {!approvedInstructors.includes(item.email) && !item.isVerified ? (
+                    <>
+                      <a href={`${item.cv}`}
+                        className="text-center bg-black text-white inter py-1 px-3 rounded-lg cursor-pointer"
+                      >
+                        View CV
+                      </a>
+                      <button
+                        className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
+                        onClick={() => {
+                          setInstructorEmail(item.email);
+                          handleApproval(item.email);
+                        }}
+                      >
+                        Approve
+                      </button>
+                    </>
+                  ) : null}
+                  <button
+                    className="text-center bg-strong-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
+                    onClick={() => {
+                      handleRejection(item.email);
+                    }}
+                  >
+                    Reject
+                  </button>
+                </div>
               </div>
             ))}
           </>
@@ -256,52 +255,52 @@ const Requests: React.FC = () => {
             <div className="border-2 border-gray-300 w-full mt-2"></div>
 
             {currentItems?.map((course) => (
-        <div key={course._id} className="grid grid-cols-12 items-center py-2 text-sm">
-          <div className="flex space-x-3 col-span-3 text-justify">
-          <div className="  rounded-full w-10 h-10 shadow-sm border-2 border-gray-600 overflow-hidden">
+              <div key={course._id} className="grid grid-cols-12 items-center py-2 text-sm">
+                <div className="flex space-x-3 col-span-3 text-justify">
+                  <div className="  rounded-full w-10 h-10 shadow-sm border-2 border-gray-600 overflow-hidden">
                     <img
-                      src={`${getInstructorData(course.instructorRef,"profile")}`}
+                      src={`${getInstructorData(course.instructorRef, "profile")}`}
                       alt="avatar"
                       className="w-full h-full object-cover rounded-full"
                     />
                   </div>
-                  <h4 className="inter mt-2">{getInstructorData(course.instructorRef,"name")}</h4>
-          </div>
-          <div className="flex col-span-3 justify-start items-center space-x-2">
-            <h4 className="inter">{course.title}</h4>
-          </div>
-          <div className="col-span-2 flex justify-center items-center text-justify">
-            <h6 className="inter">{getCategoryName(course.categoryRef)}</h6>
-          </div>
-          <div className="col-span-1 flex justify-center items-center">
-            <h3 className="inter">{formatDate(course.createdAt)}</h3>
-          </div>
-          <div className="col-span-3 flex justify-end items-center space-x-2">
-            <button
-              className="text-center bg-black text-white inter py-1 px-3 rounded-lg cursor-pointer"
-              onClick={() => navigate(`/admin/course-detail/${course._id}`)}
-            >
-              View
-            </button>
-            <button
-              className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-              onClick={() => handleCourseApproval(course._id,getInstructorData(course.instructorRef,"email"))}
-            >
-              Approve
-            </button>
-            <button
-              className="text-center bg-strong-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-              onClick={() => handleCourseRejection(course._id,getInstructorData(course.instructorRef,"email"))}
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-      ))}
+                  <h4 className="inter mt-2">{getInstructorData(course.instructorRef, "name")}</h4>
+                </div>
+                <div className="flex col-span-3 justify-start items-center space-x-2">
+                  <h4 className="inter">{course.title}</h4>
+                </div>
+                <div className="col-span-2 flex justify-center items-center text-justify">
+                  <h6 className="inter">{getCategoryName(course.categoryRef)}</h6>
+                </div>
+                <div className="col-span-1 flex justify-center items-center">
+                  <h3 className="inter">{formatDate(course.createdAt)}</h3>
+                </div>
+                <div className="col-span-3 flex justify-end items-center space-x-2">
+                  <button
+                    className="text-center bg-black text-white inter py-1 px-3 rounded-lg cursor-pointer"
+                    onClick={() => navigate(`/admin/course-detail/${course._id}`)}
+                  >
+                    View
+                  </button>
+                  <button
+                    className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
+                    onClick={() => handleCourseApproval(course._id, getInstructorData(course.instructorRef, "email"))}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    className="text-center bg-strong-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
+                    onClick={() => handleCourseRejection(course._id, getInstructorData(course.instructorRef, "email"))}
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            ))}
           </>
         )}
       </div>
-      {unVerifiedInstructors.length >10 || verifiedInstructors.length>10 && (
+      {unVerifiedInstructors.length > 10 || verifiedInstructors.length > 10 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

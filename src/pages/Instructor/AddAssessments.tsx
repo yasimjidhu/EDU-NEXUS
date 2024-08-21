@@ -54,7 +54,7 @@ const AddAssessments = () => {
     if (user._id) {
       dispatch(getAllCoursesOfInstructor(user?._id!)).then((res) => {
         setInstructorCourses(res.payload.courses);
-        setAssessment(prev => ({ ...prev, instructor_id: user._id }));
+        setAssessment(prev => ({ ...prev, instructor_id: user._id }));  
       });
     }
   }, [dispatch, user._id]);

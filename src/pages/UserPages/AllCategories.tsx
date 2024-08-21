@@ -3,12 +3,14 @@ import Pagination from '../../components/common/Pagination';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const AllCategories = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [categories,setCategories] = useState([])
     const dispatch: AppDispatch = useDispatch();
+    const navigate  = useNavigate()
 
     useEffect(() => {
         fetchCategories(currentPage);
@@ -26,6 +28,12 @@ const AllCategories = () => {
         setCurrentPage(page);
     };
 
+    const handleViewClick = (categoryId: string) => {
+      navigate(`/viewcategory/${categoryId}`)
+    }
+
+
+
   return (
     <>
     <div>
@@ -34,7 +42,8 @@ const AllCategories = () => {
               {categories.map((category, index) => (
                 <div
                   key={index}
-                  className="border border-gray-200 shadow-lg rounded-md text-center p-6"
+                  className="border border-gray-200 shadow-lg rounded-md text-center p-6 cursor-pointer"
+                  onClick={() => handleViewClick(category.id)}
                 >
                   <div className="rounded-full mx-auto w-36 h-36 shadow-sm border-2 border-gray-100 overflow-hidden">
                     <img

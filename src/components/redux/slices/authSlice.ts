@@ -48,7 +48,7 @@ export const signupUser = createAsyncThunk<
     'auth/signup',
     async (data: SignupData, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/auth/signup', data);
+            const response = await axios.post('http://localhost:4000/auth/signup', data);
             const {user,token} = response.data
             
             localStorage.setItem('email',user.email)
@@ -71,7 +71,7 @@ OTPData,
     'auth/verifyotp',
     async (data: OTPData, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.post('/auth/verify-otp', data);
+            const response = await axios.post('http://localhost:4000/auth/verify-otp', data);
             return response.data;
             
         } catch (error:any) {
@@ -88,7 +88,7 @@ ForgotPasswordData,
     'auth/resendotp',
     async (data:ForgotPasswordData, { rejectWithValue }) => {
       try {
-        const response = await axiosInstance.post('/auth/resendOtp',data);
+        const response = await axios.post('http://localhost:4000/auth/resendOtp',data);
         console.log('response in authslice of resend otp',response)
         return response.data;
       } catch (error) {

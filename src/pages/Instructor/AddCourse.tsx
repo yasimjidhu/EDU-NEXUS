@@ -232,7 +232,7 @@ const AddCourse: React.FC = () => {
   }, [courseAmount]);
 
   return (
-    <div className="ml-52">
+    <div className="">
       <h6 className="inter text-xl text-black text-center">Add Course</h6>
       <div className="grid grid-cols-12 space-x-4">
         <div className="col-span-7 space-y-2 p-4 ">
