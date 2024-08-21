@@ -5,6 +5,7 @@ import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { User } from '../../types/user';
 import { getAllUsers } from '../../components/redux/slices/studentSlice';
+import CsvExporter from '../..//components/Admin/CsvExporter';
 
 
 const AdminTransaction = () => {
@@ -92,6 +93,26 @@ const AdminTransaction = () => {
         return user ? `${user.firstName} ${user.lastName}` : null;
     };
 
+    const csvData = filteredTransactions.map((transaction) => ({
+        Payment_id:transaction.id,
+        User: getUserName(transaction.userId) || 'Unknown User',
+        Course: getCourseName(transaction.courseId)?.title,
+        Amount: (transaction.amount / 100).toFixed(2),
+        Currency: transaction.currency,
+        Status: transaction.status,
+        Date: new Date(transaction.createdAt).toLocaleDateString(),
+    }));
+
+    const csvHeaders = [
+        { label: 'Payment_id', key:'Payment_id'},
+        { label: 'User', key: 'User' },
+        { label: 'Course', key: 'Course' },
+        { label: 'Amount', key: 'Amount' },
+        { label: 'Currency', key: 'Currency' },
+        { label: 'Status', key: 'Status' },
+        { label: 'Date', key: 'Date' },
+    ];
+
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-6">Transaction History</h1>
@@ -107,20 +128,6 @@ const AdminTransaction = () => {
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
                 </div>
                 <div className="flex flex-wrap items-center">
-                    <input
-                        type="date"
-                        name="startDate"
-                        value={filters.startDate}
-                        onChange={handleFilterChange}
-                        className="mr-2 mb-2 sm:mb-0 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <input
-                        type="date"
-                        name="endDate"
-                        value={filters.endDate}
-                        onChange={handleFilterChange}
-                        className="mr-2 mb-2 sm:mb-0 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
                     <select
                         name="status"
                         value={filters.status}
@@ -133,17 +140,14 @@ const AdminTransaction = () => {
                         <option value="failed">Failed</option>
                         <option value="refunded">Refunded</option>
                     </select>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 flex items-center">
-                        <Download size={20} className="mr-2" />
-                        Export CSV
-                    </button>
+                    <CsvExporter data={csvData} filename="transactions" headers={csvHeaders} />
                 </div>
             </div>
             <div className="overflow-x-auto bg-white rounded-lg shadow overflow-y-auto relative">
                 <table className="border-collapse table-auto w-full whitespace-no-wrap bg-white table-striped relative">
                     <thead>
                         <tr className="text-left">
-                            {['ID', 'User', 'Course', 'Amount', 'Currency', 'Status', 'Date'].map((header) => (
+                            {['User', 'Course', 'Amount', 'Currency', 'Status', 'Date'].map((header) => (
                                 <th key={header} className="bg-gray-100 sticky top-0 border-b border-gray-200 px-6 py-3 text-gray-600 font-bold tracking-wider uppercase text-xs">
                                     <button className="flex items-center" onClick={() => handleSort(header.toLowerCase())}>
                                         {header}
@@ -165,7 +169,6 @@ const AdminTransaction = () => {
                         ) : (
                             filteredTransactions.map((transaction) => (
                                 <tr key={transaction.id}>
-                                    <td className="border-t border-gray-200 px-6 py-4">{transaction.id}</td>
                                     <td className="border-t border-gray-200 px-6 py-4">
                                         {getUserName(transaction.userId)}
                                     </td>
@@ -178,7 +181,7 @@ const AdminTransaction = () => {
                                         </span>
                                     </td>
                                     <td className="border-t border-gray-200 px-6 py-4">
-                                        {new Date(transaction.created_at).toLocaleDateString()}
+                                        {new Date(transaction.createdAt).toLocaleDateString()}
                                     </td>
                                 </tr>
                             ))
