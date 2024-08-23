@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { User } from '../redux/slices/studentSlice';
 import { Group } from '../../types/chat'; // Assuming you have a Group type defined
 import { AppDispatch, RootState } from '../redux/store/store';
@@ -36,7 +36,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   useEffect(() => {
     if (userData.user?._id) {
       dispatch(getUserJoinedGroups(userData.user._id))
-      dispatch(getUnreadMessages(userData.user?._id!))
+      dispatch(getUnreadMessages(userData.user._id))
     }
   }, [dispatch, userData.user?._id])
 
@@ -50,7 +50,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     }
   };
 
-  const getUnreadCount = (studentId?: string,groupId?:string) => {
+  const getUnreadCount = useCallback((studentId?: string,groupId?:string) => {
     if(studentId){
       const conversationId = `${userData.user?._id}-${studentId}`;
       const reverseConversationId = `${studentId}-${userData.user?._id}`;
@@ -65,7 +65,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       return unread ? unread.unreadCount : 0
     }
     return 0
-  };
+  },[unreadMessages, userData.user?._id]);
   
 
 

@@ -374,4 +374,4 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   );
 };
 
-export default ChatUI;
+export default React.memo(ChatUI);

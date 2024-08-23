@@ -45,11 +45,13 @@ import GroupChat from "./pages/Chat/GroupChat";
 import { MessagedStudentsProvider } from "./contexts/messagedStudentsContext";
 import AdminTransaction from "./pages/Admin/Transactions";
 import Settings from "./pages/UserPages/Settings";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 function App() {
   return (
     <SocketProvider>
       <MessagedStudentsProvider>
+        <ErrorBoundary>
         <Router>
           <Routes>
             <Route path={routes.ROOT} element={<SignupPage />} />
@@ -114,6 +116,7 @@ function App() {
 
           </Routes>
         </Router>
+        </ErrorBoundary>
       </MessagedStudentsProvider>
     </SocketProvider>
   );
