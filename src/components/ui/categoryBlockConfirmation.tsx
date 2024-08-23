@@ -33,10 +33,13 @@ const CategoryBlockConfirmation: React.FC<CategoryBlockConfirmationProps> = ({ c
     };
 
     const handleBlockCategory = async () => {
+        console.log('handle bock called')
         if (!isConfirmed) return;
         setIsLoading(true);
         try {
-            if(!categoryId) return;
+            if(!categoryId){
+                return
+            } 
             await dispatch(blockCategory(categoryId))
             onSuccess?.();
         } catch (error) {

@@ -67,24 +67,6 @@ export const getAllCategories = createAsyncThunk(
 );
 
 
-// export const  updateCategories = createAsyncThunk<
-//     Category,
-//     Category,
-//     { rejectValue: RejectValue }
-// >(
-//     'categories/update-category',
-//     async (data: {categoryId:string,category:Category}, { rejectWithValue }) => {
-//         try {
-//             const {categoryId,category} = data
-//             const response = await axiosInstance.put(`/course/categories/${categoryId}`,{category});
-//             return response.data; 
-//         } catch (error: any) {
-//             console.error('Failed to edit categories:', error);
-//             return rejectWithValue({ error: error.message || 'Failed to update categories' });
-//         }
-//     }
-// );
-
 export const updateCategories = createAsyncThunk<
   Category, 
   { categoryId: string; category: Partial<Category> },
@@ -93,6 +75,7 @@ export const updateCategories = createAsyncThunk<
   'categories/update-category',
   async (data, { rejectWithValue }) => {
     try {
+        console.log('update cateogires called',data)
       const { categoryId, category } = data;
       const response = await axiosInstance.put(`/course/categories/${categoryId}`, { category });
       return response.data; 
@@ -113,6 +96,7 @@ export const blockCategory = createAsyncThunk<
     'categories/block-category',
     async (categoryId: string, { rejectWithValue }) => {
         try {
+            console.log('delete category reached',categoryId)
             const response = await axiosInstance.post(`/course/categories/block/${categoryId}`);
             return response.data; 
         } catch (error: any) {

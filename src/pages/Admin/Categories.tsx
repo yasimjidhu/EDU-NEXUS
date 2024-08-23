@@ -59,8 +59,8 @@ const Categories: React.FC = () => {
   };
 
   const handleSaveCategory = (updatedCategory: Partial<Category>) => {
-    if (selectedCategory && updatedCategory._id) {
-      dispatch(updateCategories({categoryId:updatedCategory._id,category:updatedCategory}));
+    if (selectedCategory && updatedCategory) {
+      dispatch(updateCategories({categoryId:selectedCategory.id!,category:updatedCategory}));
     }
     dispatch(getAllCategories(currentPage))
     closeEditModal();

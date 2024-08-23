@@ -3,19 +3,14 @@ import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import axios from "axios";
 import { BeatLoader } from "react-spinners";
+import { Category } from "@/types/category";
 
-interface Category {
-  _id: string|null|undefined;
-  name: string;
-  description: string;
-  image: File | string | null;
-}
 
 interface EditCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (category: Category) => void;
-  initialData?: Partial<Category>;
+  onSave: (category: Partial<Category>) => void;
+  initialData: Category | null;
 }
 
 const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
@@ -40,6 +35,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   }, [initialData]);
 
   const handleSave = () => {
+    console.log('onsve called',{ _id: initialData?._id, name: categoryName, description, image })
     onSave({ _id: categoryId, name: categoryName, description, image });
     onClose();
   };

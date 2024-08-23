@@ -46,76 +46,88 @@ import { MessagedStudentsProvider } from "./contexts/messagedStudentsContext";
 import AdminTransaction from "./pages/Admin/Transactions";
 import Settings from "./pages/UserPages/Settings";
 import ErrorBoundary from "./components/common/ErrorBoundary";
+import PrivateRoute from "./components/authentication/ProtectedRoute";
+import NotFound from "./components/common/NotFound";
+import Forbidden from "./components/common/Forbidden";
 
 function App() {
   return (
     <SocketProvider>
       <MessagedStudentsProvider>
         <ErrorBoundary>
-        <Router>
-          <Routes>
-            <Route path={routes.ROOT} element={<SignupPage />} />
-            <Route path={routes.LOGIN} element={<LoginPage />} />
-            <Route path={routes.HOME} element={<Home />} />
-            <Route path={routes.VERIFY_OTP} element={<OtpVerify />} />
-            <Route path={routes.GOOGLE_CALLBACK} element={<GoogleCallback />} />
-            <Route path={routes.AUTH_SUCCESS} element={<AuthSuccess />} />
-            <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
-            <Route path={routes.FORGOT_PASS_VERIFY_OTP} element={<OtpVerifyForResetPass />} />
-            <Route path={routes.RESET_PASS} element={<ResetPassword />} />
-            <Route path={routes.ENROLLMENT} element={<Enrollment />} />
-            <Route path={routes.NOT_VERIFIED} element={<NotVerified />} />
+          <Router>
+            <Routes>
+              <Route path={routes.ROOT} element={<SignupPage />} />
+              <Route path={routes.LOGIN} element={<LoginPage />} />
+              <Route path={routes.HOME} element={<Home />} />
+              <Route path={routes.VERIFY_OTP} element={<OtpVerify />} />
+              <Route path={routes.GOOGLE_CALLBACK} element={<GoogleCallback />} />
+              <Route path={routes.AUTH_SUCCESS} element={<AuthSuccess />} />
+              <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
+              <Route path={routes.FORGOT_PASS_VERIFY_OTP} element={<OtpVerifyForResetPass />} />
+              <Route path={routes.RESET_PASS} element={<ResetPassword />} />
+              <Route path={routes.ENROLLMENT} element={<Enrollment />} />
+              <Route path={routes.NOT_VERIFIED} element={<NotVerified />} />
 
-            <Route path={routes.REGISTRATION.ROOT} element={<Registration />}>
-              <Route path={routes.REGISTRATION.STUDENT} element={<StudentRegistration />} />
-              <Route path={routes.REGISTRATION.INSTRUCTOR} element={<InstructorRegistration />} />
-            </Route>
+              <Route path={routes.REGISTRATION.ROOT} element={<Registration />}>
+                <Route path={routes.REGISTRATION.STUDENT} element={<StudentRegistration />} />
+                <Route path={routes.REGISTRATION.INSTRUCTOR} element={<InstructorRegistration />} />
+              </Route>
 
-            <Route path={routes.ADMIN.ROOT} element={<Admin />}>
-              <Route path={routes.ADMIN.OVERVIEW} element={<Overview />} />
-              <Route path={routes.ADMIN.COURSES} element={<Courses />} />
-              <Route path={routes.ADMIN.COURSE_DETAIL} element={<CourseDetails />} />
-              <Route path={routes.ADMIN.ASSESSMENTS} element={<Assessments />} />
-              <Route path={routes.ADMIN.CATEGORIES} element={<Categories />} />
-              <Route path={routes.ADMIN.TRANSACTIONS} element={<AdminTransaction />} />
-              <Route path={routes.ADMIN.REQUESTS} element={<Requests />} />
-              <Route path={routes.ADMIN.USERS} element={<Users />} />
-            </Route>
+              <Route element={<PrivateRoute roles={['admin']} />}>
+                <Route path={routes.ADMIN.ROOT} element={<Admin />}>
+                  <Route path={routes.ADMIN.OVERVIEW} element={<Overview />} />
+                  <Route path={routes.ADMIN.COURSES} element={<Courses />} />
+                  <Route path={routes.ADMIN.COURSE_DETAIL} element={<CourseDetails />} />
+                  <Route path={routes.ADMIN.ASSESSMENTS} element={<Assessments />} />
+                  <Route path={routes.ADMIN.CATEGORIES} element={<Categories />} />
+                  <Route path={routes.ADMIN.TRANSACTIONS} element={<AdminTransaction />} />
+                  <Route path={routes.ADMIN.REQUESTS} element={<Requests />} />
+                  <Route path={routes.ADMIN.USERS} element={<Users />} />
+                </Route>
+              </Route>
 
-            <Route path={routes.INSTRUCTOR.ROOT} element={<Instructor />}>
-              <Route path={routes.INSTRUCTOR.OVERVIEW} element={<Overview />} />
-              <Route path={routes.INSTRUCTOR.PROFILE} element={<InstructorProfile />} />
-              <Route path={routes.INSTRUCTOR.COURSES} element={<MyCourses />} />
-              <Route path={routes.INSTRUCTOR.ADD_COURSE} element={<AddCourse />} />
-              <Route path={routes.INSTRUCTOR.ADD_LESSON} element={<AddLesson />} />
-              <Route path={routes.INSTRUCTOR.ASSESSMENTS} element={<Assessments />} />
-              <Route path={routes.INSTRUCTOR.ADD_ASSESSMENTS} element={<AddAssessments />} />
-              <Route path={routes.INSTRUCTOR.ANALYTICS} element={<Categories />} />
-              <Route path={routes.INSTRUCTOR.REQUESTS} element={<Requests />} />
-              <Route path={routes.INSTRUCTOR.COURSE_DETAIL} element={<CourseDetails />} />
-              <Route path={routes.INSTRUCTOR.CHAT} element={<InstructorChat />} />
-              <Route path={routes.INSTRUCTOR.CHATGROUP} element={<GroupChat />} />
-              <Route path={routes.INSTRUCTOR.SETTINGS} element={<Users />} />
-            </Route>
+              <Route element={<PrivateRoute roles={['instructor']} />}>
+                <Route path={routes.INSTRUCTOR.ROOT} element={<Instructor />}>
+                  <Route path={routes.INSTRUCTOR.OVERVIEW} element={<Overview />} />
+                  <Route path={routes.INSTRUCTOR.PROFILE} element={<InstructorProfile />} />
+                  <Route path={routes.INSTRUCTOR.COURSES} element={<MyCourses />} />
+                  <Route path={routes.INSTRUCTOR.ADD_COURSE} element={<AddCourse />} />
+                  <Route path={routes.INSTRUCTOR.ADD_LESSON} element={<AddLesson />} />
+                  <Route path={routes.INSTRUCTOR.ASSESSMENTS} element={<Assessments />} />
+                  <Route path={routes.INSTRUCTOR.ADD_ASSESSMENTS} element={<AddAssessments />} />
+                  <Route path={routes.INSTRUCTOR.ANALYTICS} element={<Categories />} />
+                  <Route path={routes.INSTRUCTOR.REQUESTS} element={<Requests />} />
+                  <Route path={routes.INSTRUCTOR.COURSE_DETAIL} element={<CourseDetails />} />
+                  <Route path={routes.INSTRUCTOR.CHAT} element={<InstructorChat />} />
+                  <Route path={routes.INSTRUCTOR.CHATGROUP} element={<GroupChat />} />
+                  <Route path={routes.INSTRUCTOR.SETTINGS} element={<Users />} />
+                </Route>
+              </Route>
 
-            <Route path={routes.PUBLIC.ROOT} element={<Public />}>
-              <Route path={routes.PUBLIC.ALL_COURSES} element={<AllCourses />} />
-              <Route path={routes.PUBLIC.ALL_CATEGORIES} element={<AllCategories />} />
-              <Route path={routes.PUBLIC.VIEW_COURSE} element={<ViewCourse />} />
-              <Route path={routes.PUBLIC.VIEW_CATEGORY} element={<ViewCategory />} />
-              <Route path={routes.PUBLIC.COURSE_DETAIL} element={<CourseDetail />} />
-              <Route path={routes.PUBLIC.SETTINGS} element={<Settings />} />
-              <Route path={routes.PUBLIC.SUCCESS} element={<PaymentSuccess />} />
-            </Route>
+              <Route element={<PrivateRoute roles={['student']} />}>
+                <Route path={routes.STUDENT.ROOT} element={<Student />}>
+                  <Route path={routes.STUDENT.PROFILE} element={<UserProfile />} />
+                  <Route path={routes.STUDENT.MY_COURSES} element={<MyCourse />} />
+                  <Route path={routes.STUDENT.CHAT} element={<ChatUI />} />
+                </Route>
+              </Route>
 
-            <Route path={routes.STUDENT.ROOT} element={<Student />}>
-              <Route path={routes.STUDENT.PROFILE} element={<UserProfile />} />
-              <Route path={routes.STUDENT.MY_COURSES} element={<MyCourse />} />
-              <Route path={routes.STUDENT.CHAT} element={<ChatUI />} />
-            </Route>
+              <Route path={routes.PUBLIC.ROOT} element={<Public />}>
+                <Route path={routes.PUBLIC.ALL_COURSES} element={<AllCourses />} />
+                <Route path={routes.PUBLIC.ALL_CATEGORIES} element={<AllCategories />} />
+                <Route path={routes.PUBLIC.VIEW_COURSE} element={<ViewCourse />} />
+                <Route path={routes.PUBLIC.VIEW_CATEGORY} element={<ViewCategory />} />
+                <Route path={routes.PUBLIC.COURSE_DETAIL} element={<CourseDetail />} />
+                <Route path={routes.PUBLIC.SETTINGS} element={<Settings />} />
+                <Route path={routes.PUBLIC.SUCCESS} element={<PaymentSuccess />} />
+              </Route> 
 
-          </Routes>
-        </Router>
+              {/*  404 route */}
+              <Route path="*" element={<NotFound />} /> 
+              <Route path="/forbidden" element={<Forbidden />} /> 
+            </Routes>
+          </Router>
         </ErrorBoundary>
       </MessagedStudentsProvider>
     </SocketProvider>
