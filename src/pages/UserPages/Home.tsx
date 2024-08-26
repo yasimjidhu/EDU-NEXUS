@@ -6,12 +6,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { CourseState, getAllCourses } from "../../components/redux/slices/courseSlice";
 import { ListCourses } from "../../components/common/ListCourses";
+import SkeletonLoader from "../../components/skelton/CourseList";
 
 const Home = () => {
   const { user } = useSelector((state: RootState) => state.user);
   const { categories } = useSelector((state: RootState) => state.category);
   const [allCourses, setAllCourses] = useState([])
   const [searchResults, setSearchResults] = useState<CourseState[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const dispatch: AppDispatch = useDispatch();
 
   const navigate = useNavigate()
@@ -24,12 +26,16 @@ const Home = () => {
 
   const fetchCourses = async (page: number) => {
     try {
+      setIsLoading(true)
       const response = await dispatch(getAllCourses({ page })).unwrap();
       if (response.courses.length > 0) {
         setAllCourses(response.courses);
+        setIsLoading(false)
       }
     } catch (error: any) {
       console.error("Error fetching courses:", error);
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -45,6 +51,7 @@ const Home = () => {
   const handleStartClick = (courseId: string) => {
     navigate(`/course-detail/${courseId}`)
   }
+
 
   return (
     <>
@@ -168,39 +175,45 @@ const Home = () => {
             AllCourses
           </button></Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-5 px-4">
-          {allCourses.slice(0, 4).map((course) => (
-            <div key={course._id} className="bg-white text-start rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <div className="h-44 overflow-hidden rounded-md">
-                <img
-                  src={course.thumbnail}
-                  alt={course.title}
-                  className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-300 cursor-pointer"
-                />
-              </div>
-              <h1 className="font-semibold text-md mt-3 truncate">{course.title}</h1>
-              <div className="flex justify-between mt-2 text-sm text-gray-600">
-                <div className="flex items-center">
-                  <img src="/assets/png/lesson.png" className="w-3 h-3 mr-1" alt="" />
-                  <p>Lessons: {course.lessons.length}</p>
+        <div>
+          {isLoading ? (
+            <SkeletonLoader />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-5 px-4">
+              {allCourses.slice(0, 4).map((course) => (
+                <div key={course._id} className="bg-white text-start rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <div className="h-44 overflow-hidden rounded-md">
+                    <img
+                      src={course.thumbnail}
+                      alt={course.title}
+                      className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    />
+                  </div>
+                  <h1 className="font-semibold text-md mt-3 truncate">{course.title}</h1>
+                  <div className="flex justify-between mt-2 text-sm text-gray-600">
+                    <div className="flex items-center">
+                      <img src="/assets/png/lesson.png" className="w-3 h-3 mr-1" alt="" />
+                      <p>Lessons: {course.lessons.length}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <img src="/assets/png/student.png" className="w-3 h-3 mr-1" alt="" />
+                      <p>Students: {course.enrolledStudentsCount}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <img src="/assets/png/level.png" className="w-3 h-3 mr-1" alt="" />
+                      <p>{course.level}</p>
+                    </div>
+                  </div>
+                  <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300" onClick={() => handleStartClick(course._id)}>
+                    Start Course
+                    <span className="ml-2">
+                      <img src="/assets/png/next.png" alt="" className="w-4" />
+                    </span>
+                  </button>
                 </div>
-                <div className="flex items-center">
-                  <img src="/assets/png/student.png" className="w-3 h-3 mr-1" alt="" />
-                  <p>Students: {course.enrolledStudentsCount}</p>
-                </div>
-                <div className="flex items-center">
-                  <img src="/assets/png/level.png" className="w-3 h-3 mr-1" alt="" />
-                  <p>{course.level}</p>
-                </div>
-              </div>
-              <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300" onClick={() => handleStartClick(course._id)}>
-                Start Course
-                <span className="ml-2">
-                  <img src="/assets/png/next.png" alt="" className="w-4" />
-                </span>
-              </button>
+              ))}
             </div>
-          ))}
+          )}
         </div>
 
         <section className="relative ">
@@ -381,14 +394,14 @@ const Home = () => {
               </h4>
             </div>
             <div className="poppins-normal">
-              <img src="/assets/images/feature2.png"   loading="lazy" width="80%" alt="" />
+              <img src="/assets/images/feature2.png" loading="lazy" width="80%" alt="" />
             </div>
           </div>
         </section>
         <section>
           <div className="grid grid-cols-2 gap-4">
             <div className="">
-              <img src="/assets/images/feature3.png"   loading="lazy" alt="" />
+              <img src="/assets/images/feature3.png" loading="lazy" alt="" />
             </div>
             <div className="">
               <h1 className="poppins-semibold">

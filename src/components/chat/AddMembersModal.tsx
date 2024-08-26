@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../../types/user';
 
-
 interface AddMembersModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -33,30 +32,38 @@ const AddMembersModal: React.FC<AddMembersModalProps> = ({ isOpen, onClose, user
         <h2 className="text-xl font-semibold mb-4">Add Users to Group</h2>
         <div className="overflow-y-auto max-h-60">
           {users.map((user) => (
-            <div key={user._id} className="flex items-center mb-2">
+            <div key={user._id} className="flex items-center mb-4">
+              <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
+                <img
+                  src={user.profile?.avatar || '/default-avatar.png'}
+                  alt={`${user.firstName} ${user.lastName}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-gray-800 font-semibold">{`${user.firstName} ${user.lastName}`}</h3>
+                <p className="text-gray-500">{user.email}</p>
+              </div>
               <input
                 type="checkbox"
                 id={`user-${user._id}`}
                 checked={selectedUsers.includes(user._id)}
                 onChange={() => handleUserChange(user._id)}
-                className="mr-2"
+                className="form-checkbox text-blue-500"
               />
-              <label htmlFor={`user-${user._id}`} className="text-gray-700">
-                {`${user.firstName}${user.lastName}`}
-              </label>
             </div>
           ))}
         </div>
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-6">
           <button
             onClick={onClose}
-            className="bg-gray-300 text-gray-800 py-2 px-4 rounded-md mr-2"
+            className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md mr-2"
           >
             Cancel
           </button>
           <button
             onClick={handleAddUsers}
-            className="bg-blue-500 text-white py-2 px-4 rounded-md"
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
           >
             Add Users
           </button>

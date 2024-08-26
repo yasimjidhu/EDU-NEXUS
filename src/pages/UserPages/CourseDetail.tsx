@@ -34,6 +34,7 @@ import { getAllUsers } from "../../components/redux/slices/studentSlice";
 import {  Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import {makePayment } from "../../components/redux/slices/paymentSlice";
 import { loadStripe } from "@stripe/stripe-js";
+import CourseDetailsSkelton from "../../components/skelton/CourseDetails";
 
 const CourseDetails: React.FC = () => {
 
@@ -50,6 +51,7 @@ const CourseDetails: React.FC = () => {
   const [courseId, setCourseId] = useState("");
   const [userReviews, setUserReviews] = useState([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { user } = useSelector((state: RootState) => state.user);
   const courseStoredData = useSelector((state: RootState) => state.course);
@@ -61,13 +63,16 @@ const CourseDetails: React.FC = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
+        setIsLoading(true)
         const courseResponse = await dispatch(getCourse(id));
         console.log('response of getcourse',courseResponse.payload)
         const course = courseResponse.payload.course;
         setCourseId(course._id);
         setCourseData(course);
+        setIsLoading(false)
         setTrial(course.trial.video);
       } catch (error) {
+        setIsLoading(false)
         console.error('Error fetching course:', error);
       }
     };
@@ -222,37 +227,33 @@ const CourseDetails: React.FC = () => {
       return null;
     };
   
-    if (!courseData) {
-      return (
-        <div className="flex justify-center items-center h-screen">
-          Loading...
-        </div>
-      );
-    }
-
     const publishable_key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ""
     const stripePromise = loadStripe(publishable_key);  
   
   return (
     <>
-    <Elements stripe={stripePromise}>
+    {isLoading ?
+    (
+      <CourseDetailsSkelton/>
+    ):(
+      <Elements stripe={stripePromise}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-2/3">
             <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
               <h1 className="inter text-2xl mt-4 font-bold mb-4">
-                {courseData.title}
+                {courseData?.title}
               </h1>
               <div className="flex justify-center">
                 <img
-                  src={courseData.thumbnail}
+                  src={courseData?.thumbnail}
                   alt="Course Thumbnail"
                   className="w-full rounded-lg shadow-lg mb-6"
                 />
               </div>
-              <p className="text-gray-600 mb-6">{courseData.description}</p>
+              <p className="text-gray-600 mb-6">{courseData?.description}</p>
               <div className="flex justify-between items-center">
-                {courseData.pricing.type === "free" ? (
+                {courseData?.pricing.type === "free" ? (
                   <div className="flex ">
                     <DollarSign className="w-6 h-6 mr-2 text-green-700" />
                     <h1 className="text-xl inter text-green-700">Free</h1>
@@ -261,7 +262,7 @@ const CourseDetails: React.FC = () => {
                   <div className="flex ">
                     <IndianRupee className="w-6 h-6 mt-2 text-green-700" />
                     <span className="inter text-xl text-green-700 ml-1 mt-1">
-                      {courseData.pricing.amount}
+                      {courseData?.pricing.amount}
                     </span>
                   </div>
                 )}
@@ -270,22 +271,22 @@ const CourseDetails: React.FC = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 mt-6">
                 <div className="flex items-center">
                   <Languages className="w-5 h-5 mr-2 text-blue-500" />
-                  <span className="text-sm">{courseData.language}</span>
+                  <span className="text-sm">{courseData?.language}</span>
                 </div>
                 <div className="flex items-center">
                   <GraduationCap className="w-5 h-5 mr-2 text-blue-500" />
-                  <span className="text-sm">{courseData.level || "Level"}</span>
+                  <span className="text-sm">{courseData?.level || "Level"}</span>
                 </div>
                 <div className="flex items-center">
                   <Book className="w-5 h-5 mr-2 text-blue-500" />
                   <span className="text-sm">
-                    {courseData.lessons.length} Lessons
+                    {courseData?.lessons.length} Lessons
                   </span>
                 </div>
                 <div className="flex items-center">
                   <Users className="w-5 h-5 mr-2 text-blue-500" />
                   <span className="text-sm">
-                    {courseData.enrolledStudentsCount || "0"} Students
+                    {courseData?.enrolledStudentsCount || "0"} Students
                   </span>
                 </div>
               </div>
@@ -296,11 +297,11 @@ const CourseDetails: React.FC = () => {
               ):(
                 <button
                   className="w-full  sm:w-auto bg-black hover:bg-strong-rose text-white font-bold py-1 px-6 rounded-full"
-                  onClick={() => handleEnrollment(courseData._id)}
+                  onClick={() => handleEnrollment(courseData?._id)}
                 >
-                  {courseData.pricing.type === "free"
+                  {courseData?.pricing.type === "free"
                     ? "Enroll Now"
-                    : `Enroll for ₹${courseData.pricing.amount}`}
+                    : `Enroll for ₹${courseData?.pricing.amount}`}
                 </button>
               )}
             </div>
@@ -309,13 +310,13 @@ const CourseDetails: React.FC = () => {
               <h2 className="text-2xl font-bold mb-4">Instructor</h2>
               <div className="flex items-center ">
                 <img
-                  src={getInstructorData(courseData.instructorRef, "profile")}
+                  src={getInstructorData(courseData?.instructorRef, "profile")}
                   alt="Instructor"
                   className="w-20 h-20 rounded-full mr-4 object-cover"
                 />
                 <div>
                   <h3 className="text-xl font-bold mt-4">
-                    {getInstructorData(courseData.instructorRef, "name")}
+                    {getInstructorData(courseData?.instructorRef, "name")}
                   </h3>
                   <p className="text-gray-600 mb-4"></p>
                   <div className="flex space-x-2">
@@ -360,7 +361,7 @@ const CourseDetails: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                {courseData.lessons.map((lesson, index) => (
+                {courseData?.lessons.map((lesson, index) => (
                   <div
                     key={index}
                     className="border rounded-lg overflow-hidden p-4 bg-white"
@@ -435,6 +436,8 @@ const CourseDetails: React.FC = () => {
         </div>
       </div>
     </Elements>
+    )}
+   
     </>
   );
 };

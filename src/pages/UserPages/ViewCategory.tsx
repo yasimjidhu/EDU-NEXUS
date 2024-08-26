@@ -5,6 +5,7 @@ import { getCategoryWiseCourses } from '../../components/redux/slices/courseSlic
 import { AppDispatch } from '../../components/redux/store/store';
 import Pagination from '../../components/common/Pagination';
 import FilterAndSort from '../../components/common/FilterAndSort';
+import CourseListingSkeleton from '../../components/skelton/courses';
 
 const ViewCategory: React.FC = () => {
   const [allCourses, setAllCourses] = useState([]);
@@ -15,6 +16,7 @@ const ViewCategory: React.FC = () => {
     price: '',
     level: '',
   });
+  const [isLoading,setIsLoading] = useState<boolean>(false)
 
   const dispatch: AppDispatch = useDispatch();
   const { categoryId } = useParams();
@@ -25,9 +27,11 @@ const ViewCategory: React.FC = () => {
 
   const fetchCourses = async (categoryId: string, page: number, sort: string, filters: any) => {
     if (categoryId) {
+      setIsLoading(true)
       const response = await dispatch(getCategoryWiseCourses({ categoryId, page, sort, filters }));
       const { courses, totalPages } = response.payload;
       setAllCourses(courses);
+      setIsLoading(false)
       setTotalPages(totalPages);
     }
   };
@@ -45,6 +49,10 @@ const ViewCategory: React.FC = () => {
     setFilters(newFilters);
     setCurrentPage(1);
   };
+
+  if(isLoading){
+    return <CourseListingSkeleton/>
+  }
 
   return (
     <div className="container mx-auto px-4">

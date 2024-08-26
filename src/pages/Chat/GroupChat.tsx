@@ -212,6 +212,20 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
     });
   };
 
+// Logic to get unjoined users
+const unjoinedUsersInGroup = () => {
+  if (!groupData || !messagedStudents) return [];
+
+  // Filter messagedStudents to get users not in groupData.members
+  const unjoinedUsers = messagedStudents.filter(student => 
+    !groupData.members.includes(student._id)
+  );
+
+  return unjoinedUsers; 
+};
+
+ 
+
   return (
     <div className="flex h-screen bg-[#e5ddd5]">
       <div className="flex flex-col flex-grow">
@@ -243,7 +257,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
         {isAddModalOpen && 
         <AddMembersModal
           isOpen={isAddModalOpen}
-          users={messagedStudents}
+          users={unjoinedUsersInGroup()}
           onAddUsers={handleOnAddStudents}
           onClose={() => setIsAddModalOpen(false)} />
         }

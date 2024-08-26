@@ -4,19 +4,23 @@ import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllCoursesOfInstructor } from "../../components/redux/slices/courseSlice";
 import { PencilIcon } from "lucide-react";
+import CourseListingSkeleton from "../../components/skelton/courses";
 
 const MyCourses = () => {
   const { categories } = useSelector((state: RootState) => state.category);
   const { user } = useSelector((state: RootState) => state.user);
   const [myCourses, setMyCourses] = useState<any[]>([]);
+  const [isLoading,setIsLoading] = useState<boolean>(false)
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()
 
   useEffect(() => {
     if (user._id) {
+      setIsLoading(true)
       dispatch(getAllCoursesOfInstructor(user._id)).then((res) => {
         setMyCourses(res.payload.courses);
+        setIsLoading(false)
       });
     }
   }, [dispatch, user._id]);
@@ -26,6 +30,10 @@ const MyCourses = () => {
     e.stopPropagation();
     navigate(`/instructor/add-course`, { state: courseId });
   };
+
+  if(isLoading){
+    return <CourseListingSkeleton/>
+  }
 
   return (
     <div className=" space-y-4">

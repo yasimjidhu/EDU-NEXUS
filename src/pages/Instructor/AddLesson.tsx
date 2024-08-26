@@ -258,13 +258,13 @@ const AddLesson: React.FC = () => {
           <div className="mb-2">
           <input
             type="text"
-            value={currentLesson.attachments.length > 0 ? currentLesson.attachments[0].title : ""}
+            value={currentLesson.attachments && currentLesson.attachments.length > 0 ? currentLesson.attachments[0].title : ""}
             onChange={(e) => setAttachmentTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Attachment Title"
           />
         </div>
-
+ 
             <div
               className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => handleInputClick("attachments-input")}
