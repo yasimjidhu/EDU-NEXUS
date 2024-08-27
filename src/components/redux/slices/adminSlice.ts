@@ -3,13 +3,6 @@ import { axiosInstance } from "../../../constants/axiosInstance";
 import { Category } from "@/types/category";
 
 
-// interface Category {
-//     _id?:string | null;
-//     name: string;
-//     description: string;
-//     image: File| string|null;
-//     coursesCount?:number | null;
-// }
 
 interface RejectValue {
     error: string;

@@ -104,7 +104,10 @@ const Settings: React.FC = () => {
   
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    if(!newPassword || confirmPassword!){
+      setPasswordError('please completes the fields')
+      return
+    }
     if (newPassword !== confirmPassword) {
       setPasswordError("Passwords don't match");
       return;
@@ -149,9 +152,7 @@ const Settings: React.FC = () => {
   if (!formData) return <div>Loading...</div>;
 
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
-      <h1 className="text-xl font-bold mb-6">User Settings</h1>
-
+    <div className="container mx-auto  max-w-6xl">
       {saveSuccess && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
           <strong className="font-bold">Success!</strong>
@@ -247,7 +248,7 @@ const Settings: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 type="button"
                 onClick={() => setIsEditing(!isEditing)}
               >
@@ -255,7 +256,7 @@ const Settings: React.FC = () => {
               </button>
               {isEditing && (
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  className="bg-medium-rose hover:bg-strong-rose text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                   type="submit"
                 >
                   Save Changes
@@ -301,7 +302,7 @@ const Settings: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+          <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-2">
             <h2 className="text-xl font-semibold mb-4">Reset Password</h2>
             <form onSubmit={handlePasswordReset}>
               <div className="mb-4">
@@ -317,7 +318,7 @@ const Settings: React.FC = () => {
                   onChange={handlePasswordChange}
                 />
               </div>
-              <div className="mb-6">
+              <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirmPassword">
                   Confirm Password
                 </label>
@@ -334,7 +335,7 @@ const Settings: React.FC = () => {
                 <p className="text-red-500 text-xs italic mb-4">{passwordError}</p>
               )}
               <button
-                className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 type="submit"
               >
                 Reset Password

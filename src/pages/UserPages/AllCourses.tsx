@@ -106,15 +106,17 @@ const AllCourses: React.FC = () => {
           )}
         </div>
 
-        {/* Right column for filter and sort */}
-        <div className="md:w-1/4">
-          <FilterAndSort
-            sortBy={sortBy}
-            filters={filters}
-            onSortChange={handleSortChange}
-            onFilterChange={handleFilterChange}
-          />
-        </div>
+        {/*filter and sort */}
+        {allCourses && allCourses.length > 0 && (
+          <div className="md:w-1/4">
+            <FilterAndSort
+              sortBy={sortBy}
+              filters={filters}
+              onSortChange={handleSortChange}
+              onFilterChange={handleFilterChange}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

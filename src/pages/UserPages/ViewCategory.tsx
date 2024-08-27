@@ -16,7 +16,7 @@ const ViewCategory: React.FC = () => {
     price: '',
     level: '',
   });
-  const [isLoading,setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const dispatch: AppDispatch = useDispatch();
   const { categoryId } = useParams();
@@ -50,8 +50,8 @@ const ViewCategory: React.FC = () => {
     setCurrentPage(1);
   };
 
-  if(isLoading){
-    return <CourseListingSkeleton/>
+  if (isLoading) {
+    return <CourseListingSkeleton />
   }
 
   return (
@@ -109,16 +109,18 @@ const ViewCategory: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* Right column for filter and sort */}
-        <div className="md:w-1/4">
-          <FilterAndSort
-            sortBy={sortBy}
-            filters={filters}
-            onSortChange={handleSortChange}
-            onFilterChange={handleFilterChange}
-          />
-        </div>
+        {allCourses && allCourses.length > 0 && (
+          <div className="md:w-1/4">
+            <FilterAndSort
+              sortBy={sortBy}
+              filters={filters}
+              onSortChange={handleSortChange}
+              onFilterChange={handleFilterChange}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

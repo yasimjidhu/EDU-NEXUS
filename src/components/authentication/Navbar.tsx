@@ -24,7 +24,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userUnreadMessages,setUserUnreadMessages] = useState<UnreadMessage[]>([])
+  const [userUnreadMessages, setUserUnreadMessages] = useState<UnreadMessage[]>([])
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const { user, allUsers } = useSelector((state: RootState) => state.user);
@@ -82,17 +82,18 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   };
 
   const filteredUnreadMessages = () => {
-  
+
     const userUnreadMessages = unreadMessages.filter((item) => {
       const [id1, id2] = item.conversationId.split("-");
-  
+      console.log('id1', id1)
+      console.log('id1', id2)
       // Check if the current user's ID is present in the conversation ID
       return id1 === user?._id || id2 === user?._id;
     });
-  
+    console.log('userUnread messages filtered', userUnreadMessages)
     return userUnreadMessages;
   };
-  
+
 
   const handleLogout = async () => {
     try {
@@ -155,7 +156,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   }
   const totalUnreadMessages = unreadMessages.reduce((total, msg) => total + msg.unreadCount, 0);
 
-  const renderMessagePreview = (message:any) => {
+  const renderMessagePreview = (message: any) => {
     switch (message.fileType) {
       case 'image':
         return (
@@ -180,7 +181,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
     }
   };
 
-  console.log('unread medssages are',unreadMessages)
+  console.log('unread medssages are', unreadMessages)
 
   return (
     <>
@@ -305,7 +306,11 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
                             />
                             <div className="flex-1">
                               <p className="font-semibold text-sm">{message.latestMessage.senderName}</p>
-                              {renderMessagePreview(message.latestMessage)}
+                              {message.latestMessage.text !== "" ?(
+                                <p className=" text-sm">{message.latestMessage.text}</p>
+                              ):(
+                                renderMessagePreview(message.latestMessage)
+                              )}
                             </div>
                             <span className="text-xs text-purple-500 font-semibold">{message.unreadCount}</span>
                           </div>

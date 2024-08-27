@@ -6,6 +6,7 @@ import { logoutUser } from "../redux/slices/authSlice";
 import { AppDispatch, RootState } from "../redux/store/store";
 import { getUnreadMessages } from "../redux/slices/chatSlice";
 import { UnreadMessage } from "../../types/chat";
+import { FileText, Headphones, Image } from "lucide-react";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +59,32 @@ const Navbar: React.FC = () => {
       navigate('/instructor/chat')
     }
   }
+
+  
+  const renderMessagePreview = (message: any) => {
+    switch (message.fileType) {
+      case 'image':
+        return (
+          <div className="flex items-center">
+            <Image className="w-5 h-5 mr-2 text-blue-500" />
+            <span className="text-sm text-gray-600">Image</span>
+          </div>
+        );
+      case 'audio':
+        return (
+          <div className="flex items-center">
+            <Headphones className="w-5 h-5 mr-2 text-green-500" />
+            <span className="text-sm text-gray-600">Audio message</span>
+          </div>
+        );
+      default:
+        return (
+          <p className="text-sm text-gray-600 truncate">
+            {message.text || <FileText className="inline w-4 h-4 mr-1 text-gray-400" />}
+          </p>
+        );
+    }
+  };
 
   const filteredUnreadMessages = () => {
   
@@ -146,7 +173,11 @@ const Navbar: React.FC = () => {
                         />
                         <div className="flex-1">
                           <p className="font-semibold text-sm">{message.latestMessage.senderName}</p>
-                          <p className="text-sm text-gray-600 truncate">{message.latestMessage.text}</p>
+                          {message.latestMessage.text !== "" ?(
+                                <p className=" text-sm">{message.latestMessage.text}</p>
+                              ):(
+                                renderMessagePreview(message.latestMessage)
+                              )}
                         </div>
                         <span className="text-xs text-purple-500 font-semibold">{message.unreadCount}</span>
                       </div>

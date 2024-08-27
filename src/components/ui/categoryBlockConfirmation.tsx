@@ -33,7 +33,7 @@ const CategoryBlockConfirmation: React.FC<CategoryBlockConfirmationProps> = ({ c
     };
 
     const handleBlockCategory = async () => {
-        console.log('handle bock called')
+        console.log('handle bock called',categoryId,isConfirmed)
         if (!isConfirmed) return;
         setIsLoading(true);
         try {

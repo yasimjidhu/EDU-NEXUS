@@ -271,7 +271,7 @@ const AddLesson: React.FC = () => {
             >
               {attachmentLoading ? (
                 <BeatLoader color="#4F46E5" />
-              ) : currentLesson.attachments.length > 0 ? (
+              ) : currentLesson.attachments && currentLesson.attachments.length > 0 ? (
                 <ul className="w-full px-4">
                   {currentLesson.attachments.map((attachment, index) => (
                     <li key={index} className="flex items-center justify-between mb-2">
@@ -351,7 +351,7 @@ const AddLesson: React.FC = () => {
                 {expandedLessonIndex === index && (
                   <>
                     <p className="text-gray-600">{lesson.description}</p>
-                    {lesson.attachments.length > 0 && (
+                    {lesson.attachments && lesson.attachments.length > 0 && (
                       <div className="mt-2">
                         <p className="font-medium">Attachments:</p>
                         <ul className="list-disc list-inside">

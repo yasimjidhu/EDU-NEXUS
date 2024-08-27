@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CategoryModal from "../../components/Admin/CategoryModal";
 import EditCategoryModal from "../../components/Admin/EditCategoryModal";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
-import {getAllCategories,updateCategories} from "../../components/redux/slices/adminSlice";
+import { getAllCategories, updateCategories } from "../../components/redux/slices/adminSlice";
 import { Category } from "../../types/category";
 import CategoryBlockConfirmation from "../../components/ui/categoryBlockConfirmation";
 import { toast } from "react-toastify";
@@ -27,18 +27,18 @@ const Categories: React.FC = () => {
 
   useEffect(() => {
     fetchCategories(currentPage);
-}, [currentPage]);
+  }, [currentPage]);
 
   const fetchCategories = async (page: number) => {
     const response = await dispatch(getAllCategories(page));
     const { totalPages } = response.payload as any
     setTotalPages(totalPages);
-};
+  };
 
-  
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-};
+  };
 
   const handleEditClick = (category: Category) => {
     setSelectedCategory(category);
@@ -60,7 +60,7 @@ const Categories: React.FC = () => {
 
   const handleSaveCategory = (updatedCategory: Partial<Category>) => {
     if (selectedCategory && updatedCategory) {
-      dispatch(updateCategories({categoryId:selectedCategory.id!,category:updatedCategory}));
+      dispatch(updateCategories({ categoryId: selectedCategory.id!, category: updatedCategory }));
     }
     dispatch(getAllCategories(currentPage))
     closeEditModal();
@@ -76,7 +76,8 @@ const Categories: React.FC = () => {
 
   return (
     <>
-      <div className="w-full px-8 flex justify-end">
+      <div className="w-full flex justify-between">
+        <h2 className="inter text-black text-xl">Categories</h2>
         <button
           className="bg-lite-black py-1 px-4 rounded-md text-white poppins-normal"
           onClick={handleCreateClick}
@@ -126,7 +127,7 @@ const Categories: React.FC = () => {
                     Edit
                   </button>
                   <CategoryBlockConfirmation
-                    categoryId={category._id}
+                    categoryId={category.id}
                     onSuccess={handleBlockSuccess}
                     onError={handleBlockError}
                   />
@@ -145,9 +146,11 @@ const Categories: React.FC = () => {
           <p className="mt-4 text-gray-600">No categories available</p>
         </div>
       )}
-       <div className='mt-10 '>
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-      </div>
+      {categories.length > 8 && (
+        <div className='mt-10 '>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        </div>
+      )}
     </>
   );
 };
