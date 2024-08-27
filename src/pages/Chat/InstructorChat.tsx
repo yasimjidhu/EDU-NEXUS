@@ -154,9 +154,11 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
         }
       }
 
-      const messageData = {
+      const messageData:Message = {
         conversationId,
         senderId: user?._id || '',
+        senderName:`${user?.firstName} ${user?.lastName}`,
+        senderProfile:user?.profile.avatar,
         text: inputMessage.trim(),
         fileUrl,
         fileType,
@@ -166,7 +168,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       try {
         const response = await dispatch(sendMessage(messageData));
         const savedMessage = response.payload;
-
+        console.log('savedmessage in db',savedMessage)
         socket.emit('message', savedMessage);
         setInputMessage('');
         setSelectedFile(null);

@@ -267,7 +267,7 @@ const CourseDetails: React.FC = () => {
         </div>
 
         <div className="lg:w-1/3">
-          <div className="sticky top-24 space-y-6">
+          <div className="sticky top-24 space-y-6"> 
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-bold mb-4">Course Trailer</h2>
               <div className="relative pb-[56.25%]">

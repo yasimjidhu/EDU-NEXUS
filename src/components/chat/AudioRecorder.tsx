@@ -110,6 +110,7 @@ export const AudioRecord: React.FC<AudioRecordProps> = ({
     const handleSaveRecordedAudio = (blob: Blob) => {
         recordedAudio(blob)
         handleSendMessage()
+        resetInput();
     }
 
     const formatDuration = (seconds: number) => {
@@ -118,6 +119,14 @@ export const AudioRecord: React.FC<AudioRecordProps> = ({
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
+    const resetInput = () => {
+        setAudioBlob(null);
+        setAudioProgress(0);
+        setAudioDuration(0);
+        setIsPlaying(false);
+        // Reset any other input-related state variables
+    };
+    
     const handleSendButtonClick = () => {
         if (isRecording) {
             handleStopRecording();
@@ -125,6 +134,7 @@ export const AudioRecord: React.FC<AudioRecordProps> = ({
             handleSaveRecordedAudio(audioBlob);
         } else if (selectedFile || inputMessage.trim() !== '') {
             handleSendMessage();
+            resetInput()
         } else {
             handleStartRecording();
         }
@@ -213,7 +223,7 @@ export const AudioRecord: React.FC<AudioRecordProps> = ({
                         }}
                         accept="image/*,video/*,audio/*"
                     />
-                    <Paperclip size={24} className="text-gray-500 hover:text-gray-700" />
+                    <Paperclip size={24} className="text-gray-500 hover:text-gray-700 mr-4" />
                 </label>
             )}
             <audio ref={audioRef} className="hidden" />

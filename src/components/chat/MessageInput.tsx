@@ -52,7 +52,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
   };
 
   return (
-    <div className="sticky bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
+    <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
       <div className="flex items-center space-x-2 relative">
         <button
           type="button"
@@ -77,16 +77,6 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
           handleSendMessage={handleSubmit}
           recordedAudio={handleRecordedAudio}
         />
-
-        <button
-          onClick={handleSubmit}
-          className={`p-2 rounded-full focus:outline-none mr-3 transition duration-300 ${isRecording || audioBlob || selectedFile || message.trim() !== '' 
-            ? 'bg-green-500 hover:bg-green-600' 
-            : 'text-blue-500 hover:text-blue-700'
-          }`}
-        >
-          <Send size={20} className="text-black" />
-        </button>
       </div>
     </div>
   );

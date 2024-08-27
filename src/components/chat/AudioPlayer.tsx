@@ -18,7 +18,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src }) => {
     if (!audio) return;
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleLoadedMetadata = () => setDuration(audio.duration || 0);
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
@@ -55,10 +55,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src }) => {
   };
 
   const formatTime = (time: number): string => {
+    if (isNaN(time) || time === Infinity) return '0:00';
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+  
 
   return (
     <div className="flex items-center space-x-2 bg-gray-100 p-4 rounded-lg max-w-xs">

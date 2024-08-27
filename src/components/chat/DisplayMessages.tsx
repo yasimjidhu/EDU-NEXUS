@@ -102,18 +102,18 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
     };
 
     return (
-        <div className="flex-1 overflow-y-auto p-3 bg-gradient-to-b from-gray-100 to-gray-200">
+        <div className="flex-1 overflow-y-auto p-3 bg-gradient-to-b from-gray-100 to-gray-200 pb-16">
             {messages.map((message) => {
                 const onlyEmojis = isOnlyEmojis(message.text || '');
                 return (
                     <div
                         key={message._id}
-                        className={` flex ${message.senderId === user?._id ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${message.senderId === user?._id ? 'justify-end' : 'justify-start'}`}
                     >
                         <div
                             data-message-id={message._id}
                             data-sender-id={message.senderId}
-                            className={`chat-message max-w-xs p-3 m-2 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${message.senderId === user?._id
+                            className={`chat-message max-w-xs p-3 m-2 mb-5 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${message.senderId === user?._id
                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
                                 : 'bg-white text-gray-800'
                                 }`}
@@ -160,5 +160,6 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
             })}
             <div ref={messagesEndRef}></div>
         </div>
-    )
+    );
+    
 }

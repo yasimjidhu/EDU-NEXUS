@@ -55,6 +55,7 @@ interface LatestMessage {
     _id: string;
     senderId: string;
     senderName: string;
+    senderProfile:string;
     text: string | null;
     fileUrl: string | null;
     fileType: string | null;

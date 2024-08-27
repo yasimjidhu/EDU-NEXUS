@@ -10,7 +10,9 @@ import { fetchUserData, clearUserState } from "../redux/slices/studentSlice";
 import { clearInstructorState } from "../redux/slices/instructorSlice";
 import useDebounce from "../../hooks/useDebounce";
 import { CourseState, searchCourses } from "../redux/slices/courseSlice";
-import { ArrowDownCircle } from "lucide-react";
+import { ArrowDownCircle, Bell, Image, Headphones, FileText } from "lucide-react";
+import { clearUnreadMessages, getUnreadMessages } from "../redux/slices/chatSlice";
+import { UnreadMessage } from "../../types/chat";
 
 interface NavbarProps {
   isAuthenticated: boolean;
@@ -18,13 +20,16 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
-  const { user } = useSelector((state: RootState) => state.user);
-  const authData = useSelector((state: RootState) => state.auth);
-
   const [isOpen, setIsOpen] = useState(false);
-  const [showMessage, setShowMessage] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const debouncedSearchQuery = useDebounce(searchQuery, 300)
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [userUnreadMessages,setUserUnreadMessages] = useState<UnreadMessage[]>([])
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  const { user, allUsers } = useSelector((state: RootState) => state.user);
+  const authData = useSelector((state: RootState) => state.auth);
+  const { unreadMessages } = useSelector((state: RootState) => state.chat);
 
   const navigate = useNavigate();
   type AppDispatch = ThunkDispatch<any, any, any>;
@@ -33,15 +38,15 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 100) {
-        setShowMessage(false)
+        setShowMessage(false);
       }
-    }
-    window.addEventListener('scroll', handleScroll)
+    };
+    window.addEventListener('scroll', handleScroll);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [])
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -53,22 +58,47 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
     if (debouncedSearchQuery) {
       dispatch(searchCourses(debouncedSearchQuery)).then((result) => {
         if (searchCourses.fulfilled.match(result)) {
-          onSearch(result.payload)
-          setShowMessage(true)
+          onSearch(result.payload);
+          setShowMessage(true);
         }
-      })
+      });
     }
-  }, [debouncedSearchQuery, dispatch])
+  }, [debouncedSearchQuery, dispatch]);
+
+  useEffect(() => {
+    if (user?._id) {
+      dispatch(getUnreadMessages(user._id));
+      const userMessages = filteredUnreadMessages()
+      setUserUnreadMessages(userMessages)
+    }
+  }, [dispatch, user?._id]);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
+  const toggleNotificationDropdown = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+  };
+
+  const filteredUnreadMessages = () => {
+  
+    const userUnreadMessages = unreadMessages.filter((item) => {
+      const [id1, id2] = item.conversationId.split("-");
+  
+      // Check if the current user's ID is present in the conversation ID
+      return id1 === user?._id || id2 === user?._id;
+    });
+  
+    return userUnreadMessages;
+  };
+  
+
   const handleLogout = async () => {
     try {
       await (dispatch as AppDispatch)(logoutAdmin());
       dispatch(clearUserState());
-      dispatch(clearInstructorState())
+      dispatch(clearInstructorState());
       navigate("/login");
       toast.success("Logout Successful");
     } catch (error: any) {
@@ -114,6 +144,43 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
       );
     }
   };
+
+
+  const handleViewAllClick = () => {
+    if (user?.role == 'student') {
+      navigate('/student/chat')
+    } else if (user?.role == 'instructor') {
+      navigate('/instructor/chat')
+    }
+  }
+  const totalUnreadMessages = unreadMessages.reduce((total, msg) => total + msg.unreadCount, 0);
+
+  const renderMessagePreview = (message:any) => {
+    switch (message.fileType) {
+      case 'image':
+        return (
+          <div className="flex items-center">
+            <Image className="w-5 h-5 mr-2 text-blue-500" />
+            <span className="text-sm text-gray-600">Image</span>
+          </div>
+        );
+      case 'audio':
+        return (
+          <div className="flex items-center">
+            <Headphones className="w-5 h-5 mr-2 text-green-500" />
+            <span className="text-sm text-gray-600">Audio message</span>
+          </div>
+        );
+      default:
+        return (
+          <p className="text-sm text-gray-600 truncate">
+            {message.text || <FileText className="inline w-4 h-4 mr-1 text-gray-400" />}
+          </p>
+        );
+    }
+  };
+
+  console.log('unread medssages are',unreadMessages)
 
   return (
     <>
@@ -211,12 +278,49 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
                   </div>
                 )}
               </div>
-              <div className="cursor-pointer p-2 bg-purple-500 rounded-xl">
-                <img
-                  src="/assets/png/bell.png"
-                  className="w-16"
-                  alt="Notifications"
-                />
+              <div className="relative" onClick={toggleNotificationDropdown}>
+                <div className="cursor-pointer p-2 bg-purple-500 rounded-xl">
+                  <img
+                    src="/assets/png/bell.png"
+                    className="w-16"
+                    alt="Notifications"
+                  />
+                  {totalUnreadMessages > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full px-2 py-1">
+                      {totalUnreadMessages}
+                    </span>
+                  )}
+                </div>
+                {isNotificationOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                    <div className="bg-purple-500 text-white font-bold py-2 px-4">Notifications</div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {userUnreadMessages.length > 0 ? (
+                        userUnreadMessages.map((message, index) => (
+                          <div key={index} className="flex items-center p-3 hover:bg-gray-50 border-b border-gray-100">
+                            <img
+                              src={message.latestMessage.senderProfile || '/assets/png/user.png'}
+                              alt="User"
+                              className="w-10 h-10 rounded-full object-cover mr-3"
+                            />
+                            <div className="flex-1">
+                              <p className="font-semibold text-sm">{message.latestMessage.senderName}</p>
+                              {renderMessagePreview(message.latestMessage)}
+                            </div>
+                            <span className="text-xs text-purple-500 font-semibold">{message.unreadCount}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-gray-500">No new notifications</div>
+                      )}
+                    </div>
+                    <div className="bg-gray-50 p-2 text-center">
+                      <button className="text-purple-500 hover:text-purple-700 font-semibold text-sm" onClick={handleViewAllClick}>
+                        View All
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -227,3 +331,4 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
 };
 
 export default Navbar;
+

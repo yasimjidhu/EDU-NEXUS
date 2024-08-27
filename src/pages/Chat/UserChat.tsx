@@ -164,9 +164,11 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         }
       }
 
-      const messageData = {
+      const messageData : Message= {
         conversationId,
         senderId: user?._id || '',
+        senderName:`${user?.firstName} ${user?.lastName}`,
+        senderProfile:user?.profile.avatar,
         text: inputMessage.trim(),
         fileUrl,
         fileType: fileType as 'audio' | 'image' | 'video' | undefined,
@@ -268,17 +270,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-1/4 bg-white border-r border-gray-200">
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Chats</h2>
-          <div className="flex items-center">
-            <button className="inter text-md bg-strong-rose text-white px-4 py-2 rounded-full flex items-center"
-              onClick={() => setIsModalOpen(true)}>
-              <Plus className="mr-2" /> Create Group
-            </button>
-          </div>
-        </div>
-
-        {/* sidebar */}
+        {/* Sidebar */}
         <ChatSidebar
           messagedStudents={enrolledInstructors}
           onlineUsers={onlineUsers}
@@ -289,47 +281,41 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
           onClickEntity={handleClickEntity}
           user={'student'}
         />
-
       </div>
-
-      {isModalOpen && (
-        <Suspense fallback={<div>Loading....</div>}>
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
-            <div className="relative z-10 bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-              <CreateGroupModal
-                show={isModalOpen}
-                students={enrolledInstructors}
-                handleClose={() => setIsModalOpen(false)}
-                onCreateGroup={(data: any) => handleCreateGroup(data)}
-              />
+  
+      <div className="flex-1 flex flex-col relative">
+        {isModalOpen && (
+          <Suspense fallback={<div>Loading....</div>}>
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+              <div className="relative z-10 bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+                <CreateGroupModal
+                  show={isModalOpen}
+                  students={enrolledInstructors}
+                  handleClose={() => setIsModalOpen(false)}
+                  onCreateGroup={(data: any) => handleCreateGroup(data)}
+                />
+              </div>
             </div>
-          </div>
-        </Suspense>
-      )}
-
-      <div className="flex-1 flex flex-col">
-        {/* Render Group Chat UI if a group is selected */}
-        {showMessages == "group" && selectedGroup ? (
-          <Suspense fallback={<div>Loading...</div>}>
-            <GroupChat id={selectedGroup._id!}
-              userId={user?._id!} />
           </Suspense>
-        ) : showMessages == "user" && selectedInstructor ? (
+        )}
+  
+        {showMessages === "group" && selectedGroup ? (
+          <Suspense fallback={<div>Loading...</div>}>
+            <GroupChat id={selectedGroup._id!} userId={user?._id!} />
+          </Suspense>
+        ) : showMessages === "user" && selectedInstructor ? (
           <>
-
-            {/* Chat Header */}
             <Header
               isTyping={isTyping}
               onlineUsers={onlineUsers}
               selectedStudent={selectedInstructor}
               key={selectedInstructor._id}
             />
-
-            {/* Show Messages */}
-            <DisplayMessages messages={messages} />
-
-            <div className="sticky bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
+            <div className="flex-1 overflow-y-auto">
+              <DisplayMessages messages={messages} />
+            </div>
+            <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
               <div className="flex items-center space-x-2 relative">
                 <button
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -337,7 +323,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
                 >
                   <Smile size={24} />
                 </button>
-
                 {showEmojiPicker && (
                   <Suspense fallback={<div className='flex justify-center items-center'>Loading...</div>}>
                     <div className="absolute bottom-20 left-2">
@@ -372,6 +357,8 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
       </div>
     </div>
   );
+  
+  
 };
 
 export default React.memo(ChatUI);

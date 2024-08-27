@@ -167,7 +167,7 @@ const SignupPage: React.FC = () => {
               <div className="w-full mx-auto flex justify-center items-center mt-3 rounded-sm">
                 <GoogleSignInButton message="Signup" />
               </div>
-              <h5 className="text-center mt-3">
+              <h5 className="text-center mt-3 mb-3">
                 I have an account?{" "}
                 <Link to="/login">
                   <span className="text-violet-900 font-semibold"> Login </span>
