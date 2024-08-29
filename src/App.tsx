@@ -49,6 +49,7 @@ import ErrorBoundary from "./components/common/ErrorBoundary";
 import PrivateRoute from "./components/authentication/ProtectedRoute";
 import NotFound from "./components/common/NotFound";
 import Forbidden from "./components/common/Forbidden";
+import Analytics from "./pages/Instructor/Analytics";
 
 function App() {
   return (
@@ -96,7 +97,7 @@ function App() {
                   <Route path={routes.INSTRUCTOR.ADD_LESSON} element={<AddLesson />} />
                   <Route path={routes.INSTRUCTOR.ASSESSMENTS} element={<Assessments />} />
                   <Route path={routes.INSTRUCTOR.ADD_ASSESSMENTS} element={<AddAssessments />} />
-                  <Route path={routes.INSTRUCTOR.ANALYTICS} element={<Categories />} />
+                  <Route path={routes.INSTRUCTOR.ANALYTICS} element={<Analytics />} />
                   <Route path={routes.INSTRUCTOR.REQUESTS} element={<Requests />} />
                   <Route path={routes.INSTRUCTOR.COURSE_DETAIL} element={<CourseDetails />} />
                   <Route path={routes.INSTRUCTOR.CHAT} element={<InstructorChat />} />

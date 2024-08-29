@@ -24,7 +24,6 @@ const AdminTransaction = () => {
     useEffect(() => {
         if (allUsers.length <= 0) {
             dispatch(getAllUsers()).then((res) => {
-                console.log('response payload of allusers', res.payload)
                 setAllUsers(res.payload)
             })
         }
@@ -64,12 +63,34 @@ const AdminTransaction = () => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
-    const filteredTransactions = transactions.filter(
-        (transaction) =>
-            transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            transaction.user_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            transaction.course_id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const getCourseName = (courseId: string) => {
+        return allCourses?.find((course) => course._id == courseId)
+    }
+
+    const getUserName = (userId: string): string | null => {
+        if (!allUsers) return null;
+        const user = allUsers.find((user) => user._id === userId);
+        return user ? `${user.firstName} ${user.lastName}` : null;
+    };
+
+    const filteredTransactions = transactions.filter((transaction) => {
+        const lowerCaseSearchTerm = searchTerm?.toLowerCase() || "";
+    
+        const courseName = getCourseName(transaction.courseId)?.title?.toLowerCase() || "";
+        const userName = getUserName(transaction.userId)?.toLocaleLowerCase() || "";
+        const statusMatches = filters.status === "" || transaction.status === filters.status;
+        
+        return (
+            statusMatches &&
+            (
+                transaction.id.toLowerCase().includes(lowerCaseSearchTerm) ||
+                userName.includes(lowerCaseSearchTerm) ||
+                courseName.includes(lowerCaseSearchTerm)
+            )
+        );
+    });
+    
+
 
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
@@ -83,18 +104,8 @@ const AdminTransaction = () => {
         }
     };
 
-    const getCourseName = (courseId: string) => {
-        return allCourses?.find((course) => course._id == courseId)
-    }
-
-    const getUserName = (userId: string): string | null => {
-        if (!allUsers) return null;
-        const user = allUsers.find((user) => user._id === userId);
-        return user ? `${user.firstName} ${user.lastName}` : null;
-    };
-
     const csvData = filteredTransactions.map((transaction) => ({
-        Payment_id:transaction.id,
+        Payment_id: transaction.id,
         User: getUserName(transaction.userId) || 'Unknown User',
         Course: getCourseName(transaction.courseId)?.title,
         Amount: (transaction.amount / 100).toFixed(2),
@@ -104,7 +115,7 @@ const AdminTransaction = () => {
     }));
 
     const csvHeaders = [
-        { label: 'Payment_id', key:'Payment_id'},
+        { label: 'Payment_id', key: 'Payment_id' },
         { label: 'User', key: 'User' },
         { label: 'Course', key: 'Course' },
         { label: 'Amount', key: 'Amount' },
@@ -170,7 +181,7 @@ const AdminTransaction = () => {
                             filteredTransactions.map((transaction) => (
                                 <tr key={transaction.id}>
                                     <td className="border-t border-gray-200 px-6 py-4">
-                                        {getUserName(transaction.userId)}
+                                        {getUserName(transaction.userId)?.toLocaleUpperCase()}
                                     </td>
                                     <td className="border-t border-gray-200 px-6 py-4">{getCourseName(transaction.courseId)?.title}</td>
                                     <td className="border-t border-gray-200 px-6 py-4">{(transaction.amount / 100).toFixed(2)}</td>
@@ -198,7 +209,7 @@ const AdminTransaction = () => {
                         <button
                             key={i}
                             onClick={() => paginate(i + 1)}
-                            className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                            className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1 ? 'bg-medium-rose text-white' : 'bg-gray-200'}`}
                         >
                             {i + 1}
                         </button>
