@@ -222,6 +222,20 @@ export const getCourse= createAsyncThunk(
   }
 );
 
+export const getInstructorCourseDetailed= createAsyncThunk(
+  'course/getCourse',
+  async (instructorId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/course/courses/get-courses-detailed/${instructorId}`);
+      console.log('response of detailed course payemtn',response.data.courses)
+      return response.data.courses;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
 export const getAllCourses = createAsyncThunk(
   'course/getAllCourses',
   async ({ page, sort, filters }: { page: number; sort?: string; filters?: any }, { rejectWithValue }) => {

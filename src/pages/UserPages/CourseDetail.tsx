@@ -164,6 +164,7 @@ const CourseDetails: React.FC = () => {
   
         const paymentResponse = await dispatch(makePayment({
           user_id: user._id,
+          instructor_id:courseData.instructorRef,
           course_id: courseData._id,
           amount: courseData.pricing.amount,
           currency: 'inr',

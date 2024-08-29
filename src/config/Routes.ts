@@ -30,7 +30,6 @@ const routes = {
       ADD_LESSON: "/instructor/add-lesson",
       ASSESSMENTS: "/instructor/assessments",
       ADD_ASSESSMENTS: "/instructor/add-assessments",
-      ANALYTICS: "/instructor/analytics",
       REQUESTS: "/instructor/requests",
       COURSE_DETAIL: "/instructor/course-detail/:id",
       CHAT: "/instructor/chat",

@@ -65,6 +65,23 @@ export const getTransactions = createAsyncThunk(
   }
 )
 
+export const getInstructorCoursesTransaction = createAsyncThunk(
+  'payment/getInstructorCoursesTransaction',
+  async (instructorId:string, { rejectWithValue }) => {
+    try {
+      console.log('getinstructor payment called in slice',instructorId)
+      const response = await axiosInstance.get(`/payment/find-transactions/${instructorId}`);
+      console.log('instructor payment data',response.data)
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+)
+
 
 const paymentSlice = createSlice({
   name: 'payment',

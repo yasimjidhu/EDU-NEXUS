@@ -57,27 +57,7 @@ const Sidebar = () => {
                     </span>
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    to="/instructor/analytics"
-                    className={
-                      "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
-                    }
-                  >
-                    <svg
-                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M16 0H8C7.45 0 7 .45 7 1V23C7 23.55 7.45 24 8 24H16C16.55 24 17 23.55 17 23V1C17 .45 16.55 0 16 0ZM15 22H9V2H15V22ZM12 19C12.55 19 13 18.55 13 18V6C13 5.45 12.55 5 12 5C11.45 5 11 5.45 11 6V18C11 18.55 11.45 19 12 19Z" />
-                    </svg>
-                    <span className="flex-1 ml-3 whitespace-nowrap">
-                      Analytics
-                    </span>
-                  </Link>
-                </li>
+               
                 <li>
                   <Link
                     to="/instructor/assessments"
