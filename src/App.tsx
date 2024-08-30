@@ -50,6 +50,7 @@ import PrivateRoute from "./components/authentication/ProtectedRoute";
 import NotFound from "./components/common/NotFound";
 import Forbidden from "./components/common/Forbidden";
 import InstructorOverview from "./pages/Instructor/Overview";
+import StudentOverview from "./pages/UserPages/Overview";
 
 function App() {
   return (
@@ -108,6 +109,7 @@ function App() {
               <Route element={<PrivateRoute roles={['student']} />}>
                 <Route path={routes.STUDENT.ROOT} element={<Student />}>
                   <Route path={routes.STUDENT.PROFILE} element={<UserProfile />} />
+                  <Route path={routes.STUDENT.OVERVIEW} element={<StudentOverview />} />
                   <Route path={routes.STUDENT.MY_COURSES} element={<MyCourse />} />
                   <Route path={routes.STUDENT.CHAT} element={<ChatUI />} />
                 </Route>

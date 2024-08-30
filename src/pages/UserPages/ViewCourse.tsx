@@ -172,7 +172,7 @@ const ViewCourse: React.FC = () => {
     if (completedLessons.size === totalLesson && totalLesson > 0) {
       setCourseCompleted(true);
       if (user?._id) {
-        dispatch(updateAssessmentCompletion({ userId: user._id, courseId }));
+        dispatch(updateAssessmentCompletion({ userId: user._id, courseId,score:assessmentResult! }));
       }
     }
   }, [completedLessons, totalLesson, user, courseId, dispatch]);

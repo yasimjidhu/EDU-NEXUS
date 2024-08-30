@@ -11,13 +11,15 @@ export interface PaymentState {
   error: string | null;
   data:string;
   transactions:any[];
+  profit:number;
 }
 
 const initialState: PaymentState = {
   loading: false,
   error: null,
   data:"",
-  transactions:[]
+  transactions:[],
+  profit:0
 };
 
 export const makePayment = createAsyncThunk(
@@ -124,7 +126,21 @@ const paymentSlice = createSlice({
       .addCase(getTransactions.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+      .addCase(getInstructorCoursesTransaction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getInstructorCoursesTransaction.fulfilled, (state, action) => {
+        state.loading = false;
+        const profit = action.payload.reduce((sum:number,payment:any)=>sum + payment.instructorAmount / 100,0)
+        state.profit = profit
+      })
+      .addCase(getInstructorCoursesTransaction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      
   },
 });
 

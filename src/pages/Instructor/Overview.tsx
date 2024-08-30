@@ -8,16 +8,16 @@ import { AppDispatch, RootState } from '../../components/redux/store/store';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const CustomizedAxisTick = ({ x, y, payload }) => {
-  const maxChars = 15; // Adjust this value based on your needs
-  let displayName = payload.value;
-  if (displayName.length > maxChars) {
-    displayName = displayName.substring(0, maxChars) + '...';
-  }
-  return (
-    <Text x={x} y={y} dy={16} textAnchor="middle" fill="#666" fontSize={12}>
-      {displayName}
-    </Text>
-  );
+    const maxChars = 15; // Adjust this value based on your needs
+    let displayName = payload.value;
+    if (displayName.length > maxChars) {
+        displayName = displayName.substring(0, maxChars) + '...';
+    }
+    return (
+        <Text x={x} y={y} dy={16} textAnchor="middle" fill="#666" fontSize={12}>
+            {displayName}
+        </Text>
+    );
 };
 
 const InstructorOverview = () => {
@@ -52,7 +52,7 @@ const InstructorOverview = () => {
 
                 setCourseData(combinedData);
             } catch (err) {
-                setError('Failed to fetch data. Please try again later.');
+                setError('You dont have any uploaded courses, upload first');
                 console.error('Error fetching data:', err);
             } finally {
                 setIsLoading(false);
@@ -63,7 +63,16 @@ const InstructorOverview = () => {
     }, [dispatch, user?._id]);
 
     if (isLoading) return <div className="text-center p-4">Loading...</div>;
-    if (error) return <div className="text-center p-4 text-red-500">{error}</div>;
+    if (error) {
+        return (
+            <div className="w-full flex justify-center items-center">
+                <div className="w-[35%] text-center">
+                    <img src="/assets/images/nothing.png" alt="No Courses" className="mb-4 w-full" />
+                    <h4 className="text-xl">{error}</h4>
+                </div>
+            </div>
+        )
+    }
 
     const totalStudents = courseData.reduce((sum, course) => sum + course.studentsEnrolled, 0);
     const totalRevenue = courseData.reduce((sum, course) => sum + course.totalRevenue, 0);
@@ -74,14 +83,21 @@ const InstructorOverview = () => {
     return (
         <div className="p-4 bg-gray-100 min-h-screen">
             <h1 className="text-3xl font-bold mb-6">Instructor Analytics</h1>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {courseData.map((course, index) => (
                     <div key={index} className="bg-white p-4 rounded shadow">
                         <h2 className="text-xl font-semibold mb-2">{course.name}</h2>
                         <p>Students Enrolled: {course.studentsEnrolled}</p>
-                        <p>Revenue: ₹{course.instructorRevenue.toFixed(2)}</p>
                         <p>Average Rating: {course.averageRating.toFixed(1)}</p>
+                        <p className='mt-2'>
+                            Revenue:
+                            <span
+                                className={`ml-2 text-md inter ${course.instructorRevenue === 0 ? 'text-red-600' : 'text-green-600'}`}
+                            >
+                                ₹ {course.instructorRevenue.toFixed(2)}
+                            </span>
+                        </p>
                     </div>
                 ))}
             </div>
@@ -89,8 +105,8 @@ const InstructorOverview = () => {
             <div className="bg-white p-4 rounded shadow mb-6">
                 <h2 className="text-xl font-semibold mb-4">Overall Statistics</h2>
                 <p>Total Students: {totalStudents}</p>
-                <p>Total Revenue: ₹ {totalRevenue.toFixed(2)}</p>
                 <p>Average Rating: {averageRating}</p>
+                <p className='mt-2'> Total Revenue: <span className='text-xl inter text-green-600'>₹ {totalRevenue.toFixed(2)}</span></p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

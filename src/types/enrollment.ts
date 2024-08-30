@@ -11,4 +11,5 @@ export interface CheckEnrollment{
 export interface UpdateAssessmentPayload {
     userId: string;
     courseId: string;
+    score:number;
 }

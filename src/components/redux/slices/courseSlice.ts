@@ -248,6 +248,7 @@ export const getAllCourses = createAsyncThunk(
       });
 
       const response = await axiosInstance.get(`/course/courses?${queryParams}`);
+      console.log('rseponse of allcourses',response)
       return {
         courses: response.data.courses.allCourses,
         totalPages: Math.ceil(response.data.courses.totalCourses / 6)
@@ -349,7 +350,7 @@ export const updateLesson = createAsyncThunk(
   }
 );
 
-
+ 
 export const updateLessonProgress = createAsyncThunk(
   'course/updateLessonProgress',
   async ({ courseId,userId, lessonId, progress,totalLesson }: { courseId: string,userId:string, lessonId: string, progress: number,totalLesson:number }, { rejectWithValue }) => {
@@ -493,9 +494,9 @@ export const updateAssessmentCompletion = createAsyncThunk<
   }
 >(
   'course/update-assessment-completion',
-  async ({ userId, courseId }: UpdateAssessmentPayload, { rejectWithValue }) => {
+  async ({ userId, courseId,score }: UpdateAssessmentPayload, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post<EnrollmentEntity>(`/course/enrollments/update-completion`, { userId, courseId });
+      const response = await axiosInstance.post<EnrollmentEntity>(`/course/enrollments/update-completion`, { userId, courseId,score });
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {

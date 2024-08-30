@@ -38,6 +38,7 @@ const routes = {
     STUDENT: {
       ROOT: "/student",
       PROFILE: "/student/profile",
+      OVERVIEW: "/student/overview",
       COURSE_DETAIL: "/student/course-detail/:id",
       MY_COURSES: "/student/mycourses",
       CHAT:"/student/chat"

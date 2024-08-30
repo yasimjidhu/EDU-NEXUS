@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchUserData } from '../../components/redux/slices/studentSlice';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../components/redux/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { User } from '../../components/redux/slices/instructorSlice';
 import { 
   User as UserIcon, 
@@ -22,6 +22,8 @@ import {
 const InstructorProfile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const dispatch: AppDispatch = useDispatch();
+
+  const {profit} = useSelector((state:RootState)=>state.payment)
 
   useEffect(() => {
     dispatch(fetchUserData()).then((res) => setUser(res.payload))
@@ -90,9 +92,8 @@ const InstructorProfile: React.FC = () => {
             value={user.isGAuth ? 'Google Auth' : 'Standard'}
           />
           <StatusCard
-            icon={<DollarSign size={20} />}
             title="Profit"
-            value={user.profit ? `$${user.profit.toFixed(2)}` : 'N/A'}
+            value={profit ? `₹${profit.toFixed(2)}` : 'N/A'}
           />
           <StatusCard
             icon={<Globe size={20} />}
