@@ -24,7 +24,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
     const { user } = useSelector((state: RootState) => state.user)
     const { socket } = useSocket()
 
-    const handleMessageRead = (messageId: string,userId:string) => {
+    const handleMessageRead = (messageId: string, userId: string) => {
         if (!readMessages.has(messageId)) {
             setReadMessages((prevReadMessages) => {
                 const updatedReadMessages = new Set(prevReadMessages);
@@ -33,8 +33,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
             });
 
             if (socket) {
-                console.log('message read socket emited',messageId,userId)
-                socket.emit('messageRead', {messageId,userId});
+                socket.emit('messageRead', { messageId, userId });
             }
         }
     };
@@ -51,8 +50,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
                     const messageId = entry.target.getAttribute('data-message-id');
                     const senderId = entry.target.getAttribute('data-sender-id');
                     if (messageId && senderId !== user?._id) {
-                        console.log('handle message read called')
-                        handleMessageRead(messageId,user?._id!);
+                        handleMessageRead(messageId, user?._id!);
                     }
                 }
             });
@@ -161,5 +159,5 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
             <div ref={messagesEndRef}></div>
         </div>
     );
-    
+
 }

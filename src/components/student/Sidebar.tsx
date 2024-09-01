@@ -36,6 +36,7 @@ const Sidebar = () => {
                     </span>
                   </Link>
                 </li>
+
                 <li>
                   <Link
                     to="/student/mycourses"
@@ -57,27 +58,6 @@ const Sidebar = () => {
                     </span>
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    to="/student/analytics"
-                    className={
-                      "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
-                    }
-                  >
-                    <svg
-                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M16 0H8C7.45 0 7 .45 7 1V23C7 23.55 7.45 24 8 24H16C16.55 24 17 23.55 17 23V1C17 .45 16.55 0 16 0ZM15 22H9V2H15V22ZM12 19C12.55 19 13 18.55 13 18V6C13 5.45 12.55 5 12 5C11.45 5 11 5.45 11 6V18C11 18.55 11.45 19 12 19Z" />
-                    </svg>
-                    <span className="flex-1 ml-3 whitespace-nowrap">
-                      Analytics
-                    </span>
-                  </Link>
-                </li>
                
                 <li>
                   <Link
@@ -93,6 +73,27 @@ const Sidebar = () => {
                     />
                     <span className="flex-1 ml-3 whitespace-nowrap">
                       Messages
+                    </span>
+                  </Link>
+                </li>
+                <li className="">
+                  <Link
+                    to="/student/profile"
+                    className={
+                      "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
+                    }
+                  >
+                    <svg
+                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M14 2a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2Zm0 16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16Zm-3-4.5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 .5-.5Zm.5-4.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h6a.5.5 0 0 0 .5-.5Zm0-4.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h6a.5.5 0 0 0 .5-.5Zm4.5 9h-3v-3h-2v3h-3v2h3v3h2v-3h3v-2Z" />
+                    </svg>
+                    <span className="flex-1 ml-3 whitespace-nowrap">
+                      Profile
                     </span>
                   </Link>
                 </li>

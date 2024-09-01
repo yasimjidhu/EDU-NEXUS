@@ -51,6 +51,7 @@ import NotFound from "./components/common/NotFound";
 import Forbidden from "./components/common/Forbidden";
 import InstructorOverview from "./pages/Instructor/Overview";
 import StudentOverview from "./pages/UserPages/Overview";
+import PublicRoute from "./components/authentication/PublicRoute";
 
 function App() {
   return (
@@ -59,8 +60,10 @@ function App() {
         <ErrorBoundary>
           <Router>
             <Routes>
-              <Route path={routes.ROOT} element={<SignupPage />} />
-              <Route path={routes.LOGIN} element={<LoginPage />} />
+              <Route element={<PublicRoute restricted={true}/>}>
+                <Route path={routes.ROOT} element={<SignupPage />} />
+                <Route path={routes.LOGIN} element={<LoginPage />} />
+              </Route>
               <Route path={routes.HOME} element={<Home />} />
               <Route path={routes.VERIFY_OTP} element={<OtpVerify />} />
               <Route path={routes.GOOGLE_CALLBACK} element={<GoogleCallback />} />
@@ -125,9 +128,9 @@ function App() {
                 <Route path={routes.PUBLIC.SUCCESS} element={<PaymentSuccess />} />
               </Route> 
 
-              {/*  404 route */}
-              <Route path="*" element={<NotFound />} /> 
-              <Route path="/forbidden" element={<Forbidden />} /> 
+              {/*  404 route and 403 */}
+              <Route path={routes.RESTRICTED.NOTFOUND} element={<NotFound />} /> 
+              <Route path={routes.RESTRICTED.FORBIDDEN} element={<Forbidden />} /> 
             </Routes>
           </Router>
         </ErrorBoundary>

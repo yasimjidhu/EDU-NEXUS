@@ -62,6 +62,7 @@ export const Register = createAsyncThunk(
     try {
       console.log('register reached in frontend')
       const response = await axiosInstance.post('/user/register', payload.formData);
+      console.log('response of register',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -126,6 +127,7 @@ export const ApproveInstructor = createAsyncThunk(
   async (email: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/user/approve', email);
+      console.log('approve instructor response',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -178,6 +180,7 @@ const studentSlice = createSlice({
       })
       .addCase(Register.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
+        console.log('paylod of register in thunk',action.payload)
         state.user = action.payload.user;
         state.error = null;
       })

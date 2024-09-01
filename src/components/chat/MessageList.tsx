@@ -91,7 +91,6 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) =>
                 const messageId = entry.target.getAttribute('data-message-id');
                 const senderId = entry.target.getAttribute('data-sender-id');
                 if (messageId && senderId !== currentUserId) {
-                    console.log('handle message read called in group chat')
                     handleMessageRead(messageId,currentUserId!);
                 }
             }

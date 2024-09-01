@@ -146,6 +146,7 @@ const Courses: React.FC = () => {
     navigate(`/course-detail/${courseId}`);
   };
 
+  
   // Function to get instructor name by ID
   const getInstructorName = (instructorId: string) => {
     const instructor = allInstructors.find((inst) => inst._id === instructorId);

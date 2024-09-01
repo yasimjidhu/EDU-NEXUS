@@ -1,6 +1,7 @@
 export interface Message {
     id?: string;
     conversationId: string;
+    recipientEmail?:string;
     senderId: string;
     senderName?: string;
     senderProfile?: string;

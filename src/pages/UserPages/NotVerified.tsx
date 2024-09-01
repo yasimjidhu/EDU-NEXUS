@@ -7,12 +7,13 @@ import { RootState } from "../../components/redux/store/store";
 const NotVerified: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.user);
+  console.log('user in notverified',user)
 
   useEffect(() => {
     if (user?.isVerified) {
       navigate("/home");
     }
-  }, [user?.isVerified]); 
+  }, [user?.isVerified,navigate]); 
 
   return (
     <div>

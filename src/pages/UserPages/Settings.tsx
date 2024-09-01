@@ -60,6 +60,13 @@ const Settings: React.FC = () => {
     if (formData?.firstName !== user?.firstName) userUpdateData.firstName = formData?.firstName;
     if (formData?.lastName !== user?.lastName) userUpdateData.lastName = formData?.lastName;
     if (formData?.email !== user?.email) userUpdateData.email = formData?.email;
+    
+    if (formData?.contact?.phone !== user?.contact?.phone) {
+      userUpdateData.contact = {
+        ...user?.contact, // Ensure existing contact data is preserved
+        phone: formData?.contact?.phone,
+      };
+    }
   
     // Handle profile image update
     if (profileImage !== user?.profile?.avatar) {
@@ -73,9 +80,10 @@ const Settings: React.FC = () => {
           const gender = user?.profile?.gender ?? "";
   
           userUpdateData.profile = {
+            ...user?.profile, // Preserve existing profile data
             avatar: fileUrl,
-            dateOfBirth, // Default to empty string if undefined
-            gender, // Default to empty string if undefined
+            dateOfBirth,
+            gender,
           };
         }
       } catch (error) {
@@ -101,6 +109,7 @@ const Settings: React.FC = () => {
       toast.info("No changes to save.");
     }
   };
+  
   
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();

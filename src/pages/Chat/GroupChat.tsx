@@ -61,7 +61,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
   useEffect(() => {
     fetchGroupMessages(groupId)
   }, [groupId, dispatch])
-
+  
   useEffect(() => {
     if (audioBlob || selectedFile || inputMessage.trim() !== '') {
       handleSendMessage()
@@ -177,7 +177,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
   const handleAddStudents = () => {
     setIsAddModalOpen(true)
   }
-
+  console.log('groupdata',group)
   const handleOnAddStudents =async (userIds: string[]) => {
     try {
       await dispatch(addUsersToGroup({ groupId: groupData?._id!, userIds }));

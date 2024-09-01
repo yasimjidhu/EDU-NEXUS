@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
 import { User } from '../../components/redux/slices/studentSlice';
-import { addMessage, createGroup, getMessages, getUserJoinedGroups, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import { addMessage, createGroup, getMessages, getUserJoinedGroups, incrementUnreadCount, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useSocket } from '../../contexts/SocketContext';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { Group, Message } from '../../types/chat';
@@ -79,7 +79,38 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
 
   useEffect(() => {
     if (socket) {
+      // Handler for receiving new messages
+      const newMessageHandler = (newMessage: Message) => {
+        console.log('New message received in user-specific room:', newMessage);
+        
+        // Dispatch action to add message to Redux store
+        dispatch(addMessage(newMessage));
+        
+        // If the message is not from the currently selected conversation, mark as unread
+        if (newMessage.conversationId !== selectedConversationId) {
+          dispatch(incrementUnreadCount(newMessage.conversationId));
+        }
+  
+        // Optionally emit 'messageDelivered' if the sender needs confirmation
+        if (newMessage.senderId !== user?._id) {
+          socket.emit('messageDelivered', { messageId: newMessage._id, userId: user?._id });
+        }
+      };
+  
+      // Listen for 'newMessage' events
+      socket.on('newMessage', newMessageHandler);
+  
+      return () => {
+        socket.off('newMessage', newMessageHandler);
+      };
+    }
+  }, [socket, dispatch, selectedConversationId, user?._id]);
+  
+
+  useEffect(() => {
+    if (socket) {
       const messageHandler = (newMessage: Message) => {
+        console.log('new message recieved in user chat',newMessage)
         dispatch(addMessage(newMessage));
         if (newMessage.senderId !== user?._id) {
           socket.emit('messageDelivered', newMessage._id);
@@ -168,6 +199,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         conversationId,
         senderId: user?._id || '',
         senderName:`${user?.firstName} ${user?.lastName}`,
+        recipientEmail:selectedInstructor.email,
         senderProfile:user?.profile.avatar,
         text: inputMessage.trim(),
         fileUrl,

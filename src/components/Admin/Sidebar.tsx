@@ -112,19 +112,6 @@ const Sidebar = ({isActive}:status) => {
                 </li>
                 <li>
                   <Link
-                    to="/admin/complaints"
-                    className={
-                      isActive
-                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
-                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
-                    }
-                  >
-                  <img src="/assets/icon/chat.png" className='w-5 h-auto' alt="" />
-                    <span className="flex-1 ml-3 whitespace-nowrap">Complaints</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
                     to="/admin/transactions"
                     className={
                       isActive

@@ -60,6 +60,10 @@ const routes = {
       STUDENT: "/register/student",
       INSTRUCTOR: "/register/instructor",
     },
+    RESTRICTED:{
+      NOTFOUND:'*',
+      FORBIDDEN:'/forbidden'
+    }
   };
   
   export default routes;

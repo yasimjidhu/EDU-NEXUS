@@ -8,6 +8,7 @@ export interface ChatState {
   messages: Message[];
   messagedStudents: TStudent[];
   unreadMessages: UnreadMessage[];
+  unreadCounts: Record<string, number>; 
   group?: Group | null;
   groups?: Group[];
   loading: boolean;
@@ -18,6 +19,7 @@ const initialState: ChatState = {
   messages: [],
   messagedStudents: [],
   unreadMessages: [],
+  unreadCounts:{},
   group: null,
   groups: [],
   loading: false,
@@ -52,9 +54,7 @@ export const getUnreadMessages = createAsyncThunk(
   'chat/get-unread-messages',
   async (userId: string, { rejectWithValue }) => {
     try {
-      console.log('get unreade messages called in slice', userId)
       const response = await axiosInstance.get(`/chat/unread-messages/${userId}`);
-      console.log('respnose of unread in slice', response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -67,7 +67,7 @@ export const getMessagedStudents = createAsyncThunk(
   async (instructorId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/messaged-students/${instructorId}`);
-
+      console.log('response of messaged students fetch',response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -129,6 +129,7 @@ export const addUsersToGroup = createAsyncThunk(
   async ({ groupId, userIds }: { groupId: string, userIds: string[] }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(`/chat/addToGroup/${groupId}`, { userIds });
+      console.log('response of add user to group',response.data)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || 'Failed to add users');
@@ -159,7 +160,6 @@ const chatSlice = createSlice({
       state.messages.push(action.payload);
     },
     updateMessageStatus: (state, action: PayloadAction<Message>) => {
-      console.log('update message status reached', action.payload)
       const index = state.messages.findIndex((msg: any) => msg._id == action.payload._id)
       if (index !== -1) {
         state.messages[index].status = action.payload.status
@@ -209,8 +209,16 @@ const chatSlice = createSlice({
       if (conversation) {
         conversation.unreadCount = 0
       }
+      state.unreadCounts[conversationId] = 0;
     },
-
+    incrementUnreadCount: (state, action: PayloadAction<string>) => {
+      const conversationId = action.payload;
+      if (!state.unreadCounts[conversationId]) {
+        state.unreadCounts[conversationId] = 1;
+      } else {
+        state.unreadCounts[conversationId] += 1;
+      }
+    },
 
     clearUnreadMessages: (state) => {
       state.unreadMessages = [];
@@ -354,6 +362,14 @@ const chatSlice = createSlice({
 
 
 
-export const { addMessage, clearMessages, updateMessageStatus, clearGroup, markConversationAsRead, clearUnreadMessages } = chatSlice.actions;
+export const {
+  addMessage,
+  clearMessages,
+  updateMessageStatus,
+  clearGroup,
+  markConversationAsRead,
+  clearUnreadMessages,
+  incrementUnreadCount
+  } = chatSlice.actions;
 
 export default chatSlice.reducer;

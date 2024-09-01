@@ -102,7 +102,7 @@ const InstructorRegistration: React.FC = () => {
       }
     } catch (error: any) {
       console.error("Error during registration:", error);
-      toast.error("An error occurred during registration");
+      toast.error(error.response.data.error.message + " " + 'allowed types are pdf and docx');
     } finally {
       setSubmitting(false);
     }

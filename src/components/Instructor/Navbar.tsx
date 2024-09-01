@@ -59,7 +59,6 @@ const Navbar: React.FC = () => {
       navigate('/instructor/chat')
     }
   }
-
   
   const renderMessagePreview = (message: any) => {
     switch (message.fileType) {
@@ -160,7 +159,7 @@ const Navbar: React.FC = () => {
             </div>
             {/* Notification Dropdown */}
             {isNotificationOpen && unreadMessages.length > 0 && (
-              <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+              <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
                 <div className="bg-purple-500 text-white font-bold py-2 px-4">Notifications</div>
                 <div className="max-h-96 overflow-y-auto">
                   {userUnreadMessages.length > 0 ? (

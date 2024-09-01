@@ -146,6 +146,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
     }
   };
 
+  const handleCoursesClick = ()=>{
+    navigate('/allcourses')
+  }
 
   const handleViewAllClick = () => {
     if (user?.role == 'student') {
@@ -181,7 +184,6 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
     }
   };
 
-  console.log('unread medssages are', unreadMessages)
 
   return (
     <>
@@ -191,10 +193,10 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
         </div>
         <div className="w-2/5">
           <ul className="flex justify-around items-center space-x-4">
-            <li className="text-md font-medium inter bg-purple-500 text-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-purple-500 text-white p-2 rounded-xl cursor-pointer">
               Home
             </li>
-            <li className="text-md font-medium inter bg-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-white p-2 rounded-xl cursor-pointer" onClick={handleCoursesClick}>
               Courses
             </li>
             <li className="text-md font-medium inter bg-white p-2 rounded-xl">
@@ -292,8 +294,8 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
                     </span>
                   )}
                 </div>
-                {isNotificationOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                {isNotificationOpen && unreadMessages.length > 0 && (
+                  <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
                     <div className="bg-purple-500 text-white font-bold py-2 px-4">Notifications</div>
                     <div className="max-h-96 overflow-y-auto">
                       {userUnreadMessages.length > 0 ? (

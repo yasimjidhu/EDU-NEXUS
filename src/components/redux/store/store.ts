@@ -25,7 +25,6 @@ const persistConfig = {
   key: "root",
   storage: storage,
   whitelist: ['auth', 'otp', 'course', 'instructor', 'category'], 
-  blacklist: ['user'], 
 };
 
 const rootReducer = combineReducers({
