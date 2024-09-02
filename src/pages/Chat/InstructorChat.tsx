@@ -39,13 +39,13 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   const [audioDuration, setAudioDuration] = useState(0);
   const [joinedGroups, setJoinedGroups] = useState<Group[]>([])
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
-  const [selectedConversationId,setSelectedConversationId] = useState<string>('')
+  const [selectedConversationId, setSelectedConversationId] = useState<string>('')
   const [showMessages, setShowMessages] = useState<"user" | "group" | ''>('')
-  const [clickedItem,setClickedItem] = useState<'students'|'group'|''|'instructor'>('')
+  const [clickedItem, setClickedItem] = useState<'students' | 'group' | '' | 'instructor'>('')
 
 
   const { user } = useSelector((state: RootState) => state.user);
-  const { messages, loading, error,groups } = useSelector((state: RootState) => state.chat);
+  const { messages, loading, error, groups } = useSelector((state: RootState) => state.chat);
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()
@@ -74,24 +74,24 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       // Handler for receiving new messages
       const newMessageHandler = (newMessage: Message) => {
         console.log('New message received in user-specific room:', newMessage);
-        
+
         // Dispatch action to add message to Redux store
         dispatch(addMessage(newMessage));
-        
+
         // If the message is not from the currently selected conversation, mark as unread
         if (newMessage.conversationId !== selectedConversationId) {
           dispatch(incrementUnreadCount(newMessage.conversationId));
         }
-  
+
         // Optionally emit 'messageDelivered' if the sender needs confirmation
         if (newMessage.senderId !== user?._id) {
           socket.emit('messageDelivered', { messageId: newMessage._id, userId: user?._id });
         }
       };
-  
+
       // Listen for 'newMessage' events
       socket.on('newMessage', newMessageHandler);
-  
+
       return () => {
         socket.off('newMessage', newMessageHandler);
       };
@@ -101,7 +101,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   useEffect(() => {
     if (socket) {
       const messageHandler = (newMessage: Message) => {
-        console.log('new message recieved in instructor chat',newMessage)
+        console.log('new message recieved in instructor chat', newMessage)
         dispatch(addMessage(newMessage));
         if (newMessage.senderId !== user?._id) {
           socket.emit('messageDelivered', newMessage._id);
@@ -138,12 +138,12 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     };
   }, []);
 
-  
-  useEffect(()=>{
-    if(showMessages.trim() !== '' && selectedConversationId.trim() !== ''){
-      dispatch(markConversationAsRead({conversationId:selectedConversationId,item:showMessages}))
+
+  useEffect(() => {
+    if (showMessages.trim() !== '' && selectedConversationId.trim() !== '') {
+      dispatch(markConversationAsRead({ conversationId: selectedConversationId, item: showMessages }))
     }
-  },[showMessages,selectedConversationId])
+  }, [showMessages, selectedConversationId])
 
   useEffect(() => {
     if (selectedStudent && socket) {
@@ -183,13 +183,13 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           return; // Exit if upload fails
         }
       }
-      console.log('recipient email is',selectedStudent.email)
-      const messageData:Message = {
+      console.log('recipient email is', selectedStudent.email)
+      const messageData: Message = {
         conversationId,
         senderId: user?._id || '',
-        senderName:`${user?.firstName} ${user?.lastName}`,
-        recipientEmail:selectedStudent.email,
-        senderProfile:user?.profile.avatar,
+        senderName: `${user?.firstName} ${user?.lastName}`,
+        recipientEmail: selectedStudent.email,
+        senderProfile: user?.profile.avatar,
         text: inputMessage.trim(),
         fileUrl,
         fileType,
@@ -199,7 +199,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       try {
         const response = await dispatch(sendMessage(messageData));
         const savedMessage = response.payload;
-        console.log('savedmessage in db',savedMessage)
+        console.log('savedmessage in db', savedMessage)
         socket.emit('message', savedMessage);
         setInputMessage('');
         setSelectedFile(null);
@@ -219,7 +219,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       }
     }
   };
-  
+
   const handleFileSelect = (file: File) => {
     if (file) {
       setSelectedFile(file);
@@ -269,7 +269,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   }
 
   const handleSelectStudent = (student: User) => {
-    console.log('selected student',student)
+    console.log('selected student', student)
     const conversationid = [user?._id, student._id].sort().join('-');
     setSelectedConversationId(conversationid)
     setSelectedStudent(student)
@@ -288,7 +288,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     setAudioBlob(blob)
   }
 
-  const handleClickEntity = (item: 'students' | 'group'|'instructor')=>{
+  const handleClickEntity = (item: 'students' | 'group' | 'instructor') => {
     setClickedItem(item)
   }
 
@@ -297,12 +297,12 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       <div className="w-1/4 bg-white border-r border-gray-200">
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Chats</h2>
-          <div className="flex items-center">
+          <div className="flex justify-between items-center">
             <button
-              className="inter text-md bg-strong-rose text-white px-4 py-2 rounded-full flex items-center"
+              className="inter text-md bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-2 rounded-full flex items-center shadow-lg transition-colors duration-300 ease-in-out hover:bg-pink-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-pink-300"
               onClick={() => setIsModalOpen(true)}
             >
-              <Plus className="mr-2" /> Create Group
+              <Plus className="" /> Create Group
             </button>
           </div>
         </div>
@@ -337,11 +337,11 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       <div className="flex-1 flex flex-col">
         {/* Render Group Chat UI if a group is selected */}
         {showMessages == "group" && selectedGroup ? (
-          <GroupChat id={selectedGroup._id!} 
-          userId={user?._id!}/>
+          <GroupChat id={selectedGroup._id!}
+            userId={user?._id!} />
         ) : showMessages == "user" && selectedStudent ? (
           <>
-          
+
             {/* Chat Header */}
             <Header
               isTyping={isTyping}
@@ -386,8 +386,8 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
               {clickedItem === "students"
                 ? "Select a student to start chatting"
                 : clickedItem === "group"
-                ? "Select a group to start chatting"
-                : "Please select a chat to start messaging"}
+                  ? "Select a group to start chatting"
+                  : "Please select a chat to start messaging"}
             </p>
           </div>
         )}

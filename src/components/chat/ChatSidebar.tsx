@@ -27,6 +27,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   user,
 }) => {
   const [showGroups, setShowGroups] = useState(false);
+  const [userJoinedGroups,setUserJoinedGroups] = useState<Group[]>([])
 
   const dispatch: AppDispatch = useDispatch();
   const userData = useSelector((state: RootState) => state.user);
@@ -76,20 +77,6 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       return timestampB - timestampA;
     });
   }, [messagedStudents, getLatestMessageTimestamp, userData.user?._id]);
-
-  const renderLatestMessage = (conversationId: string) => {
-    const latestMessage = messages
-      .filter((msg) => msg.conversationId === conversationId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-    if (latestMessage) {
-      return (
-        <p className="text-sm text-gray-500 truncate">
-          {latestMessage.text || (latestMessage.fileType ? `[${latestMessage.fileType}]` : 'New message')}
-        </p>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">

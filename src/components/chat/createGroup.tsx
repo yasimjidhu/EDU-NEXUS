@@ -21,7 +21,8 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
-  const {user}  = useSelector((state:RootState)=>state.user)
+  
+  const { user } = useSelector((state: RootState) => state.user);
   const { response, error, loading: uploadLoading, sendRequest } = useAxios({
     method: 'POST',
     url: import.meta.env.VITE_CLOUDINARY_UPLOAD_URL,
@@ -44,26 +45,25 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
     }
   }, [response]);
 
-  useEffect(() => {
-    if (uploadedImageUrl) {
-      onCreateGroup({
-        name: groupName,
-        description: groupDescription,
-        image: uploadedImageUrl,
-        members: selectedStudents,
-      });
-      setLoading(false);
-      handleClose();
-    }
-  }, [uploadedImageUrl, groupName, groupDescription, selectedStudents, onCreateGroup, handleClose]);
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setGroupImage(file);
       const reader = new FileReader();
       reader.onloadend = () => setImageUrl(reader.result as string);
       reader.readAsDataURL(file);
+
+      // Proceed with uploading the image
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+      try {
+        await sendRequest({ data: formData });
+      } catch (err) {
+        console.error('Image upload failed:', error);
+        // Handle the error appropriately
+      }
     }
   };
 
@@ -79,25 +79,18 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
     e.preventDefault();
     setLoading(true);
 
-    if (groupImage) {
-      const formData = new FormData();
-      formData.append('file', groupImage);
-      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-
-      try {
-        await sendRequest({ data: formData });
-      } catch (err) {
-        console.error('Image upload failed:', error);
-        setLoading(false);
-      }
-    } else {
-      // If no image to upload, create group immediately
+    try {
+      // Proceed with group creation
       onCreateGroup({
         name: groupName,
         description: groupDescription,
-        image: null,
+        image: uploadedImageUrl || null, // Ensure image URL is available
         members: selectedStudents,
       });
+    } catch (err) {
+      console.error('Group creation failed:', error);
+      // Handle the error appropriately
+    } finally {
       setLoading(false);
       handleClose();
     }
@@ -114,6 +107,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
       setUploadedImageUrl(null);
     }
   }, [show]);
+
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -164,6 +158,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
                         <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageUpload} accept="image/*" />
                       </label>
                     </div>
+                    {loading ? 'Loading ...' : ''}
                   </div>
                   <div className="mb-4">
                     <label htmlFor="groupDescription" className="block text-sm inter text-gray-700">
@@ -186,17 +181,28 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
                         <div
                           key={student._id}
                           onClick={() => handleStudentSelection(student._id)}
-                          className={`flex items-center p-2 cursor-pointer hover:bg-gray-50 ${selectedStudents.includes(student._id) ? 'bg-indigo-50' : ''}`}
+                          className={`flex justify-between items-center p-2 cursor-pointer hover:bg-gray-50 ${selectedStudents.includes(student._id) ? 'bg-indigo-50' : ''}`}
                         >
-                          <input
-                            type="checkbox"
-                            checked={selectedStudents.includes(student._id)}
-                            onChange={() => {}}
-                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                          />
-                          <label className="ml-3 block text-sm font-medium text-gray-700">
-                            {student.firstName} {student.lastName}
-                          </label>
+                          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 flex-shrink-0">
+                            <img
+                              src={student.profile?.avatar || '/default-avatar.png'}
+                              alt={`${student.firstName} ${student.lastName}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className='w-2/3'>
+                            <label className="ml-3 block text-sm font-medium text-gray-700">
+                              {student.firstName} {student.lastName}
+                            </label>
+                          </div>
+                          <div className='flex justify-end w-[50%] '>
+                            <input
+                              type="checkbox"
+                              checked={selectedStudents.includes(student._id)}
+                              onChange={() => { }}
+                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            />
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -204,7 +210,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
                   <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <button
                       type="submit"
-                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-medium-rose text-base font-medium text-white hover:bg-strong-rose focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
                       disabled={loading || uploadLoading}
                     >
                       {loading || uploadLoading ? 'Creating...' : 'Create Group'}

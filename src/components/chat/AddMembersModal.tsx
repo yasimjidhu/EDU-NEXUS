@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../../types/user';
+import { toast } from 'react-toastify';
 
 interface AddMembersModalProps {
   isOpen: boolean;
@@ -24,9 +25,13 @@ const AddMembersModal: React.FC<AddMembersModalProps> = ({ isOpen, onClose, user
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen){
+    console.log('not open')
+    return 
+  } 
 
   if(users.length == 0){
+    toast.warning('all your contacts were already jouined in this group')
     return 
   }
 
@@ -67,7 +72,7 @@ const AddMembersModal: React.FC<AddMembersModalProps> = ({ isOpen, onClose, user
           </button>
           <button
             onClick={handleAddUsers}
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
+            className="bg-medium-rose hover:bg-strong-rose text-white py-2 px-4 rounded-md"
           >
             Add Users
           </button>

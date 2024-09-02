@@ -61,7 +61,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
   useEffect(() => {
     fetchGroupMessages(groupId)
   }, [groupId, dispatch])
-  
+
   useEffect(() => {
     if (audioBlob || selectedFile || inputMessage.trim() !== '') {
       handleSendMessage()
@@ -177,8 +177,8 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
   const handleAddStudents = () => {
     setIsAddModalOpen(true)
   }
-  console.log('groupdata',group)
-  const handleOnAddStudents =async (userIds: string[]) => {
+  console.log('groupdata', group)
+  const handleOnAddStudents = async (userIds: string[]) => {
     try {
       await dispatch(addUsersToGroup({ groupId: groupData?._id!, userIds }));
 
@@ -190,7 +190,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
         }
         return prev;
       });
-  
+
       // Show success toast message
       toast.success('Students added to group successfully');
     } catch (error) {
@@ -212,25 +212,25 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
     });
   };
 
-// Logic to get unjoined users
-const unjoinedUsersInGroup = () => {
-  if (!groupData || !messagedStudents) return [];
+  // Logic to get unjoined users
+  const unjoinedUsersInGroup = () => {
+    if (!groupData || !messagedStudents) return [];
 
-  // Filter messagedStudents to get users not in groupData.members
-  const unjoinedUsers = messagedStudents.filter(student => 
-    !groupData.members.includes(student._id)
-  );
+    // Filter messagedStudents to get users not in groupData.members
+    const unjoinedUsers = messagedStudents.filter(student =>
+      !groupData.members.includes(student._id)
+    );
 
-  return unjoinedUsers; 
-};
+    return unjoinedUsers;
+  };
 
- 
+
 
   return (
-    <div className="flex h-screen bg-[#e5ddd5]">
+    <div className="flex h-screen bg-slate-200">
       <div className="flex flex-col flex-grow">
         {/* Group header */}
-        <div className="bg-[#075e54] p-3 text-white flex items-center justify-between rounded-xs">
+        <div className="bg-slate-50 p-3 text-black flex items-center justify-between rounded-xs">
           <div className="flex items-center">
             <div className="w-10 h-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
               <img src={groupData?.image} alt="" className="w-full h-full object-cover rounded-full" />
@@ -242,7 +242,7 @@ const unjoinedUsersInGroup = () => {
           </div>
           <div className="flex space-x-4">
             <UserPlus size={20} className="cursor-pointer" onClick={handleAddStudents} />
-            <LogOut size={20} className="cursor-pointer" onClick={handleLeaveGroup}/>
+            <LogOut size={20} className="cursor-pointer" onClick={handleLeaveGroup} />
             <MoreVertical size={20} className="cursor-pointer" />
           </div>
         </div>
@@ -254,12 +254,12 @@ const unjoinedUsersInGroup = () => {
         </div>
 
         {/* Modal for adding students to group */}
-        {isAddModalOpen && 
-        <AddMembersModal
-          isOpen={isAddModalOpen}
-          users={unjoinedUsersInGroup()}
-          onAddUsers={handleOnAddStudents}
-          onClose={() => setIsAddModalOpen(false)} />
+        {isAddModalOpen &&
+          <AddMembersModal
+            isOpen={isAddModalOpen}
+            users={unjoinedUsersInGroup()}
+            onAddUsers={handleOnAddStudents}
+            onClose={() => setIsAddModalOpen(false)} />
         }
 
         {/* Loading Indicator */}

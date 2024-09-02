@@ -171,6 +171,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   };
 
   const handleCoursesClick = () => {
+    if(!user){
+      return
+    }
     navigate('/allcourses')
   }
 
