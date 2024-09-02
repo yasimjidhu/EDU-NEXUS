@@ -1,9 +1,14 @@
+import { incrementUnreadCount } from "../components/redux/slices/chatSlice";
+import { AppDispatch } from "../components/redux/store/store";
 import { useState,useEffect,useRef,useCallback } from "react";
+import { useDispatch } from "react-redux";
 
 const useWebSocket = (url:string)=>{
     const [messages,setMessages] = useState<any[]>([])
     const [isConnected,setIsConnected] = useState(false)
     const socketRef = useRef<WebSocket | null >(null)
+
+    const dispatch: AppDispatch = useDispatch();
 
     useEffect(()=>{
         socketRef.current = new WebSocket(url)
@@ -19,6 +24,8 @@ const useWebSocket = (url:string)=>{
         socketRef.current.onmessage = (event)=>{
             const message = JSON.parse(event.data)
             setMessages((prevMessages)=>[...prevMessages,message])
+            console.log('message in socket',message)
+            dispatch(incrementUnreadCount(message.conversationId))
         }
         socketRef.current.onerror = (error)=>{
             console.log('Web socket error',error)

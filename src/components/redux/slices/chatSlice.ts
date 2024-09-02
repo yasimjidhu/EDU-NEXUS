@@ -219,6 +219,44 @@ const chatSlice = createSlice({
         state.unreadCounts[conversationId] += 1;
       }
     },
+    updateUnreadMessages: (state, action: PayloadAction<Message>) => {
+      console.log('update unread messages reached', action.payload)
+      const newMessage = action.payload;
+      const existingUnreadMessage = state.unreadMessages.find(
+        (msg) => msg.conversationId === newMessage.conversationId
+      );
+      console.log('existingUnreadMessage is ',existingUnreadMessage)
+      if (existingUnreadMessage) {
+        // Update the latest message and increment unread count
+        existingUnreadMessage.latestMessage = {
+          _id: newMessage._id!,
+          senderId: newMessage.senderId,
+          senderName: newMessage.senderName!,
+          senderProfile: newMessage.senderProfile!,
+          text: newMessage.text || null,
+          fileUrl: newMessage.fileUrl || null,
+          fileType: newMessage.fileType || null,
+          createdAt: newMessage.createdAt?.toString() || '',
+        };
+        existingUnreadMessage.unreadCount += 1;
+      } else {
+        // Add a new unread message entry
+        state.unreadMessages.push({
+          conversationId: newMessage.conversationId,
+          unreadCount: 1,
+          latestMessage: {
+            _id: newMessage._id!,
+            senderId: newMessage.senderId,
+            senderName: newMessage.senderName!,
+            senderProfile: newMessage.senderProfile!,
+            text: newMessage.text || null,
+            fileUrl: newMessage.fileUrl || null,
+            fileType: newMessage.fileType || null,
+            createdAt: newMessage.createdAt?.toString() || '',
+          },
+        });
+      }
+    },
 
     clearUnreadMessages: (state) => {
       state.unreadMessages = [];
@@ -369,7 +407,8 @@ export const {
   clearGroup,
   markConversationAsRead,
   clearUnreadMessages,
-  incrementUnreadCount
+  incrementUnreadCount,
+  updateUnreadMessages
   } = chatSlice.actions;
 
 export default chatSlice.reducer;

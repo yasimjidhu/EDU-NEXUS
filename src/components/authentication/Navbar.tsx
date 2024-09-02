@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../../index.css";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutAdmin } from "../redux/slices/authSlice";
@@ -10,9 +10,10 @@ import { fetchUserData, clearUserState } from "../redux/slices/studentSlice";
 import { clearInstructorState } from "../redux/slices/instructorSlice";
 import useDebounce from "../../hooks/useDebounce";
 import { CourseState, searchCourses } from "../redux/slices/courseSlice";
-import { ArrowDownCircle, Bell, Image, Headphones, FileText } from "lucide-react";
-import { clearUnreadMessages, getUnreadMessages } from "../redux/slices/chatSlice";
-import { UnreadMessage } from "../../types/chat";
+import { ArrowDownCircle, Image, Headphones, FileText } from "lucide-react";
+import { addMessage, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
+import { Message, UnreadMessage } from "../../types/chat";
+import { useSocket } from "../../contexts/SocketContext";
 
 interface NavbarProps {
   isAuthenticated: boolean;
@@ -29,7 +30,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
 
   const { user, allUsers } = useSelector((state: RootState) => state.user);
   const authData = useSelector((state: RootState) => state.auth);
-  const { unreadMessages } = useSelector((state: RootState) => state.chat);
+  const { unreadMessages, unreadCounts } = useSelector((state: RootState) => state.chat);
+  const { socket, onlineUsers } = useSocket();
+
 
   const navigate = useNavigate();
   type AppDispatch = ThunkDispatch<any, any, any>;
@@ -53,6 +56,29 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
       (dispatch as AppDispatch)(fetchUserData());
     }
   }, [authData.email, isAuthenticated, dispatch]);
+
+  useEffect(() => {
+    if (socket) {
+      console.log('unread message in nvbar are',unreadMessages)
+      const newMessageHandler = (newMessage: Message) => {
+        console.log('new message reached in navbar',newMessage)
+        dispatch(addMessage(newMessage));
+        if (newMessage.conversationId.includes(user?._id!)) {
+          dispatch(incrementUnreadCount(newMessage.conversationId));
+        }
+        if (newMessage.senderId !== user?._id) {
+          dispatch(updateUnreadMessages(newMessage))
+          socket.emit('messageDelivered', { messageId: newMessage._id, userId: user?._id });
+        }
+      };
+
+      socket.on('newMessage', newMessageHandler);
+
+      return () => {
+        socket.off('newMessage', newMessageHandler);
+      };
+    }
+  }, [socket, dispatch, user?._id]);
 
   useEffect(() => {
     if (debouncedSearchQuery) {
@@ -81,17 +107,15 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
     setIsNotificationOpen(!isNotificationOpen);
   };
 
+
   const filteredUnreadMessages = () => {
 
-    const userUnreadMessages = unreadMessages.filter((item) => {
+    const usersUnreadMessages = unreadMessages.filter((item) => {
       const [id1, id2] = item.conversationId.split("-");
-      console.log('id1', id1)
-      console.log('id1', id2)
       // Check if the current user's ID is present in the conversation ID
       return id1 === user?._id || id2 === user?._id;
     });
-    console.log('userUnread messages filtered', userUnreadMessages)
-    return userUnreadMessages;
+    return usersUnreadMessages;
   };
 
 
@@ -146,7 +170,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
     }
   };
 
-  const handleCoursesClick = ()=>{
+  const handleCoursesClick = () => {
     navigate('/allcourses')
   }
 
@@ -157,7 +181,12 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
       navigate('/instructor/chat')
     }
   }
-  const totalUnreadMessages = unreadMessages.reduce((total, msg) => total + msg.unreadCount, 0);
+
+  const totalUnreadMessages = useMemo(() => {
+    const values =  Object.values(unreadCounts).reduce((total, count) => total + count, 0)
+    console.log('values',values)
+    return values
+  }, [unreadCounts])
 
   const renderMessagePreview = (message: any) => {
     switch (message.fileType) {
@@ -183,7 +212,6 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
         );
     }
   };
-
 
   return (
     <>
@@ -289,7 +317,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
                     alt="Notifications"
                   />
                   {totalUnreadMessages > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full px-2 py-1">
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
                       {totalUnreadMessages}
                     </span>
                   )}
@@ -298,8 +326,8 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
                   <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
                     <div className="bg-purple-500 text-white font-bold py-2 px-4">Notifications</div>
                     <div className="max-h-96 overflow-y-auto">
-                      {userUnreadMessages.length > 0 ? (
-                        userUnreadMessages.map((message, index) => (
+                      {unreadMessages.length > 0 ? (
+                        unreadMessages.map((message, index) => (
                           <div key={index} className="flex items-center p-3 hover:bg-gray-50 border-b border-gray-100">
                             <img
                               src={message.latestMessage.senderProfile || '/assets/png/user.png'}
@@ -308,9 +336,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
                             />
                             <div className="flex-1">
                               <p className="font-semibold text-sm">{message.latestMessage.senderName}</p>
-                              {message.latestMessage.text !== "" ?(
+                              {message.latestMessage.text !== "" ? (
                                 <p className=" text-sm">{message.latestMessage.text}</p>
-                              ):(
+                              ) : (
                                 renderMessagePreview(message.latestMessage)
                               )}
                             </div>

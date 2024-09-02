@@ -1,23 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutUser } from "../redux/slices/authSlice";
 import { AppDispatch, RootState } from "../redux/store/store";
-import { getUnreadMessages } from "../redux/slices/chatSlice";
-import { UnreadMessage } from "../../types/chat";
+import { addMessage, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
+import { Message, UnreadMessage } from "../../types/chat";
 import { FileText, Headphones, Image } from "lucide-react";
+import { useSocket } from "../../contexts/SocketContext";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
-  const [userUnreadMessages,setUserUnreadMessages] = useState<UnreadMessage[]>([])
+  const [userUnreadMessages, setUserUnreadMessages] = useState<UnreadMessage[]>([])
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
 
   const { user, allUsers } = useSelector((state: RootState) => state.user);
-  const { unreadMessages } = useSelector((state: RootState) => state.chat);
+  const { unreadMessages, unreadCounts } = useSelector((state: RootState) => state.chat);
+  const { socket, onlineUsers } = useSocket();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -52,6 +54,29 @@ const Navbar: React.FC = () => {
     }
   }, [dispatch, user?._id])
 
+  useEffect(() => {
+    if (socket) {
+      console.log('unread message in nvbar are', unreadMessages)
+      const newMessageHandler = (newMessage: Message) => {
+        console.log('new message reached in navbar', newMessage)
+        dispatch(addMessage(newMessage));
+        if (newMessage.conversationId.includes(user?._id!)) {
+          dispatch(incrementUnreadCount(newMessage.conversationId));
+        }
+        if (newMessage.senderId !== user?._id) {
+          dispatch(updateUnreadMessages(newMessage))
+          socket.emit('messageDelivered', { messageId: newMessage._id, userId: user?._id });
+        }
+      };
+
+      socket.on('newMessage', newMessageHandler);
+
+      return () => {
+        socket.off('newMessage', newMessageHandler);
+      };
+    }
+  }, [socket, dispatch, user?._id]);
+
   const handleViewAllClick = () => {
     if (user?.role == 'student') {
       navigate('/student/chat')
@@ -59,7 +84,7 @@ const Navbar: React.FC = () => {
       navigate('/instructor/chat')
     }
   }
-  
+
   const renderMessagePreview = (message: any) => {
     switch (message.fileType) {
       case 'image':
@@ -86,19 +111,23 @@ const Navbar: React.FC = () => {
   };
 
   const filteredUnreadMessages = () => {
-  
+
     const userUnreadMessages = unreadMessages.filter((item) => {
       const [id1, id2] = item.conversationId.split("-");
-  
+
       // Check if the current user's ID is present in the conversation ID
       return id1 === user?._id || id2 === user?._id;
     });
-  
+
     return userUnreadMessages;
   };
 
 
-  const totalUnreadMessages = unreadMessages.reduce((total, msg) => total + msg.unreadCount, 0);
+  const totalUnreadMessages = useMemo(() => {
+    const values = Object.values(unreadCounts).reduce((total, count) => total + count, 0)
+    console.log('values', values)
+    return values
+  }, [unreadCounts])
 
   return (
     <div className="bg-white border-b border-gray-200 shadow-lg ml-52">
@@ -162,8 +191,8 @@ const Navbar: React.FC = () => {
               <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
                 <div className="bg-purple-500 text-white font-bold py-2 px-4">Notifications</div>
                 <div className="max-h-96 overflow-y-auto">
-                  {userUnreadMessages.length > 0 ? (
-                    userUnreadMessages.map((message, index) => (
+                  {unreadMessages.length > 0 ? (
+                    unreadMessages.map((message, index) => (
                       <div key={index} className="flex items-center p-3 hover:bg-gray-50 border-b border-gray-100">
                         <img
                           src={message.latestMessage.senderProfile || '/assets/png/user.png'}
@@ -172,11 +201,11 @@ const Navbar: React.FC = () => {
                         />
                         <div className="flex-1">
                           <p className="font-semibold text-sm">{message.latestMessage.senderName}</p>
-                          {message.latestMessage.text !== "" ?(
-                                <p className=" text-sm">{message.latestMessage.text}</p>
-                              ):(
-                                renderMessagePreview(message.latestMessage)
-                              )}
+                          {message.latestMessage.text !== "" ? (
+                            <p className=" text-sm">{message.latestMessage.text}</p>
+                          ) : (
+                            renderMessagePreview(message.latestMessage)
+                          )}
                         </div>
                         <span className="text-xs text-purple-500 font-semibold">{message.unreadCount}</span>
                       </div>
