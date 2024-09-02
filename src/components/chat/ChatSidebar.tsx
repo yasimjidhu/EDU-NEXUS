@@ -27,8 +27,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   user,
 }) => {
   const [showGroups, setShowGroups] = useState(false);
-  const [userJoinedGroups,setUserJoinedGroups] = useState<Group[]>([])
-
+  
   const dispatch: AppDispatch = useDispatch();
   const userData = useSelector((state: RootState) => state.user);
   const { messages, groups, unreadCounts } = useSelector((state: RootState) => state.chat);

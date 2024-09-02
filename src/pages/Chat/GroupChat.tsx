@@ -74,6 +74,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
     socket.emit('joinGroup', groupId);
 
     socket.on('groupMessage', (msg: Message) => {
+      console.log('group message in group chat',msg)
       setGroupMessages((prev) => [...prev, msg]);
     });
 
@@ -139,7 +140,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
       try {
         const response = await dispatch(sendMessage(messageData));
         const savedMessage = response.payload;
-
+        console.log('saved message form group chat',savedMessage,groupData?._id)
         socket.emit('groupMessage', groupData?._id, savedMessage);
 
         // Reset input and file states
@@ -177,7 +178,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
   const handleAddStudents = () => {
     setIsAddModalOpen(true)
   }
-  console.log('groupdata', group)
+  
   const handleOnAddStudents = async (userIds: string[]) => {
     try {
       await dispatch(addUsersToGroup({ groupId: groupData?._id!, userIds }));

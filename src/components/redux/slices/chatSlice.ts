@@ -8,6 +8,7 @@ export interface ChatState {
   messages: Message[];
   messagedStudents: TStudent[];
   unreadMessages: UnreadMessage[];
+  unreadGroupMessages: Record<string, number>;
   unreadCounts: Record<string, number>;
   group?: Group | null;
   groups?: Group[];
@@ -19,6 +20,7 @@ const initialState: ChatState = {
   messages: [],
   messagedStudents: [],
   unreadMessages: [],
+  unreadGroupMessages: {},
   unreadCounts: {},
   group: null,
   groups: [],
@@ -264,6 +266,51 @@ const chatSlice = createSlice({
     clearUnreadMessages: (state) => {
       state.unreadMessages = [];
     },
+    addGroupMessage: (state, action: PayloadAction<Message>) => {
+      const message = action.payload;
+      const { conversationId } = message;
+
+      // Find the existing unread message entry
+      const existingUnread = state.unreadMessages.find(
+        (msg) => msg.conversationId === conversationId
+      );
+
+      if (existingUnread) {
+        // Update the unread count and latest message
+        existingUnread.unreadCount += 1;
+        existingUnread.latestMessage = {
+          _id: message._id || "",
+          senderId: message.senderId,
+          senderName: message.senderName || "",
+          senderProfile: message.senderProfile || "",
+          text: message.text || null,
+          fileUrl: message.fileUrl || null,
+          fileType: message.fileType || null,
+          createdAt: message.createdAt?.toISOString() || "",
+        };
+      } else {
+        // Add new unread message entry
+        state.unreadMessages.push({
+          conversationId,
+          unreadCount: 1,
+          latestMessage: {
+            _id: message._id || "",
+            senderId: message.senderId,
+            senderName: message.senderName || "",
+            senderProfile: message.senderProfile || "",
+            text: message.text || null,
+            fileUrl: message.fileUrl || null,
+            fileType: message.fileType || null,
+            createdAt: message.createdAt?.toISOString() || "",
+          },
+        });
+      }
+    },
+    updateGroupUnreadCount: (state, action: PayloadAction<string>) => {
+      const groupId = action.payload;
+      state.unreadGroupMessages[groupId] = (state.unreadGroupMessages[groupId] || 0) + 1;
+    },
+
   },
   extraReducers: (builder) => {
     builder
@@ -418,7 +465,10 @@ export const {
   markConversationAsRead,
   clearUnreadMessages,
   incrementUnreadCount,
-  updateUnreadMessages
+  updateUnreadMessages,
+  addGroupMessage,
+  updateGroupUnreadCount
+
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

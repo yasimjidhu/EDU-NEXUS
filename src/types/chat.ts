@@ -13,6 +13,7 @@ export interface Message {
     updatedAt?: Date;
     _id?: string;
     isGroup?: boolean;
+    groupId?:string;
 }
 
 export interface TStudent {

@@ -11,7 +11,7 @@ import { clearInstructorState } from "../redux/slices/instructorSlice";
 import useDebounce from "../../hooks/useDebounce";
 import { CourseState, searchCourses } from "../redux/slices/courseSlice";
 import { ArrowDownCircle, Image, Headphones, FileText } from "lucide-react";
-import { addMessage, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
+import { addGroupMessage, addMessage, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
 import { Message, UnreadMessage } from "../../types/chat";
 import { useSocket } from "../../contexts/SocketContext";
 
@@ -59,9 +59,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
 
   useEffect(() => {
     if (socket) {
-      console.log('unread message in nvbar are',unreadMessages)
       const newMessageHandler = (newMessage: Message) => {
-        console.log('new message reached in navbar',newMessage)
         dispatch(addMessage(newMessage));
         if (newMessage.conversationId.includes(user?._id!)) {
           dispatch(incrementUnreadCount(newMessage.conversationId));
@@ -72,10 +70,17 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
         }
       };
 
+      const handleNewGroupMessage = (message: Message) => {
+        console.log('new grop message reached in navbar',message)
+        dispatch(addGroupMessage(message));
+      };
+
+      socket.on('groupMessage',handleNewGroupMessage)
       socket.on('newMessage', newMessageHandler);
 
       return () => {
         socket.off('newMessage', newMessageHandler);
+        socket.off('groupMessage', handleNewGroupMessage);
       };
     }
   }, [socket, dispatch, user?._id]);

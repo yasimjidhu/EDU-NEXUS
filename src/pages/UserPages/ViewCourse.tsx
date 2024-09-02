@@ -56,7 +56,7 @@ interface CourseEntity {
 
 const ViewCourse: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const [course, setCourse] = useState<CourseEntity | null>(null);
+  const [course, setCourse] = useState<any>(null);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [lessonProgress, setLessonProgress] = useState<{
     [key: string]: number;
@@ -74,6 +74,7 @@ const ViewCourse: React.FC = () => {
   const [assessmentResult, setAssessmentResult] = useState<number | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [courseCompleted, setCourseCompleted] = useState(false);
+  const [preventAssessment, setPreventAssessment] = useState<boolean>(false)
 
   const dispatch: AppDispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.user);
@@ -136,9 +137,8 @@ const ViewCourse: React.FC = () => {
     setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
   };
 
-  const handleSubmitAssessment = () => {
-
-    if (!currentAssessment) return;
+  const handleSubmitAssessment = async () => {
+    if (!currentAssessment || !user?._id || !courseId) return;
 
     const unansweredQuestions = currentAssessment.questions.filter(
       (question) => !userAnswers[question._id]
@@ -151,7 +151,6 @@ const ViewCourse: React.FC = () => {
       return;
     }
 
-    // Clear any previous errors
     setFormErrors([]);
     const correctAnswers = currentAssessment.questions.reduce(
       (count, question) => {
@@ -162,20 +161,46 @@ const ViewCourse: React.FC = () => {
       0
     );
 
-    const score =
+    console.log('correct answers', correctAnswers)
+    console.log('total questions', currentAssessment.questions.length)
+    const score = Math.round(
       (correctAnswers / currentAssessment.questions.length) *
-      currentAssessment.total_score;
+      currentAssessment.total_score
+    );
+    console.log('actual score is', score)
     setAssessmentResult(score);
+
+    try {
+      await dispatch(updateAssessmentCompletion({ userId: user._id, courseId, score }));
+      console.log('Assessment completion updated successfully');
+    } catch (error) {
+      console.error('Error updating assessment completion:', error);
+    }
   };
+  // console.log('course data',course.enrollments)
 
   useEffect(() => {
     if (completedLessons.size === totalLesson && totalLesson > 0) {
       setCourseCompleted(true);
-      if (user?._id) {
-        dispatch(updateAssessmentCompletion({ userId: user._id, courseId,score:assessmentResult! }));
-      }
     }
-  }, [completedLessons, totalLesson, user, courseId, dispatch]);
+  }, [completedLessons, totalLesson]);
+
+  useEffect(() => {
+    if (!course?.enrollments) return;
+
+    const { assessments, enrollments } = course;
+    const passMark = assessments[0].passing_score;
+
+    const userEnrollment = enrollments.find(({ userId }) => userId === user?._id);
+
+    if (!userEnrollment) return;
+
+    const { attempts, maxAttempts, score } = userEnrollment;
+
+    if (attempts >= maxAttempts || score >= passMark) {
+      setPreventAssessment(true);
+    }
+  }, [course, user?._id]);
 
 
   const handleVideoProgress = useCallback(
@@ -283,7 +308,7 @@ const ViewCourse: React.FC = () => {
                 </div>
               )}
 
-              <Review courseId={courseId!}/>
+            <Review courseId={courseId!} />
 
             {courseCompleted && (
               <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
@@ -293,7 +318,7 @@ const ViewCourse: React.FC = () => {
             {/* Assessment Section */}
             {courseCompleted &&
               course.assessments.length > 0 &&
-              (!showAssessment ? (
+              (!showAssessment && !preventAssessment ? (
                 <button
                   onClick={handleStartAssessment}
                   className="bg-medium-rose text-white px-4 py-2 rounded-xl transition-colors"
@@ -305,15 +330,18 @@ const ViewCourse: React.FC = () => {
                   <h4 className="text-xl font-bold mb-4 text-center">
                     {currentAssessment?.title}
                   </h4>
-                  <div className="flex-col items-start mb-6">
-                    <p className="inter">
-                      Total Score: {currentAssessment?.total_score}
-                    </p>
-                    <p className="inter">
-                      Passing Score: {currentAssessment?.passing_score}
-                    </p>
-                  </div>
-
+                  {
+                    preventAssessment == false && (
+                      <div className="flex-col items-start mb-6">
+                        <p className="inter">
+                          Total Score: {currentAssessment?.total_score}
+                        </p>
+                        <p className="inter">
+                          Passing Score: {currentAssessment?.passing_score}
+                        </p>
+                      </div>
+                    )
+                  }
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
