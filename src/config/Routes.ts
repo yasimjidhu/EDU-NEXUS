@@ -17,6 +17,7 @@ const routes = {
       COURSE_DETAIL: "/admin/course-detail/:id",
       ASSESSMENTS: "/admin/assessments",
       CATEGORIES: "/admin/categories",
+      FEEDBACKS: "/admin/feedbacks",
       TRANSACTIONS: "/admin/transactions",
       REQUESTS: "/admin/requests",
       USERS: "/admin/users",
@@ -45,6 +46,8 @@ const routes = {
     },
     PUBLIC: {
       ROOT: "/",
+      ABOUT_US:'/about-us',
+      CONTACT_US:'/contact-us',
       ALL_COURSES: "/allcourses",
       ALL_CATEGORIES: "/allcategories",
       VIEW_COURSE: "/view-course/:courseId",

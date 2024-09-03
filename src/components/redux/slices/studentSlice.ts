@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosInstance } from '../../../constants/axiosInstance';
+import { FeedbackPayload, FeedbackResponse } from '../../../types/feedback';
 
 export interface User {
   contact: {
@@ -161,6 +162,35 @@ export const updateUserDetails = createAsyncThunk(
   }
 );
 
+export const submitFeedback = createAsyncThunk(
+  'student/submit-feedback',
+  async (feedback:FeedbackPayload, { rejectWithValue }) => {
+    try {
+      console.log('post submit feedback called', feedback);
+      const response = await axiosInstance.post(`/user/feedback`, {feedback:feedback});
+      console.log('Response of sumbit feedback', response);
+      return response.data.message 
+    } catch (error: any) {
+      const errorMessage = error.response?.data || 'An error occurred';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const getFeedbacks = createAsyncThunk(
+  'student/get-feedbacks',
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log('get  feedback called');
+      const response = await axiosInstance.get(`/user/feedbacks`);
+      console.log('Response of get feedbacks', response);
+      return response.data 
+    } catch (error: any) {
+      const errorMessage = error.response?.data || 'An error occurred';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 
 const studentSlice = createSlice({
   name: 'student',

@@ -1,5 +1,6 @@
 
 import { Link } from 'react-router-dom';
+import { Book } from 'lucide-react';
 
 interface status{
     isActive:boolean
@@ -108,6 +109,19 @@ const Sidebar = ({isActive}:status) => {
                   >
                   <img src="/assets/png/user.png" className='w-5 h-auto' alt="" />
                     <span className="flex-1 ml-3 whitespace-nowrap">Users</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/feedbacks"
+                    className={
+                      isActive
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
+                    }
+                  >
+                  <Book/>
+                    <span className="flex-1 ml-3 whitespace-nowrap">Feedbacks</span>
                   </Link>
                 </li>
                 <li>

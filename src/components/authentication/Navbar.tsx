@@ -190,6 +190,14 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
     }
   }
 
+  const handleAboutUsClik = ()=>{
+    navigate('/about-us')
+  }
+
+  const handleContactUsClick = ()=>{
+    navigate('/contact-us')
+  }
+
   const totalUnreadMessages = useMemo(() => {
     const values =  Object.values(unreadCounts).reduce((total, count) => total + count, 0)
     console.log('values',values)
@@ -238,10 +246,10 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
             <li className="text-md font-medium inter bg-white p-2 rounded-xl">
               Teach
             </li>
-            <li className="text-md font-medium inter bg-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-white p-2 rounded-xl cursor-pointer" onClick={handleContactUsClick}>
               Contact Us
             </li>
-            <li className="text-md font-medium inter bg-white p-2 rounded-xl">
+            <li className="text-md font-medium inter bg-white p-2 rounded-xl cursor-pointer" onClick={handleAboutUsClik}>
               About Us
             </li>
           </ul>

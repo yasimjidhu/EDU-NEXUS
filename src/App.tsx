@@ -52,6 +52,9 @@ import Forbidden from "./components/common/Forbidden";
 import InstructorOverview from "./pages/Instructor/Overview";
 import StudentOverview from "./pages/UserPages/Overview";
 import PublicRoute from "./components/authentication/PublicRoute";
+import AboutUs from "./pages/UserPages/AboutUs";
+import ContactUs from "./pages/UserPages/ContactUs";
+import FeedbackPage from "./pages/Admin/Feedbacks";
 
 function App() {
   return (
@@ -60,7 +63,7 @@ function App() {
         <ErrorBoundary>
           <Router>
             <Routes>
-              <Route element={<PublicRoute restricted={true}/>}>
+              <Route element={<PublicRoute restricted={true} />}>
                 <Route path={routes.ROOT} element={<SignupPage />} />
                 <Route path={routes.LOGIN} element={<LoginPage />} />
               </Route>
@@ -86,6 +89,7 @@ function App() {
                   <Route path={routes.ADMIN.COURSE_DETAIL} element={<CourseDetails />} />
                   <Route path={routes.ADMIN.ASSESSMENTS} element={<Assessments />} />
                   <Route path={routes.ADMIN.CATEGORIES} element={<Categories />} />
+                  <Route path={routes.ADMIN.FEEDBACKS} element={<FeedbackPage />} />
                   <Route path={routes.ADMIN.TRANSACTIONS} element={<AdminTransaction />} />
                   <Route path={routes.ADMIN.REQUESTS} element={<Requests />} />
                   <Route path={routes.ADMIN.USERS} element={<Users />} />
@@ -120,17 +124,19 @@ function App() {
 
               <Route path={routes.PUBLIC.ROOT} element={<Public />}>
                 <Route path={routes.PUBLIC.ALL_COURSES} element={<AllCourses />} />
+                <Route path={routes.PUBLIC.ABOUT_US} element={<AboutUs />} />
+                <Route path={routes.PUBLIC.CONTACT_US} element={<ContactUs />} />
                 <Route path={routes.PUBLIC.ALL_CATEGORIES} element={<AllCategories />} />
                 <Route path={routes.PUBLIC.VIEW_COURSE} element={<ViewCourse />} />
                 <Route path={routes.PUBLIC.VIEW_CATEGORY} element={<ViewCategory />} />
                 <Route path={routes.PUBLIC.COURSE_DETAIL} element={<CourseDetail />} />
                 <Route path={routes.PUBLIC.SETTINGS} element={<Settings />} />
                 <Route path={routes.PUBLIC.SUCCESS} element={<PaymentSuccess />} />
-              </Route> 
+              </Route>
 
               {/*  404 route and 403 */}
-              <Route path={routes.RESTRICTED.NOTFOUND} element={<NotFound />} /> 
-              <Route path={routes.RESTRICTED.FORBIDDEN} element={<Forbidden />} /> 
+              <Route path={routes.RESTRICTED.NOTFOUND} element={<NotFound />} />
+              <Route path={routes.RESTRICTED.FORBIDDEN} element={<Forbidden />} />
             </Routes>
           </Router>
         </ErrorBoundary>
