@@ -249,7 +249,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
         </div>
 
         {/* Message list */}
-        <div className="flex-grow overflow-y-auto p-4 space-y-2">
+        <div className="flex-grow overflow-y-auto p-4 space-y-12">
           <MessageList currentUserId={userId} messages={groupMessages} key={user?._id} />
           <div ref={messagesEndRef} />
         </div>

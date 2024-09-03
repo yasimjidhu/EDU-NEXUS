@@ -9,7 +9,7 @@ const Instructor = () => {
       <Sidebar className="w-52 fixed h-full" />
       <div className='flex flex-col flex-grow'>
         <Navbar />
-        <main className="flex-grow p-2 overflow-auto bg-gray-100 ml-52">
+        <main className="flex-grow p-4 overflow-auto bg-gray-100 ml-52">
           <Outlet />
         </main>
       </div>

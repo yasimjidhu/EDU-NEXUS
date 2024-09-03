@@ -294,20 +294,19 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <div className="w-1/4 bg-white border-r border-gray-200">
+      <div className="w-1/4 bg-white border-r border-gray-200 flex flex-col">
+        {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Chats</h2>
-          <div className="flex justify-between items-center">
-            <button
-              className="inter text-md bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-2 rounded-full flex items-center shadow-lg transition-colors duration-300 ease-in-out hover:bg-pink-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-pink-300"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <Plus className="" /> Create Group
-            </button>
-          </div>
+          <button
+            className="inter text-md bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-2 rounded-full flex items-center shadow-lg transition-colors duration-300 ease-in-out hover:bg-pink-600 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-pink-300"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <Plus className="" /> Create Group
+          </button>
         </div>
-
-        {/* messaged students list */}
+  
+        {/* Sidebar Content */}
         <ChatSidebar
           messagedStudents={messagedStudents}
           onlineUsers={onlineUsers}
@@ -317,31 +316,33 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           selectedGroup={selectedGroup}
           onClickEntity={handleClickEntity}
           user={'instructor'}
+          className="flex-1 overflow-y-auto" // Ensure this fills the remaining space
         />
       </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
-          <div className="relative z-10 bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <CreateGroupModal
-              show={isModalOpen}
-              students={messagedStudents}
-              handleClose={() => setIsModalOpen(false)}
-              onCreateGroup={(data: any) => handleCreateGroup(data)}
-            />
+  
+      <div className="flex-1 flex flex-col relative">
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+            <div className="relative z-10 bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+              <CreateGroupModal
+                show={isModalOpen}
+                students={messagedStudents}
+                handleClose={() => setIsModalOpen(false)}
+                onCreateGroup={(data: any) => handleCreateGroup(data)}
+              />
+            </div>
           </div>
-        </div>
-      )}
-
-      <div className="flex-1 flex flex-col">
+        )}
+  
         {/* Render Group Chat UI if a group is selected */}
         {showMessages == "group" && selectedGroup ? (
-          <GroupChat id={selectedGroup._id!}
-            userId={user?._id!} />
+          <GroupChat
+            id={selectedGroup._id!}
+            userId={user?._id!}
+          />
         ) : showMessages == "user" && selectedStudent ? (
           <>
-
             {/* Chat Header */}
             <Header
               isTyping={isTyping}
@@ -349,11 +350,13 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
               selectedStudent={selectedStudent}
               key={selectedStudent._id}
             />
-
+  
             {/* Show Messages */}
-            <DisplayMessages messages={messages} />
-
-            <div className="sticky bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
+            <div className="flex-1 overflow-y-auto">
+              <DisplayMessages messages={messages} />
+            </div>
+  
+            <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
               <div className="flex items-center space-x-2 relative">
                 <button
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -361,12 +364,13 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
                 >
                   <Smile size={24} />
                 </button>
-
+  
                 {showEmojiPicker && (
                   <div className="absolute bottom-20 left-2">
                     <Picker onEmojiClick={handleEmojiClick} />
                   </div>
                 )}
+  
                 <AudioRecord
                   handleInput={handleInput}
                   handleKeyPress={handleKeyPress}
@@ -394,6 +398,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       </div>
     </div>
   );
+  
 };
 
 export default InstructorChat;

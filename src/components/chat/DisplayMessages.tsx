@@ -101,7 +101,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
 
     return (
         <div className="flex-1 overflow-y-auto p-3   pb-16">
-            {messages.map((message) => {
+            {messages.map((message,index) => {
                 const onlyEmojis = isOnlyEmojis(message.text || '');
                 return (
                     <div
