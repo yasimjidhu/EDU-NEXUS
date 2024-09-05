@@ -25,6 +25,7 @@ const routes = {
     INSTRUCTOR: {
       ROOT: "/instructor",
       OVERVIEW: "/instructor/overview",
+      ANALYTICS: "/instructor/analytics",
       PROFILE: "/instructor/profile",
       COURSES: "/instructor/courses",
       ADD_COURSE: "/instructor/add-course",

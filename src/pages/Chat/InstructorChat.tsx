@@ -76,7 +76,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
         console.log('New message received in user-specific room:', newMessage);
 
         // Dispatch action to add message to Redux store
-        dispatch(addMessage(newMessage));
+        // dispatch(addMessage(newMessage));
 
         // If the message is not from the currently selected conversation, mark as unread
         if (newMessage.conversationId !== selectedConversationId) {
@@ -183,7 +183,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           return; // Exit if upload fails
         }
       }
-      console.log('recipient email is', selectedStudent.email)
+
       const messageData: Message = {
         conversationId,
         senderId: user?._id || '',
@@ -199,7 +199,6 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       try {
         const response = await dispatch(sendMessage(messageData));
         const savedMessage = response.payload;
-        console.log('savedmessage in db', savedMessage)
         socket.emit('message', savedMessage);
         setInputMessage('');
         setSelectedFile(null);

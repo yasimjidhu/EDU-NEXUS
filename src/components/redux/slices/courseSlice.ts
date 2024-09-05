@@ -133,6 +133,7 @@ export interface EnrollmentEntity {
     courseId: string;
     enrolledAt?: Date | string;
     completionStatus?: CompleationStatus;
+    completedAssessmentId?:string;
     progress?: {
         completedLessons?:  string[] | [] | null;
         completedAssessments?: string[] | [] | null;
@@ -486,6 +487,20 @@ export const getAssessment= createAsyncThunk(
   }
 );
 
+export const getStudentAssessments= createAsyncThunk(
+  'course/get-student-assessments',
+  async (userId:string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/course/enrollments/${userId}`);
+      console.log('response of get student assessments in sice',response)
+      return response.data
+    } catch (error: any) {
+      console.log('error in get assessment',error)
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 export const updateAssessmentCompletion = createAsyncThunk<
   EnrollmentEntity, 
   UpdateAssessmentPayload,
@@ -494,9 +509,10 @@ export const updateAssessmentCompletion = createAsyncThunk<
   }
 >(
   'course/update-assessment-completion',
-  async ({ userId, courseId,score }: UpdateAssessmentPayload, { rejectWithValue }) => {
+  async ({ userId, courseId,score,completedAssessmentId,examStatus }: UpdateAssessmentPayload, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post<EnrollmentEntity>(`/course/enrollments/update-completion`, { userId, courseId,score });
+      console.log('update assessment completeiton called',examStatus)
+      const response = await axiosInstance.post<EnrollmentEntity>(`/course/enrollments/update-completion`, { userId, courseId,score,completedAssessmentId,examStatus });
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
@@ -512,6 +528,33 @@ export const getEnrolledStudentInstructors = createAsyncThunk(
   async (userId:string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/course/enrollments/instructorRefs/${userId}`);
+      return response.data;
+    } catch (error: any) {
+        console.log(error)
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getStudentCourseOverview = createAsyncThunk(
+  "course/getStudentCourseOverview",
+  async (userId:string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/course/courses/course-overview/${userId}`);
+      return response.data;
+    } catch (error: any) {
+        console.log(error)
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getStudentEnrollmentOverview = createAsyncThunk(
+  "course/getStudentEnrollmentOverview",
+  async (instructorId:string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/course/courses/enrollment-overview/${instructorId}`);
+      console.log('response of get student enrollment overview',response)
       return response.data;
     } catch (error: any) {
         console.log(error)

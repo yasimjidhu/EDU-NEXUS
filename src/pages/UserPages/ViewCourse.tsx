@@ -136,7 +136,8 @@ const ViewCourse: React.FC = () => {
   const handleNextQuestion = () => {
     setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
   };
-
+ 
+  console.log('current assessment is ',currentAssessment)
   const handleSubmitAssessment = async () => {
     if (!currentAssessment || !user?._id || !courseId) return;
 
@@ -167,11 +168,15 @@ const ViewCourse: React.FC = () => {
       (correctAnswers / currentAssessment.questions.length) *
       currentAssessment.total_score
     );
+
+    const examStatus = score >= currentAssessment.passing_score ? 'passed' : 'failed';
+
     console.log('actual score is', score)
     setAssessmentResult(score);
 
+    console.log('user exam status',examStatus)
     try {
-      await dispatch(updateAssessmentCompletion({ userId: user._id, courseId, score }));
+      await dispatch(updateAssessmentCompletion({ userId: user._id, courseId, score,completedAssessmentId:currentAssessment._id,examStatus }));
       console.log('Assessment completion updated successfully');
     } catch (error) {
       console.error('Error updating assessment completion:', error);
@@ -189,7 +194,7 @@ const ViewCourse: React.FC = () => {
     if (!course?.enrollments) return;
 
     const { assessments, enrollments } = course;
-    const passMark = assessments[0].passing_score;
+    const passMark = assessments[0]?.passing_score;
 
     const userEnrollment = enrollments.find(({ userId }) => userId === user?._id);
 
@@ -337,7 +342,7 @@ const ViewCourse: React.FC = () => {
                           Total Score: {currentAssessment?.total_score}
                         </p>
                         <p className="inter">
-                          Passing Score: {currentAssessment?.passing_score}
+                          Passing Score: {currentAssessment?.passing_score || 0}
                         </p>
                       </div>
                     )

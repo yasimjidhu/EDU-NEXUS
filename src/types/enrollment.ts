@@ -12,4 +12,6 @@ export interface UpdateAssessmentPayload {
     userId: string;
     courseId: string;
     score:number;
+    completedAssessmentId:string;
+    examStatus:'passed'|'failed'|'pending';
 }

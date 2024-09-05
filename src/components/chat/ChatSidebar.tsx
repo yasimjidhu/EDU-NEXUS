@@ -157,7 +157,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 </div>
                 {getUnreadCount(student._id) > 0 && (
                   <span className="ml-2 inline-flex items-center justify-center w-4 h-4 text-sm p-2 font-medium text-white bg-green-500 rounded-full">
-                    {getUnreadCount(student._id)}
+                    {getUnreadCount(student._id) == 1 ? 1 : getUnreadCount(student._id)-1}
                   </span>
                 )}
               </div>

@@ -55,6 +55,7 @@ import PublicRoute from "./components/authentication/PublicRoute";
 import AboutUs from "./pages/UserPages/AboutUs";
 import ContactUs from "./pages/UserPages/ContactUs";
 import FeedbackPage from "./pages/Admin/Feedbacks";
+import { Analytics } from "./pages/Instructor/Analytics";
 
 function App() {
   return (
@@ -99,6 +100,7 @@ function App() {
               <Route element={<PrivateRoute roles={['instructor']} />}>
                 <Route path={routes.INSTRUCTOR.ROOT} element={<Instructor />}>
                   <Route path={routes.INSTRUCTOR.OVERVIEW} element={<InstructorOverview />} />
+                  <Route path={routes.INSTRUCTOR.ANALYTICS} element={<Analytics />} />
                   <Route path={routes.INSTRUCTOR.PROFILE} element={<InstructorProfile />} />
                   <Route path={routes.INSTRUCTOR.COURSES} element={<MyCourses />} />
                   <Route path={routes.INSTRUCTOR.ADD_COURSE} element={<AddCourse />} />

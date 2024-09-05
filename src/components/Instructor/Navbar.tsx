@@ -182,7 +182,7 @@ const Navbar: React.FC = () => {
               />
               {totalUnreadMessages > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
-                  {totalUnreadMessages}
+                  {totalUnreadMessages == 1 ? totalUnreadMessages : totalUnreadMessages - 1}
                 </span>
               )}
             </div>

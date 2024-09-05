@@ -1,4 +1,5 @@
 
+import { BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Sidebar = () => {
@@ -19,11 +20,11 @@ const Sidebar = () => {
                   <Link
                     to="/instructor/overview"
                     className={
-                      "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
+                      "flex items-center p-2  rounded-lg dark:text-white hover:bg-black group"
                     }
                   >
                     <svg
-                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                      className="flex-shrink-0 w-5 h-5 text-white transition duration-75  group-hover:text-gray-900 dark:group-hover:text-white"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -38,13 +39,26 @@ const Sidebar = () => {
                 </li>
                 <li className="">
                   <Link
-                    to="/instructor/profile"
+                    to="/instructor/analytics"
                     className={
                       "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
                     }
                   >
+                   <BarChart3/>
+                    <span className="flex-1 ml-3 whitespace-nowrap">
+                      Analytics
+                    </span>
+                  </Link>
+                </li>
+                <li className="">
+                  <Link
+                    to="/instructor/profile"
+                    className={
+                      "flex items-center p-2  rounded-lg dark:text-white hover:bg-black group"
+                    }
+                  >
                     <svg
-                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                      className="flex-shrink-0 w-5 h-5 text-white transition duration-75  group-hover:text-gray-900 dark:group-hover:text-white"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -65,7 +79,7 @@ const Sidebar = () => {
                     }
                   >
                     <svg
-                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                      className="flex-shrink-0 w-5 h-5 text-white transition duration-75  group-hover:text-gray-900 dark:group-hover:text-white"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
@@ -87,7 +101,7 @@ const Sidebar = () => {
                     }
                   >
                     <svg
-                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                      className="flex-shrink-0 w-5 h-5 text-white transition duration-75  group-hover:text-gray-900 dark:group-hover:text-white"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"

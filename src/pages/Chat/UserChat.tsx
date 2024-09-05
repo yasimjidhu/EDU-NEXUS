@@ -84,7 +84,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         console.log('New message received in user-specific room:', newMessage);
         
         // Dispatch action to add message to Redux store
-        dispatch(addMessage(newMessage));
+        // dispatch(addMessage(newMessage));
         
         // If the message is not from the currently selected conversation, mark as unread
         if (newMessage.conversationId !== selectedConversationId) {
