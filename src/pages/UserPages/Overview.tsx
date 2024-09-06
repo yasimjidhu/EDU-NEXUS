@@ -15,6 +15,7 @@ const StudentOverview = () => {
     if (user?._id) {
       dispatch(getStudentCourseOverview(user._id))
         .then((res) => {
+          console.log('overviedw',res.payload)
           setOverview(res.payload[0] || {}); // Update state with the first item in the array
         })
         .catch((err) => console.error('Error fetching course overview:', err));
@@ -22,6 +23,11 @@ const StudentOverview = () => {
       dispatch(getStudentAssessments(user._id)).then((res) => setAssessments(res.payload));
     }
   }, [dispatch, user]);
+
+  const getAssessmentDetails = (id: string) => {
+    const assessment = assessments.find((item) => item.completedAssessmentId === id);
+    return assessment ? assessment.studentAssessments[0] : null;
+  };
 
   const transformStudentOverviewData = (data: any) => {
     const courses = data.courses || [];
@@ -46,11 +52,7 @@ const StudentOverview = () => {
     };
   };
 
-  const getAssessmentDetails = (id: string) => {
-    const assessment = assessments.find((item) => item.completedAssessmentId === id);
-    return assessment ? assessment.studentAssessments[0] : null;
-  };
-
+  
   const { studentInfo, courseProgress } = transformStudentOverviewData(overview);
 
   return (

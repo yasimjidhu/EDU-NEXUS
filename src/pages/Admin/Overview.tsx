@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Text } from 'recharts';
-import { getAllCourses } from '../../components/redux/slices/courseSlice';
+import { getAllCourses, getPopularInstructorsCourses } from '../../components/redux/slices/courseSlice';
 import { getAllTransactions, getTransactions } from '../../components/redux/slices/paymentSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
+import DisplayPopularInstructors from '../../components/Admin/DisplayPopularInstructors';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -22,6 +23,7 @@ const CustomizedAxisTick = ({ x, y, payload }) => {
 
 const AdminOverview = () => {
   const [courseData, setCourseData] = useState([]);
+  const [popularCourses, setPopularCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -44,8 +46,12 @@ const AdminOverview = () => {
         console.log('all courses response in frontend', coursesResponse)
         const { courses, totalPages } = coursesResponse.payload;
 
+        const popularCoursesResponse = await dispatch(getPopularInstructorsCourses())
+        const data = popularCoursesResponse.payload
+        console.log('popular courses',data)
+        setPopularCourses(data)
+
         const transactionsResponse = await dispatch(getTransactions(filters));
-        console.log('transcation response in frontend', transactionsResponse)
         const transactions = transactionsResponse.payload;
 
         const combinedData = courses.map(course => {
@@ -184,6 +190,11 @@ const AdminOverview = () => {
           </table>
         </div>
       </div>
+      {
+        popularCourses.length > 0 && (
+          <DisplayPopularInstructors data={popularCourses}/>
+        )
+      }
     </div>
   );
 };

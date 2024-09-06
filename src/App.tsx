@@ -100,7 +100,6 @@ function App() {
               <Route element={<PrivateRoute roles={['instructor']} />}>
                 <Route path={routes.INSTRUCTOR.ROOT} element={<Instructor />}>
                   <Route path={routes.INSTRUCTOR.OVERVIEW} element={<InstructorOverview />} />
-                  <Route path={routes.INSTRUCTOR.ANALYTICS} element={<Analytics />} />
                   <Route path={routes.INSTRUCTOR.PROFILE} element={<InstructorProfile />} />
                   <Route path={routes.INSTRUCTOR.COURSES} element={<MyCourses />} />
                   <Route path={routes.INSTRUCTOR.ADD_COURSE} element={<AddCourse />} />

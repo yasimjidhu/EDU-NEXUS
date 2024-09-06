@@ -243,9 +243,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
             <li className="text-md font-medium inter bg-white p-2 rounded-xl cursor-pointer" onClick={handleCoursesClick}>
               Courses
             </li>
-            <li className="text-md font-medium inter bg-white p-2 rounded-xl">
+            {/* <li className="text-md font-medium inter bg-white p-2 rounded-xl">
               Teach
-            </li>
+            </li> */}
             <li className="text-md font-medium inter bg-white p-2 rounded-xl cursor-pointer" onClick={handleContactUsClick}>
               Contact Us
             </li>

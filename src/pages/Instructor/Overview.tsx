@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Text } from 'recharts';
-import { getInstructorCourseDetailed } from '../../components/redux/slices/courseSlice';
+import { getInstructorCourseDetailed, getInstructorsStudentsOverview } from '../../components/redux/slices/courseSlice';
 import { getInstructorCoursesTransaction } from '../../components/redux/slices/paymentSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
+import DropDown from '../../components/common/Dropdown';
+import { getAllUsers, StudentState } from '../../components/redux/slices/studentSlice';
+import InstructorAnalyticsSkeleton from '../../components/skelton/InstructorOverview';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const CustomizedAxisTick = ({ x, y, payload }) => {
+
     const maxChars = 15; // Adjust this value based on your needs
     let displayName = payload.value;
     if (displayName.length > maxChars) {
@@ -24,16 +28,25 @@ const InstructorOverview = () => {
     const [courseData, setCourseData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedCourseId, setSelectedCourseId] = useState<string>('')
+    const [studentsOverview, setStudentsOverview] = useState<string>(null)
+    const [enrolledStudentIds, setEnrolledStudentIds] = useState<string[]>([])
+    const [allUsers, setAllUSers] = useState<StudentState>([])
 
     const dispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.user);
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!user) return;
             setIsLoading(true);
             try {
                 const coursesResponse = await dispatch(getInstructorCourseDetailed(user?._id));
                 const courses = coursesResponse.payload;
+                console.log('course in frontend', courses)
+                if (selectedCourseId == '') {
+                    setSelectedCourseId(courses[0]._id)
+                }
 
                 const paymentsResponse = await dispatch(getInstructorCoursesTransaction(user?._id));
                 const payments = paymentsResponse.payload;
@@ -62,17 +75,46 @@ const InstructorOverview = () => {
         fetchData();
     }, [dispatch, user?._id]);
 
-    if (isLoading) return <div className="text-center p-4">Loading...</div>;
-    if (error) {
-        return (
-            <div className="w-full flex justify-center items-center">
-                <div className="w-[35%] text-center">
-                    <img src="/assets/images/nothing.png" alt="No Courses" className="mb-4 w-full" />
-                    <h4 className="text-xl">{error}</h4>
-                </div>
-            </div>
-        )
-    }
+    useEffect(() => {
+        // Define an async function inside useEffect
+        const fetchStudentsData = async () => {
+            if (user?._id && selectedCourseId) {
+                try {
+                    // Dispatch the async thunk and await the response
+                    const resultAction = await dispatch(getInstructorsStudentsOverview({ instructorId: user._id, courseId: selectedCourseId }));
+
+                    // Handle the result
+                    if (getInstructorsStudentsOverview.fulfilled.match(resultAction)) {
+                        const studentsData = resultAction.payload;
+                        setStudentsOverview(studentsData[0])
+                        const studentIds = studentsData[0].enrolledStudents.map(item => item.userId);
+                        setEnrolledStudentIds(studentIds);
+
+                    } else {
+                        // Handle error case
+                        console.error('Failed to fetch students data:', resultAction.payload);
+                    }
+                } catch (error) {
+                    console.error('Error dispatching getInstructorsStudentsOverview:', error);
+                }
+            }
+        };
+
+        fetchStudentsData();
+    }, [dispatch, user?._id, selectedCourseId]);
+
+    useEffect(() => {
+        dispatch(getAllUsers()).then(res => setAllUSers(res.payload))
+
+    }, [])
+
+    function getUser(userId: string) {
+        const user = allUsers.find(data => data._id == userId)
+        return user
+    }   
+
+    if (isLoading) return <div className="text-center p-4"><InstructorAnalyticsSkeleton/></div>;
+
 
     const totalStudents = courseData.reduce((sum, course) => sum + course.studentsEnrolled, 0);
     const totalRevenue = courseData.reduce((sum, course) => sum + course.totalRevenue, 0);
@@ -172,6 +214,58 @@ const InstructorOverview = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div className="bg-white p-4 rounded shadow">
+                <div className='flex justify-between'>
+                    <h2 className="text-xl font-semibold mb-4">Students Overview</h2>
+                    <h2 className="text-xl font-semibold mb-4">{studentsOverview?.title}</h2>
+                    
+                    <DropDown
+                        text='Select Course'
+                        data={courseData}
+                        onSelect={(id) => setSelectedCourseId(id)}
+                    />
+                </div>
+                {
+                    studentsOverview && (
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gray-200">
+                                        <th className="text-left p-2">User</th>
+                                        <th className="text-left p-2">Full Name</th>
+                                        <th className="text-left p-2"> Score</th>
+                                        <th className="text-left p-2">Total Score</th>
+                                        <th className="text-left p-2">Attempts</th>
+                                        <th className="text-left p-2">Exam Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {studentsOverview.enrolledStudents.map((student, index) => (
+                                        <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
+                                            <td className="p-2">
+                                                <div className="rounded-full w-10 h-10 shadow-sm border-2 border-gray-600 overflow-hidden">
+                                                    <img
+                                                        src={getUser(student.studentId).profile.avatar}
+                                                        alt="avatar"
+                                                        className="w-full h-full object-cover rounded-full"
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="p-2">{getUser(student.studentId).firstName + ' ' + getUser(student.studentId).lastName}</td>
+                                            <td className="p-2">{student.score ? student.score : 'N/A'}</td>
+                                            <td className="p-2">{studentsOverview.totalScore}</td>
+                                            <td className="p-2">{student.attempts ? student.attempts : 'N/A'}</td>
+                                            <td className={`p-2 ${student.score === undefined ? 'text-gray-600' : student.score >= studentsOverview.totalScore ? 'text-green-700' : 'text-red-600'}`}>
+                                                {student.score === undefined ? 'No Assessment' : student.score >= studentsOverview.totalScore ? 'Passed' : 'Failed'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )
+                }
             </div>
         </div>
     );

@@ -228,13 +228,28 @@ export const getInstructorCourseDetailed= createAsyncThunk(
   async (instructorId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/course/courses/get-courses-detailed/${instructorId}`);
-      console.log('response of detailed course payemtn',response.data.courses)
+      console.log('response of detailed course ',response.data.courses)
       return response.data.courses;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
+
+export const getInstructorsStudentsOverview = createAsyncThunk(
+  'course/getInstructorsStudentsOverview',
+  async ({ instructorId, courseId }: { instructorId: string, courseId: string }, { rejectWithValue }) => {
+    try {
+      // Pass courseId as a query parameter
+      const response = await axiosInstance.get(`/course/courses/studentsOverview/${instructorId}?courseId=${courseId}`);
+      console.log('response of getinstructors student overvew', response.data);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 
 
 export const getAllCourses = createAsyncThunk(
@@ -259,6 +274,21 @@ export const getAllCourses = createAsyncThunk(
     }
   }
 );
+
+export const getPopularInstructorsCourses = createAsyncThunk(
+  'course/getPopularInstructorsCourses',
+  async (_, { rejectWithValue }) => {
+    try {
+      // Pass courseId as a query parameter
+      const response = await axiosInstance.get(`/course/courses/popular-courses`);
+      console.log('response of popular courses', response.data);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 
 export const getCategoryWiseCourses = createAsyncThunk(
   'course/getCategoryWiseCourses',
