@@ -7,6 +7,7 @@ import { Review } from '../../../types/review'
 import { UpdateAssessmentPayload } from '../../../types/enrollment';
 import axios from 'axios';
 import { CourseRequest } from '../../../types/course';
+import { ReportEntity } from '../../../types/reports';
 
 interface Question {
   answer: string;
@@ -67,6 +68,7 @@ export interface CourseState {
   reviews?:Review[];
   _id?:string;
   reviewCounts?:number;
+  reports?:ReportEntity[];
 }
 
 export interface UserData{
@@ -97,7 +99,8 @@ const initialState: CourseState = {
   error: null,
   reviews:[],
   _id:'',
-  reviewCounts:0
+  reviewCounts:0,
+  reports:[]
 };
 
 interface UpdateData{
@@ -223,6 +226,34 @@ export const getCourse= createAsyncThunk(
   }
 );
 
+export const disableCourse= createAsyncThunk(
+  'course/disableCourse',
+  async (courseId: string, { rejectWithValue }) => {
+    try {
+      console.log('couser d in disablecourse',courseId)
+      const response = await axiosInstance.put(`/course/courses/disable/${courseId}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const getCourseVideoUrl = createAsyncThunk(
+  'course/getCourseVideoUrl',
+  async ({ courseId, userId }: { courseId: string; userId: string }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/course/courses/stream-video/${courseId}`, {
+        params: { userId }
+      });
+      console.log('Response of getCourseVideoUrl', response);
+      return response.data.videoUrl;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 export const getInstructorCourseDetailed= createAsyncThunk(
   'course/getCourse',
   async (instructorId: string, { rejectWithValue }) => {
@@ -303,7 +334,7 @@ export const getCategoryWiseCourses = createAsyncThunk(
       }).toString();
 
       const response = await axiosInstance.get(`/course/courses/categorywise/${categoryId}?${queryParams}`);
-      
+      console.log('response of categorywise',response.data)
       return {
         courses: response.data.allCourses,
         totalPages: Math.ceil(response.data.totalCourses / 8),
@@ -381,7 +412,47 @@ export const updateLesson = createAsyncThunk(
   }
 );
 
- 
+// Report course
+export const submitReport = createAsyncThunk(
+  'course/submitReport',
+  async ({reason,courseId,userId,courseName,userName}:{reason:string,courseId:string,userId:string,courseName:string,userName:string}, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(`/course/courses/report/${courseId}`, {reason,userId,courseName,userName});
+      console.log('response of report course',response)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const getAllReports = createAsyncThunk(
+  'course/getAllReports',
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log('get all reports called')
+      const response = await axiosInstance.get(`/course/courses/reports`);
+      console.log('response of get reports',response)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+export const updateReportStatus = createAsyncThunk(
+  'course/updateReportStatus',
+  async ({reportId,status}:{reportId:string,status:string}, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(`/course/courses/report/${reportId}`,{status});
+      console.log('response of get reports',response)
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 export const updateLessonProgress = createAsyncThunk(
   'course/updateLessonProgress',
   async ({ courseId,userId, lessonId, progress,totalLesson }: { courseId: string,userId:string, lessonId: string, progress: number,totalLesson:number }, { rejectWithValue }) => {
@@ -623,6 +694,15 @@ const courseSlice = createSlice({
       .addCase(submitCourse.rejected, (state, action : PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload.error || 'Failed to submit course';
+      })
+      .addCase(submitReport.pending, (state) => {
+        state.error = null
+      })
+      .addCase(submitReport.fulfilled, (state, action) => {
+        state.reports = [...(state.reports || []), action.payload]; // Ensuring it's an array and appending new data immutably
+      })            
+      .addCase(submitReport.rejected, (state, action) => {
+        state.error = action.error.message ?? "Failed to submit report";
       })
       .addCase(getAllCourses.pending, (state) => {
         state.loading = true;

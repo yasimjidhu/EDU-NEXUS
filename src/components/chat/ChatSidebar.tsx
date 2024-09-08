@@ -73,6 +73,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       const conversationIdB = [userData.user?._id, b._id].sort().join('-');
       const timestampA = getLatestMessageTimestamp(conversationIdA);
       const timestampB = getLatestMessageTimestamp(conversationIdB);
+      console.log('time stamp a',timestampA)
+      console.log('time stamp b',timestampB)
       return timestampB - timestampA;
     });
   }, [messagedStudents, getLatestMessageTimestamp, userData.user?._id]);

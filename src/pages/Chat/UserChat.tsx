@@ -111,7 +111,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
     if (socket) {
       const messageHandler = (newMessage: Message) => {
         console.log('new message recieved in user chat',newMessage)
-        dispatch(addMessage(newMessage));
+        // dispatch(addMessage(newMessage));
         if (newMessage.senderId !== user?._id) {
           socket.emit('messageDelivered', newMessage._id);
         }

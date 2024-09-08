@@ -55,7 +55,7 @@ import PublicRoute from "./components/authentication/PublicRoute";
 import AboutUs from "./pages/UserPages/AboutUs";
 import ContactUs from "./pages/UserPages/ContactUs";
 import FeedbackPage from "./pages/Admin/Feedbacks";
-import { Analytics } from "./pages/Instructor/Analytics";
+import AdminReportsPage from "./pages/Admin/Reports";
 
 function App() {
   return (
@@ -92,6 +92,7 @@ function App() {
                   <Route path={routes.ADMIN.CATEGORIES} element={<Categories />} />
                   <Route path={routes.ADMIN.FEEDBACKS} element={<FeedbackPage />} />
                   <Route path={routes.ADMIN.TRANSACTIONS} element={<AdminTransaction />} />
+                  <Route path={routes.ADMIN.REPORTS} element={<AdminReportsPage />} />
                   <Route path={routes.ADMIN.REQUESTS} element={<Requests />} />
                   <Route path={routes.ADMIN.USERS} element={<Users />} />
                 </Route>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { PlayCircle, Clock, FileText, CheckCircle } from "lucide-react";
+import { PlayCircle, Clock, FileText, CheckCircle, CircleAlert } from "lucide-react";
 import {
   getCourse,
+  getCourseVideoUrl,
   updateAssessmentCompletion,
   updateLessonProgress,
 } from "../../components/redux/slices/courseSlice";
@@ -11,6 +12,7 @@ import { AppDispatch, RootState } from "../../components/redux/store/store";
 import ReactPlayer from "react-player";
 import Certificate from "../../components/student/Certficate";
 import { Review } from "../../components/student/Review";
+import ReportModal from "../../components/student/ReportModal";
 
 interface Attachment {
   title?: string;
@@ -66,6 +68,7 @@ const ViewCourse: React.FC = () => {
     new Set()
   );
   const [showAssessment, setShowAssessment] = useState(false);
+  const [reportModalIsOpen, setReportModalIsOpen] = useState(false);
   const [currentAssessment, setCurrentAssessment] = useState<Assessment | null>(
     null
   );
@@ -75,9 +78,23 @@ const ViewCourse: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [courseCompleted, setCourseCompleted] = useState(false);
   const [preventAssessment, setPreventAssessment] = useState<boolean>(false)
+  const [videoUrl, setVideoUrl] = useState<string>('')
 
   const dispatch: AppDispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.user);
+
+  useEffect(() => {
+    const getVideoUrl = async () => {
+      if (courseId && user?._id) {
+        const response = await dispatch(getCourseVideoUrl({ courseId, userId: user?._id }));
+        if (response.payload) {
+          setVideoUrl(response.payload);
+        }
+      }
+    };
+
+    getVideoUrl();
+  }, [courseId]);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -136,8 +153,8 @@ const ViewCourse: React.FC = () => {
   const handleNextQuestion = () => {
     setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
   };
- 
-  console.log('current assessment is ',currentAssessment)
+
+  console.log('current assessment is ', currentAssessment)
   const handleSubmitAssessment = async () => {
     if (!currentAssessment || !user?._id || !courseId) return;
 
@@ -162,8 +179,6 @@ const ViewCourse: React.FC = () => {
       0
     );
 
-    console.log('correct answers', correctAnswers)
-    console.log('total questions', currentAssessment.questions.length)
     const score = Math.round(
       (correctAnswers / currentAssessment.questions.length) *
       currentAssessment.total_score
@@ -174,9 +189,9 @@ const ViewCourse: React.FC = () => {
     console.log('actual score is', score)
     setAssessmentResult(score);
 
-    console.log('user exam status',examStatus)
+    console.log('user exam status', examStatus)
     try {
-      await dispatch(updateAssessmentCompletion({ userId: user._id, courseId, score,completedAssessmentId:currentAssessment._id,examStatus }));
+      await dispatch(updateAssessmentCompletion({ userId: user._id, courseId, score, completedAssessmentId: currentAssessment._id, examStatus }));
       console.log('Assessment completion updated successfully');
     } catch (error) {
       console.error('Error updating assessment completion:', error);
@@ -263,9 +278,9 @@ const ViewCourse: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-2/3">
             {currentLesson && (
-              <div className="bg-black w-full h-96 rounded-lg overflow-hidden shadow-lg mb-6">
+              <div className="bg-black w-full h-96 rounded-lg overflow-hidden shadow-lg mb-6" onContextMenu={(e) => e.preventDefault()}>
                 <ReactPlayer
-                  url={currentLesson.video}
+                  url={videoUrl}
                   controls
                   width="100%"
                   height="100%"
@@ -273,11 +288,32 @@ const ViewCourse: React.FC = () => {
                 />
               </div>
             )}
-
+            {
+              reportModalIsOpen && courseId && user?._id &&  (
+                <ReportModal
+                 courseId={courseId}
+                 userId={user._id}
+                 userName={user.firstName + " " + user.lastName}
+                 isOpen={reportModalIsOpen}
+                 onClose={()=>setReportModalIsOpen(false)}
+                 courseName={course?.title}/>
+              )
+            }
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h1 className="text-2xl font-bold mb-2">
-                {currentLesson?.title || course.title}
-              </h1>
+              <div className="flex justify-between relative">
+                <h1 className="text-2xl font-bold mb-2">
+                  {currentLesson?.title || course.title}
+                </h1>
+
+                <div className="relative group">
+                  <CircleAlert color="red" size={30} className="cursor-pointer"  onClick={()=>setReportModalIsOpen(true)}/>
+
+                  {/* Tooltip */}
+                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 text-center bg-gray-500 text-white text-sm rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    Report Course
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4 text-sm text-gray-500 mt-4">
                   <span className="flex items-center">

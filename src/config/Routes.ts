@@ -19,6 +19,7 @@ const routes = {
       CATEGORIES: "/admin/categories",
       FEEDBACKS: "/admin/feedbacks",
       TRANSACTIONS: "/admin/transactions",
+      REPORTS:'/admin/reports',
       REQUESTS: "/admin/requests",
       USERS: "/admin/users",
     },

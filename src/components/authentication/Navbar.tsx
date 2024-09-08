@@ -60,7 +60,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   useEffect(() => {
     if (socket) {
       const newMessageHandler = (newMessage: Message) => {
-        dispatch(addMessage(newMessage));
+        // dispatch(addMessage(newMessage));
         if (newMessage.conversationId.includes(user?._id!)) {
           dispatch(incrementUnreadCount(newMessage.conversationId));
         }

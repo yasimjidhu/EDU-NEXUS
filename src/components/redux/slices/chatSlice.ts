@@ -224,6 +224,13 @@ const chatSlice = createSlice({
         state.unreadCounts[conversationId] += 1;
       }
     },
+    resetUnreadCount: (state, action: PayloadAction<string>) => {
+      const conversationId = action.payload;
+      if (state.unreadCounts[conversationId]) {
+        state.unreadCounts[conversationId] = 0;  // Reset unread count to 0
+      }
+    },
+    
     updateUnreadMessages: (state, action: PayloadAction<Message>) => {
       console.log('update unread messages reached', action.payload)
       const newMessage = action.payload;
@@ -465,6 +472,7 @@ export const {
   markConversationAsRead,
   clearUnreadMessages,
   incrementUnreadCount,
+  resetUnreadCount,
   updateUnreadMessages,
   addGroupMessage,
   updateGroupUnreadCount

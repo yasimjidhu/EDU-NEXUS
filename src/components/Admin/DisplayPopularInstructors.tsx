@@ -29,12 +29,12 @@ const DisplayPopularInstructors = ({ data }) => {
                         >
                             <div className="flex items-center mb-4">
                                 <img
-                                    src={user.profile.avatar}
-                                    alt={`${user.firstName} ${user.lastName}`}
+                                    src={user?.profile?.avatar}
+                                    alt={`${user?.firstName} ${user?.lastName}`}
                                     className="w-12 h-12 rounded-full mr-4 object-cover"
                                 />
                                 <h2 className="text-2xl font-semibold text-blue-600">
-                                    {user.firstName} {user.lastName}
+                                    {user?.firstName} {user?.lastName}
                                 </h2>
                             </div>
 

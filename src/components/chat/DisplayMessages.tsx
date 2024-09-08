@@ -6,7 +6,7 @@ import { isOnlyEmojis } from '../../utils/CheckIsEmojis';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store/store';
 import { useSocket } from '../../contexts/SocketContext';
-import { updateMessageStatus } from '../redux/slices/chatSlice';
+import { resetUnreadCount, updateMessageStatus } from '../redux/slices/chatSlice';
 
 interface DisplayMessagesProps {
     messages: Message[];
@@ -24,11 +24,13 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
     const { user } = useSelector((state: RootState) => state.user)
     const { socket } = useSocket()
 
-    const handleMessageRead = (messageId: string, userId: string) => {
+    const handleMessageRead = (messageId: string, userId: string,conversationId:string) => {
         if (!readMessages.has(messageId)) {
             setReadMessages((prevReadMessages) => {
+                console.log('hanle message read clled in observer',messageId)
                 const updatedReadMessages = new Set(prevReadMessages);
                 updatedReadMessages.add(messageId);
+                dispatch(resetUnreadCount(conversationId))
                 return updatedReadMessages;
             });
 
@@ -49,8 +51,10 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
                 if (entry.isIntersecting) {
                     const messageId = entry.target.getAttribute('data-message-id');
                     const senderId = entry.target.getAttribute('data-sender-id');
+                    const conversationId = entry.target.getAttribute('data-conversation-id')
+                    console.log('converstainid>>>',conversationId)
                     if (messageId && senderId !== user?._id) {
-                        handleMessageRead(messageId, user?._id!);
+                        handleMessageRead(messageId, user?._id!,conversationId!);
                     }
                 }
             });
@@ -111,6 +115,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages }) =>
                         <div
                             data-message-id={message._id}
                             data-sender-id={message.senderId}
+                            data-conversation-id={message.conversationId}
                             className={`chat-message max-w-xs p-3 m-2 mb-5 rounded-2xl shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer ${message.senderId === user?._id
                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
                                 : 'bg-white text-gray-800'

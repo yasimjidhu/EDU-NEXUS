@@ -18,7 +18,7 @@ const Home = () => {
 
   const navigate = useNavigate()
   const page = 1
-
+console.log('cateogires',categories)
 
   useEffect(() => {
     fetchCourses(page);

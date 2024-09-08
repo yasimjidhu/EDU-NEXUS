@@ -129,6 +129,9 @@ const Navbar: React.FC = () => {
     return values
   }, [unreadCounts])
 
+  const unreadMessagesCount = unreadMessages.reduce((total, message) => total + (message.unreadCount || 0), 0);
+
+
   return (
     <div className="bg-white border-b border-gray-200 shadow-lg ml-52">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -180,9 +183,9 @@ const Navbar: React.FC = () => {
                 className="w-8 h-8"
                 alt="Notifications"
               />
-              {totalUnreadMessages > 0 && (
+              {unreadMessagesCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
-                  {totalUnreadMessages == 1 ? totalUnreadMessages : totalUnreadMessages - 1}
+                  {unreadMessagesCount}
                 </span>
               )}
             </div>
