@@ -115,7 +115,11 @@ const CourseDetails: React.FC = () => {
     }
   }, [dispatch, courseId]);
 
-  
+  const getInstructorAccountId =async ()=>{
+    const instructor =await allInstructors.find((user)=>user._id == courseData?.instructorRef)
+    console.log('instructor stripe account id',instructor.stripeAccountId)
+    return instructor.stripeAccountId
+  }
 
   useEffect(() => {
     dispatch(getAllUsers()).then((res) => setAllUsers(res.payload));
@@ -161,7 +165,10 @@ const CourseDetails: React.FC = () => {
         if (!user._id || !courseData._id) {
           throw new Error('User or course information is incomplete');
         }
-  
+        
+        const adminAccountId = import.meta.env.VITE_STRIPE_ADMIN_ACCOUNT_ID || ''
+        const instructorAccountId = await getInstructorAccountId()
+
         const paymentResponse = await dispatch(makePayment({
           user_id: user._id,
           instructor_id:courseData.instructorRef,
@@ -169,7 +176,9 @@ const CourseDetails: React.FC = () => {
           amount: courseData.pricing.amount,
           currency: 'inr',
           course_name: courseData.title,
-          email:user.email
+          email:user.email,
+          adminAccountId:adminAccountId,
+          instructorAccountId:instructorAccountId
         }));
 
         console.log('paymentResposne in frontend',paymentResponse)
@@ -194,6 +203,7 @@ const CourseDetails: React.FC = () => {
     }
   };
   
+  console.log('instructors data',allInstructors)
     enum Need {
       NAME = "name",
       PROFILE = "profile",

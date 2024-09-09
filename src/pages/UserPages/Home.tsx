@@ -7,9 +7,13 @@ import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { CourseState, getAllCourses } from "../../components/redux/slices/courseSlice";
 import { ListCourses } from "../../components/common/ListCourses";
 import SkeletonLoader from "../../components/skelton/CourseList";
+import { completeOnboarding, setOnboardingCompleted } from "../../components/redux/slices/paymentSlice";
+import { toast } from "react-toastify";
 
 const Home = () => {
   const { user } = useSelector((state: RootState) => state.user);
+  const onboardingCompleted = useSelector((state: RootState) => state.payment.onboardingCompleted);
+
   const { categories } = useSelector((state: RootState) => state.category);
   const [allCourses, setAllCourses] = useState([])
   const [searchResults, setSearchResults] = useState<CourseState[]>([])
@@ -18,7 +22,22 @@ const Home = () => {
 
   const navigate = useNavigate()
   const page = 1
-console.log('cateogires',categories)
+console.log('user in hiome,',user)
+  useEffect(() => {
+    if (user?.stripeAccountId && !user.onboardingComplete) {
+      console.log('User stripe account ID is present and the function is called:', user.stripeAccountId);
+      
+      dispatch(completeOnboarding(user.stripeAccountId))
+        .then((res: any) => {
+          toast.success(res.payload);
+          dispatch(setOnboardingCompleted(true)); // Update Redux store after completion
+        })
+        .catch((error: any) => {
+          toast.error(error.message);
+        });
+    }
+  }, [dispatch, user?.stripeAccountId, onboardingCompleted]);
+
 
   useEffect(() => {
     fetchCourses(page);

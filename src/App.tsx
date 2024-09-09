@@ -56,6 +56,8 @@ import AboutUs from "./pages/UserPages/AboutUs";
 import ContactUs from "./pages/UserPages/ContactUs";
 import FeedbackPage from "./pages/Admin/Feedbacks";
 import AdminReportsPage from "./pages/Admin/Reports";
+import Reauthenticate from "./pages/Payment/Reauthenticate";
+import InstructorPaymentDashboard from "./pages/Instructor/InstructorPaymentDashboard";
 
 function App() {
   return (
@@ -109,6 +111,7 @@ function App() {
                   <Route path={routes.INSTRUCTOR.ADD_ASSESSMENTS} element={<AddAssessments />} />
                   <Route path={routes.INSTRUCTOR.REQUESTS} element={<Requests />} />
                   <Route path={routes.INSTRUCTOR.COURSE_DETAIL} element={<CourseDetails />} />
+                  <Route path={routes.INSTRUCTOR.PAYMENTS} element={<InstructorPaymentDashboard />} />
                   <Route path={routes.INSTRUCTOR.CHAT} element={<InstructorChat />} />
                   <Route path={routes.INSTRUCTOR.CHATGROUP} element={<GroupChat />} />
                   <Route path={routes.INSTRUCTOR.SETTINGS} element={<Users />} />
@@ -134,6 +137,7 @@ function App() {
                 <Route path={routes.PUBLIC.COURSE_DETAIL} element={<CourseDetail />} />
                 <Route path={routes.PUBLIC.SETTINGS} element={<Settings />} />
                 <Route path={routes.PUBLIC.SUCCESS} element={<PaymentSuccess />} />
+                <Route path={routes.PUBLIC.REAUTHENTICATE} element={<Reauthenticate />} />
               </Route>
 
               {/*  404 route and 403 */}

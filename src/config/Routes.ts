@@ -33,6 +33,7 @@ const routes = {
       ASSESSMENTS: "/instructor/assessments",
       ADD_ASSESSMENTS: "/instructor/add-assessments",
       REQUESTS: "/instructor/requests",
+      PAYMENTS: "/instructor/payments",
       COURSE_DETAIL: "/instructor/course-detail/:id",
       CHAT: "/instructor/chat",
       CHATGROUP:"/instructor/group",
@@ -57,6 +58,7 @@ const routes = {
       SETTINGS: "/settings",
       SUCCESS:"/success",
       CANCELLED:"/cancel",
+      REAUTHENTICATE:"/reauthenticate",
       FAILED:"/failure"
     },
     REGISTRATION: {

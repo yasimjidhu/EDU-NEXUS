@@ -25,6 +25,8 @@ export interface User {
   qualification: string;
   role: string;
   updatedAt: string;
+  stripeAccountId?:string;
+  onboardingComplete?:boolean;
   __v: number;
   _id: string;
 }
@@ -64,7 +66,7 @@ export const Register = createAsyncThunk(
       console.log('register reached in frontend')
       const response = await axiosInstance.post('/user/register', payload.formData);
       console.log('response of register',response)
-      return response.data;
+      return response.data.user;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
     }

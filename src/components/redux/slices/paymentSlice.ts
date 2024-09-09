@@ -1,6 +1,6 @@
 // studentSlice.ts
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '../../../constants/axiosInstance'
 import { Intent } from '../../../types/payment';
 import axios from 'axios';
@@ -12,6 +12,7 @@ export interface PaymentState {
   data:string;
   transactions:any[];
   profit:number;
+  onboardingCompleted:boolean
 }
 
 const initialState: PaymentState = {
@@ -19,7 +20,8 @@ const initialState: PaymentState = {
   error: null,
   data:"",
   transactions:[],
-  profit:0
+  profit:0,
+  onboardingCompleted:false
 };
 
 export const makePayment = createAsyncThunk(
@@ -37,6 +39,41 @@ export const makePayment = createAsyncThunk(
     }
   }
 )
+
+export const createAccountLink = createAsyncThunk(
+  'payment/createAccountLink',
+  async ({instructorId,email}:{instructorId:string,email:string}, { rejectWithValue }) => {
+    try {
+      console.log('create account link called in slice')
+      const response = await axiosInstance.post('/payment/create-account-link',{instructorId,email});
+      return response.data
+    } catch (error:any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+)
+
+export const completeOnboarding = createAsyncThunk(
+  'payment/completeOnboarding',
+  async (accountId:string, { rejectWithValue }) => {
+    try {
+      console.log('complete onboarind link called in slice')
+      const response = await axiosInstance.get(`/payment/complete-onboarding/${accountId}`);
+      console.log('response of complete onboarding',response.data)
+      return response.data
+    } catch (error:any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+)
+
+
 
 export const completePurchase = createAsyncThunk(
   'payment/completePurchase',
@@ -88,7 +125,11 @@ export const getInstructorCoursesTransaction = createAsyncThunk(
 const paymentSlice = createSlice({
   name: 'payment',
   initialState,
-  reducers: {},
+  reducers: {
+    setOnboardingCompleted(state, action: PayloadAction<boolean>) {
+      state.onboardingCompleted = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(makePayment.pending, (state) => {
@@ -144,4 +185,5 @@ const paymentSlice = createSlice({
   },
 });
 
+export const {setOnboardingCompleted} = paymentSlice.actions
 export default paymentSlice.reducer;

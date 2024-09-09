@@ -21,6 +21,7 @@ export interface User {
   qualification: string;
   role: string;
   updatedAt: string;
+  stripeAccountId?:string;
   __v: number;
   _id: string;
 }

@@ -145,6 +145,7 @@ const Requests: React.FC = () => {
     const category = allCategories.find((cat) => cat.id === categoryId);
     return category ? category.name : "Unknown Category";
   };
+  console.log('current items',currentItems)
 
   return (
     <div className="">
@@ -205,11 +206,11 @@ const Requests: React.FC = () => {
                   <div className="col-span-3 flex justify-end items-center space-x-2">
                     {!approvedInstructors.includes(item.email) && !item.isVerified ? (
                       <>
-                        <a href={`${item.cv}`}
+                        {/* <a href={`${item.cv}`}
                           className="text-center bg-black text-white inter py-1 px-3 rounded-lg cursor-pointer"
                         >
                           View CV
-                        </a>
+                        </a> */}
                         <button
                           className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
                           onClick={() => {
@@ -309,13 +310,14 @@ const Requests: React.FC = () => {
           </div>
         </div>
       )}
-      {unVerifiedInstructors.length > 10 || verifiedInstructors.length > 10 && (
+      {(unVerifiedInstructors.length > 10 || verifiedInstructors.length > 10) && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
       )}
+
     </div>
   );
 };

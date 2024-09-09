@@ -6,4 +6,6 @@ export interface Intent{
     currency:string;
     course_name:string;
     email:string;
+    adminAccountId:string;
+    instructorAccountId:string;
 }

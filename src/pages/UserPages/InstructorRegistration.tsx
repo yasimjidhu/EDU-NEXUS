@@ -8,6 +8,7 @@ import axios from "axios";
 import { BeatLoader } from "react-spinners";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { registrationFormSchema } from "../../utils/UserValidation";
+import { createAccountLink } from "../../components/redux/slices/paymentSlice";
 
 const InstructorRegistration: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -28,7 +29,7 @@ const InstructorRegistration: React.FC = () => {
     cv: null as File | null,
   };
 
-  const { loading, error } = useSelector((state: RootState) => state.user);
+  const { loading, error ,user} = useSelector((state: RootState) => state.user);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -46,21 +47,22 @@ const InstructorRegistration: React.FC = () => {
 
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     setSubmitting(true);
-
+  
     const uploadPresetProfile = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
     const uploadPresetCV = import.meta.env.VITE_CLOUDINARY_CV_PRESET;
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-
+  
     try {
       let profileImageUrl = "";
       let cvUrl = "";
-
+  
+      // Handle profile image upload
       if (values.profileImage) {
         const formDataUploadProfile = new FormData();
         formDataUploadProfile.append("file", values.profileImage);
         formDataUploadProfile.append("upload_preset", uploadPresetProfile);
         formDataUploadProfile.append("cloud_name", cloudName);
-
+  
         const responseProfile = await axios.post(
           `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
           formDataUploadProfile
@@ -68,23 +70,28 @@ const InstructorRegistration: React.FC = () => {
         profileImageUrl = responseProfile.data.secure_url;
       } else {
         toast.warning("Please select a profile image to upload");
+        return;  // Return early if profile image is not provided
       }
-
+  
+      // Handle CV upload
       if (values.cv) {
         const formDataUploadCV = new FormData();
         formDataUploadCV.append("file", values.cv);
         formDataUploadCV.append("upload_preset", uploadPresetCV);
         formDataUploadCV.append("cloud_name", cloudName);
-
+  
+        // Using /raw/upload for non-image files like PDF, DOCX
         const responseCV = await axios.post(
-          `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
+          `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
           formDataUploadCV
         );
         cvUrl = responseCV.data.secure_url;
       } else {
         toast.warning("Please select a CV to upload");
+        return;  // Return early if CV is not provided
       }
-
+  
+      // Prepare payload for registration
       const payload = {
         ...values,
         dob: new Date(values.dob),
@@ -92,21 +99,44 @@ const InstructorRegistration: React.FC = () => {
         cv: cvUrl,
         role: role,
       };
-
+  
+      // Dispatch the registration action
       const response = await dispatch(Register({ formData: payload })).unwrap();
+      console.log('Registration response:', response);
+  
       if (response) {
         toast.success("User Registered Successfully");
-        navigate("/notVerified");
+        await handleInstructorOnboarding(response._id, response.email); // Wait for onboarding
       } else {
         toast.error("Registration failed");
       }
     } catch (error: any) {
       console.error("Error during registration:", error);
-      toast.error(error.response.data.error.message + " " + 'allowed types are pdf and docx');
+      toast.error(
+        error.response?.data?.error?.message + " allowed types are pdf and docx"
+      );
     } finally {
       setSubmitting(false);
     }
   };
+  
+  // Instructor onboarding function
+  const handleInstructorOnboarding = async (instructorId: string, email: string) => {
+    try {
+      console.log('handleInstructorOnboarding called with:', instructorId, email);
+      const accountLinkResponse = await dispatch(createAccountLink({ instructorId, email }));
+      
+      if (accountLinkResponse.payload?.url) {
+        window.location.href = accountLinkResponse.payload.url;
+      } else {
+        toast.error('Failed to get account link URL');
+      }
+    } catch (error) {
+      toast.error('Failed to start onboarding');
+      console.error(error);
+    }
+  };
+  
 
   return (
     <div className="container mx-auto p-4">
