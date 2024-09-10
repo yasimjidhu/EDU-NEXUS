@@ -15,8 +15,6 @@ const LoginPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-
-
   type AppDispatch = ThunkDispatch<any, any, any>;
 
   const { loading, error } = useSelector((state: RootState) => state.auth);
