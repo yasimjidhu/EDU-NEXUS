@@ -1,6 +1,7 @@
 
 import { BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Wallet } from "lucide-react";
 
 const Sidebar = () => {
   return (
@@ -104,11 +105,7 @@ const Sidebar = () => {
                       "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
                     }
                   >
-                    <img
-                      src="/assets/icon/message.png"
-                      className="w-6 h-auto"
-                      alt=""
-                    />
+                    <Wallet/>
                     <span className="flex-1 ml-3 whitespace-nowrap">
                       Payments
                     </span>

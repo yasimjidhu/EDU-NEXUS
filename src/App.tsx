@@ -58,6 +58,7 @@ import FeedbackPage from "./pages/Admin/Feedbacks";
 import AdminReportsPage from "./pages/Admin/Reports";
 import Reauthenticate from "./pages/Payment/Reauthenticate";
 import InstructorPaymentDashboard from "./pages/Instructor/InstructorPaymentDashboard";
+import { InstructorPayoutPage } from "./pages/Instructor/InstructorPayoutPage";
 
 function App() {
   return (
@@ -111,7 +112,7 @@ function App() {
                   <Route path={routes.INSTRUCTOR.ADD_ASSESSMENTS} element={<AddAssessments />} />
                   <Route path={routes.INSTRUCTOR.REQUESTS} element={<Requests />} />
                   <Route path={routes.INSTRUCTOR.COURSE_DETAIL} element={<CourseDetails />} />
-                  <Route path={routes.INSTRUCTOR.PAYMENTS} element={<InstructorPaymentDashboard />} />
+                  <Route path={routes.INSTRUCTOR.PAYMENTS} element={<InstructorPayoutPage />} />
                   <Route path={routes.INSTRUCTOR.CHAT} element={<InstructorChat />} />
                   <Route path={routes.INSTRUCTOR.CHATGROUP} element={<GroupChat />} />
                   <Route path={routes.INSTRUCTOR.SETTINGS} element={<Users />} />

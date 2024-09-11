@@ -26,6 +26,7 @@ const AllCourses: React.FC = () => {
   const fetchCourses = async (page: number, sort: string, filters: any) => {
     setIsLoading(true);
     const response = await dispatch(getAllCourses({ page, sort, filters }));
+    console.log('allcourses data', response.payload)
     const { courses, totalPages } = response.payload;
     setAllCourses(courses);
     setTotalPages(totalPages);
@@ -99,11 +100,6 @@ const AllCourses: React.FC = () => {
               </div>
             )
           )}
-          {totalPages > 1 && (
-            <div className="mt-10">
-              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-            </div>
-          )}
         </div>
 
         {/*filter and sort */}
@@ -118,6 +114,11 @@ const AllCourses: React.FC = () => {
           </div>
         )}
       </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center items-end h-full mt-10">
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        </div>
+      )}
     </div>
   );
 };

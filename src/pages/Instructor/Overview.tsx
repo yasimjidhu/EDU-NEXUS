@@ -7,6 +7,7 @@ import { AppDispatch, RootState } from '../../components/redux/store/store';
 import DropDown from '../../components/common/Dropdown';
 import { getAllUsers, StudentState } from '../../components/redux/slices/studentSlice';
 import InstructorAnalyticsSkeleton from '../../components/skelton/InstructorOverview';
+import Pagination from '../../components/common/Pagination';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -31,7 +32,9 @@ const InstructorOverview = () => {
     const [selectedCourseId, setSelectedCourseId] = useState<string>('')
     const [studentsOverview, setStudentsOverview] = useState<string>(null)
     const [enrolledStudentIds, setEnrolledStudentIds] = useState<string[]>([])
+    const [currentPage, setCurrentPage] = useState<number>(1)
     const [allUsers, setAllUSers] = useState<StudentState>([])
+    const [totalPages,setTotalPages] = useState<number>(0)
 
     const dispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.user);
@@ -48,8 +51,9 @@ const InstructorOverview = () => {
                     setSelectedCourseId(courses[0]._id)
                 }
 
-                const paymentsResponse = await dispatch(getInstructorCoursesTransaction(user?._id));
-                const payments = paymentsResponse.payload;
+                const paymentsResponse = await dispatch(getInstructorCoursesTransaction({instructorId:user._id,limit:5,page:currentPage}));
+                const payments = paymentsResponse.payload.transactions;
+                setTotalPages(paymentsResponse.payload.totalPages)
 
                 const combinedData = courses.map(course => {
                     const coursePayments = payments.filter(payment => payment.courseId === course._id);
@@ -111,9 +115,13 @@ const InstructorOverview = () => {
     function getUser(userId: string) {
         const user = allUsers.find(data => data._id == userId)
         return user
-    }   
+    }
 
-    if (isLoading) return <div className="text-center p-4"><InstructorAnalyticsSkeleton/></div>;
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
+
+    if (isLoading) return <div className="text-center p-4"><InstructorAnalyticsSkeleton /></div>;
 
 
     const totalStudents = courseData.reduce((sum, course) => sum + course.studentsEnrolled, 0);
@@ -137,7 +145,7 @@ const InstructorOverview = () => {
                             <span
                                 className={`ml-2 text-md inter ${course.instructorRevenue === 0 ? 'text-red-600' : 'text-green-600'}`}
                             >
-                                ₹ {course.instructorRevenue.toFixed(2)}
+                                $ {course.instructorRevenue.toFixed(2)}
                             </span>
                         </p>
                     </div>
@@ -148,7 +156,7 @@ const InstructorOverview = () => {
                 <h2 className="text-xl font-semibold mb-4">Overall Statistics</h2>
                 <p>Total Students: {totalStudents}</p>
                 <p>Average Rating: {averageRating}</p>
-                <p className='mt-2'> Total Revenue: <span className='text-xl inter text-green-600'>₹ {totalRevenue.toFixed(2)}</span></p>
+                <p className='mt-2'> Total Revenue: <span className='text-xl inter text-green-600'>$ {totalRevenue.toFixed(2)}</span></p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -207,7 +215,7 @@ const InstructorOverview = () => {
                                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
                                     <td className="p-2">{course.name}</td>
                                     <td className="p-2">{course.studentsEnrolled}</td>
-                                    <td className="p-2">₹{course.totalRevenue.toFixed(2)}</td>
+                                    <td className="p-2">${course.totalRevenue.toFixed(2)}</td>
                                     <td className="p-2">{course.averageRating.toFixed(1)}</td>
                                 </tr>
                             ))}
@@ -219,7 +227,7 @@ const InstructorOverview = () => {
                 <div className='flex justify-between'>
                     <h2 className="text-xl font-semibold mb-4">Students Overview</h2>
                     <h2 className="text-xl font-semibold mb-4">{studentsOverview?.title}</h2>
-                    
+
                     <DropDown
                         text='Select Course'
                         data={courseData}
@@ -266,6 +274,13 @@ const InstructorOverview = () => {
                         </div>
                     )
                 }
+                <div className="flex justify-end items-center p-6">
+                    <Pagination
+                        currentPage={currentPage}
+                        onPageChange={handlePageChange}
+                        totalPages={totalPages}
+                    />
+                </div>
             </div>
         </div>
     );

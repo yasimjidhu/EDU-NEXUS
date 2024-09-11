@@ -9,29 +9,29 @@ import axios from 'axios';
 export interface PaymentState {
   loading: boolean;
   error: string | null;
-  data:string;
-  transactions:any[];
-  profit:number;
-  onboardingCompleted:boolean
+  data: string;
+  transactions: any[];
+  profit: number;
+  onboardingCompleted: boolean
 }
 
 const initialState: PaymentState = {
   loading: false,
   error: null,
-  data:"",
-  transactions:[],
-  profit:0,
-  onboardingCompleted:false
+  data: "",
+  transactions: [],
+  profit: 0,
+  onboardingCompleted: false
 };
 
 export const makePayment = createAsyncThunk(
   'payment/create-intent',
-  async (paymentData:Intent, { rejectWithValue }) => {
+  async (paymentData: Intent, { rejectWithValue }) => {
     try {
-      console.log('make payment called',paymentData)
+      console.log('make payment called', paymentData)
       const response = await axiosInstance.post('/payment/create-checkout-session', paymentData);
       return { data: response.data };
-    } catch (error:any) {
+    } catch (error: any) {
       if (axios.isAxiosError(error)) {
         return rejectWithValue(error.response?.data);
       }
@@ -42,12 +42,12 @@ export const makePayment = createAsyncThunk(
 
 export const createAccountLink = createAsyncThunk(
   'payment/createAccountLink',
-  async ({instructorId,email}:{instructorId:string,email:string}, { rejectWithValue }) => {
+  async ({ instructorId, email }: { instructorId: string, email: string }, { rejectWithValue }) => {
     try {
       console.log('create account link called in slice')
-      const response = await axiosInstance.post('/payment/create-account-link',{instructorId,email});
+      const response = await axiosInstance.post('/payment/create-account-link', { instructorId, email });
       return response.data
-    } catch (error:any) {
+    } catch (error: any) {
       if (axios.isAxiosError(error)) {
         return rejectWithValue(error.response?.data);
       }
@@ -58,13 +58,13 @@ export const createAccountLink = createAsyncThunk(
 
 export const completeOnboarding = createAsyncThunk(
   'payment/completeOnboarding',
-  async (accountId:string, { rejectWithValue }) => {
+  async (accountId: string, { rejectWithValue }) => {
     try {
       console.log('complete onboarind link called in slice')
       const response = await axiosInstance.get(`/payment/complete-onboarding/${accountId}`);
-      console.log('response of complete onboarding',response.data)
+      console.log('response of complete onboarding', response.data)
       return response.data
-    } catch (error:any) {
+    } catch (error: any) {
       if (axios.isAxiosError(error)) {
         return rejectWithValue(error.response?.data);
       }
@@ -79,10 +79,10 @@ export const completePurchase = createAsyncThunk(
   'payment/completePurchase',
   async ({ sessionId }: { sessionId: string }, { rejectWithValue }) => {
     try {
-      console.log('complete purchase called',sessionId)
+      console.log('complete purchase called', sessionId)
       const response = await axiosInstance.post('/payment/complete-purchase', { sessionId });
       return response.data;
-    } catch (error:any) {
+    } catch (error: any) {
       return rejectWithValue(error.response.data);
     }
   }
@@ -91,9 +91,9 @@ export const getTransactions = createAsyncThunk(
   'payment/getTransactions',
   async (filter: Record<string, any>, { rejectWithValue }) => {
     try {
-      console.log('get transactions reached in slice',filter)
+      console.log('get transactions reached in slice', filter)
       const response = await axiosInstance.get('/payment/find-transactions', { params: filter });
-      console.log('response of get transactions',response.data)
+      console.log('response of get transactions', response.data)
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
@@ -106,11 +106,62 @@ export const getTransactions = createAsyncThunk(
 
 export const getInstructorCoursesTransaction = createAsyncThunk(
   'payment/getInstructorCoursesTransaction',
-  async (instructorId:string, { rejectWithValue }) => {
+  async ({ instructorId, page, limit }: { instructorId: string; page: number; limit: number }, { rejectWithValue }) => {
     try {
-      console.log('getinstructor payment called in slice',instructorId)
-      const response = await axiosInstance.get(`/payment/find-transactions/${instructorId}`);
-      console.log('instructor payment data',response.data)
+      console.log('get instructor payment called in slice', instructorId, page, limit);
+
+      // Fetch transactions with pagination
+      const response = await axiosInstance.get(`/payment/find-transactions/${instructorId}`, {
+        params: { page, limit }
+      });
+      console.log('response data ofr', response.data)
+      const { transactions, totalTransactions } = response.data;
+
+      // Calculate total pages based on total transactions and limit
+      const totalPages = Math.ceil(totalTransactions / limit);
+
+      console.log('instructor payment data', transactions, totalPages, totalTransactions);
+
+      return {
+        transactions,
+        currentPage: page,
+        totalPages,
+        totalTransactions
+      };
+
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
+export const getInstructorAvailablePayouts = createAsyncThunk(
+  'payment/getInstructorAvailablePayouts',
+  async (instructorId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/payment/payouts/available-payouts/${instructorId}`);
+      console.log('available payoures response', response.data)
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
+// payout thunks
+export const getRecentPayouts = createAsyncThunk(
+  'payment/getRecentPayouts',
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log('get recent  payment called in slice')
+      const response = await axiosInstance.get(`/payment/payouts`);
+      console.log('recent  payouts data', response.data)
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
@@ -120,6 +171,80 @@ export const getInstructorCoursesTransaction = createAsyncThunk(
     }
   }
 )
+
+export const getInstructorsTodaysRevenue = createAsyncThunk(
+  'payment/getInstructorsTodaysRevenue',
+  async (instructorId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/payment/todays-revenue/${instructorId}`);
+      console.log('get instructors revenues data', response.data)
+      return response.data.revenue
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+)
+
+export const getInstructorsTotalEarnings = createAsyncThunk(
+  'payment/getInstructorsTotalEarnings',
+  async (instructorId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/payment/total-earnings/${instructorId}`);
+      console.log('get instructors total earnings data', response.data)
+      return response.data.totalEarnings
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+)
+
+export const requestInstructorPayout = createAsyncThunk(
+  'payment/requestInstructorPayout',
+  async ({ paymentId, accountId, amount, currency, email }: { paymentId: string, accountId: string, amount: number, currency: string, email: string }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('/payment/payouts/instructor', {
+        paymentId,
+        accountId,
+        amount,
+        currency,
+        email
+      });
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
+export const requestAdminPayout = createAsyncThunk(
+  'payment/requestAdminPayout',
+  async ({ paymentId, accountId, amount, currency }: { paymentId: string, accountId: string, amount: number, currency: string }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post('/payment/payouts/admin', {
+        paymentId,
+        accountId,
+        amount,
+        currency,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
 
 
 const paymentSlice = createSlice({
@@ -174,16 +299,16 @@ const paymentSlice = createSlice({
       })
       .addCase(getInstructorCoursesTransaction.fulfilled, (state, action) => {
         state.loading = false;
-        const profit = action.payload.reduce((sum:number,payment:any)=>sum + payment.instructorAmount / 100,0)
+        const profit = action.payload.transactions.reduce((sum: number, payment: any) => sum + payment.instructorAmount / 100, 0)
         state.profit = profit
       })
       .addCase(getInstructorCoursesTransaction.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
   },
 });
 
-export const {setOnboardingCompleted} = paymentSlice.actions
+export const { setOnboardingCompleted } = paymentSlice.actions
 export default paymentSlice.reducer;
