@@ -184,7 +184,7 @@ const AdminTransaction = () => {
                                         {getUserName(transaction.userId)?.toLocaleUpperCase()}
                                     </td>
                                     <td className="border-t border-gray-200 px-6 py-4">{getCourseName(transaction.courseId)?.title}</td>
-                                    <td className="border-t border-gray-200 px-6 py-4">{(transaction.amount / 100).toFixed(2)}</td>
+                                    <td className="border-t border-gray-200 px-6 py-4">{transaction.amountInINR}</td>
                                     <td className="border-t border-gray-200 px-6 py-4">{transaction.currency}</td>
                                     <td className="border-t border-gray-200 px-6 py-4">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(transaction.status)}`}>

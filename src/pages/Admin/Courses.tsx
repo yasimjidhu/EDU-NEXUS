@@ -59,7 +59,7 @@ const Courses: React.FC = () => {
     dispatch(fetchAllInstructors()).then((res: any) => {
       setAllInstructors(res.payload.instructors);
     });
-    dispatch(getAllCourses({ page: currentPage })).then((res: any) => {
+    dispatch(getAllCourses({ page: currentPage, limit: 5 })).then((res: any) => {
       setAllCourses(res.payload.courses);
       setTotalPages(res.payload.totalPages);
       setFilteredCourses(res.payload.courses);
@@ -146,7 +146,7 @@ const Courses: React.FC = () => {
     navigate(`/course-detail/${courseId}`);
   };
 
-  
+
   // Function to get instructor name by ID
   const getInstructorName = (instructorId: string) => {
     const instructor = allInstructors.find((inst) => inst._id === instructorId);
@@ -315,9 +315,13 @@ const Courses: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className=' mt-8'>
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-      </div>
+      {
+        totalPages >  1 && (
+          <div className=' mt-8'>
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+          </div>
+        )
+      }
     </div>
   );
 }

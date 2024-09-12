@@ -42,7 +42,7 @@ const AdminOverview = () => {
       };
 
       try {
-        const coursesResponse = await dispatch(getAllCourses({ page: 1 }));
+        const coursesResponse = await dispatch(getAllCourses({ page: 1,limit:10 }));
         console.log('all courses response in frontend', coursesResponse)
         const { courses, totalPages } = coursesResponse.payload;
 
@@ -53,15 +53,17 @@ const AdminOverview = () => {
 
         const transactionsResponse = await dispatch(getTransactions(filters));
         const transactions = transactionsResponse.payload;
+        console.log('transaction new',transactionsResponse.payload)
 
         const combinedData = courses.map(course => {
-          const courseTransactions = transactions.filter(transaction => transaction.courseId === course._id);
+          const courseTransactions = transactions.filter(transaction => transaction.courseId == course._id);
+          console.log('course transactions',courseTransactions)
           return {
             id: course._id,
             name: course.title,
             studentsEnrolled: courseTransactions.length,
-            totalRevenue: courseTransactions.reduce((sum, transaction) => sum + transaction.adminAmount / 100, 0),
-            adminRevenue: courseTransactions.reduce((sum, transaction) => sum + transaction.adminAmount / 100, 0),
+            totalRevenue: courseTransactions.reduce((sum, transaction) => sum + transaction.adminAmount , 0),
+            adminRevenue: courseTransactions.reduce((sum, transaction) => sum + transaction.adminAmount , 0),
             averageRating: course.averageRating || 0,
           };
         });
@@ -96,6 +98,8 @@ const AdminOverview = () => {
     ? (courseData.reduce((sum, course) => sum + course.averageRating, 0) / courseData.length).toFixed(1)
     : 'N/A';
 
+
+    console.log('coursedata',courseData)
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6">Admin Overview</h1>

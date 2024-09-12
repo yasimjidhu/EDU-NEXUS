@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Book } from 'lucide-react';
+import { Book, Wallet } from 'lucide-react';
 
 interface status{
     isActive:boolean
@@ -135,6 +135,19 @@ const Sidebar = ({isActive}:status) => {
                   >
                   <img src="/assets/icon/banner.png" className='w-6 h-auto' alt="" />
                     <span className="flex-1 ml-3 whitespace-nowrap">Transactions</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/payouts"
+                    className={
+                      isActive
+                        ? "flex items-center p-2 text-blue-600 rounded-lg dark:text-white hover:bg-black group"
+                        : "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-black group"
+                    }
+                  >
+                  <Wallet/>
+                    <span className="flex-1 ml-3 whitespace-nowrap">Payouts</span>
                   </Link>
                 </li>
                 <li>

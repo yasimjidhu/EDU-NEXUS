@@ -22,7 +22,7 @@ const Home = () => {
 
   const navigate = useNavigate()
   const page = 1
-console.log('user in hiome,',user)
+
   useEffect(() => {
     if (user?.stripeAccountId && !user.onboardingComplete) {
       console.log('User stripe account ID is present and the function is called:', user.stripeAccountId);
@@ -31,6 +31,7 @@ console.log('user in hiome,',user)
         .then((res: any) => {
           toast.success(res.payload);
           dispatch(setOnboardingCompleted(true)); // Update Redux store after completion
+          navigate('/kyc')
         })
         .catch((error: any) => {
           toast.error(error.message);
@@ -46,7 +47,7 @@ console.log('user in hiome,',user)
   const fetchCourses = async (page: number) => {
     try {
       setIsLoading(true)
-      const response = await dispatch(getAllCourses({ page })).unwrap();
+      const response = await dispatch(getAllCourses({ page ,limit:4})).unwrap();
       if (response.courses.length > 0) {
         setAllCourses(response.courses);
         setIsLoading(false)

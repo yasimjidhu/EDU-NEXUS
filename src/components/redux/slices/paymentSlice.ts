@@ -154,15 +154,14 @@ export const getInstructorAvailablePayouts = createAsyncThunk(
   }
 );
 
-// payout thunks
-export const getRecentPayouts = createAsyncThunk(
-  'payment/getRecentPayouts',
-  async (_, { rejectWithValue }) => {
+
+export const getInstructorsTodaysRevenue = createAsyncThunk(
+  'payment/getInstructorsTodaysRevenue',
+  async (instructorId: string, { rejectWithValue }) => {
     try {
-      console.log('get recent  payment called in slice')
-      const response = await axiosInstance.get(`/payment/payouts`);
-      console.log('recent  payouts data', response.data)
-      return response.data;
+      const response = await axiosInstance.get(`/payment/todays-revenue/${instructorId}`);
+      console.log('get instructors revenues data', response.data)
+      return response.data.revenue
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         return rejectWithValue(error.response?.data);
@@ -172,12 +171,12 @@ export const getRecentPayouts = createAsyncThunk(
   }
 )
 
-export const getInstructorsTodaysRevenue = createAsyncThunk(
-  'payment/getInstructorsTodaysRevenue',
-  async (instructorId: string, { rejectWithValue }) => {
+export const getTodaysAdminRevenue = createAsyncThunk(
+  'payment/getTodaysAdminRevenue',
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/payment/todays-revenue/${instructorId}`);
-      console.log('get instructors revenues data', response.data)
+      const response = await axiosInstance.get(`/payment/todays-revenue`);
+      console.log('get admin revenues data', response.data)
       return response.data.revenue
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
@@ -203,6 +202,57 @@ export const getInstructorsTotalEarnings = createAsyncThunk(
     }
   }
 )
+
+export const getAdminTotalEarnings = createAsyncThunk(
+  'payment/getAdminTotalEarnings',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/payment/total-earnings`);
+      console.log('get admin total earnings data', response.data)
+      return response.data.totalEarnings
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+)
+
+// payout thunks
+export const getRecentPayouts = createAsyncThunk(
+  'payment/getRecentPayouts',
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log('get recent  payment called in slice')
+      const response = await axiosInstance.get(`/payment/payouts`);
+      console.log('recent  payouts data', response.data)
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+)
+
+
+export const getAdminAvailablePayouts = createAsyncThunk(
+  'payment/getAdminAvailablePayouts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/payment/payouts/available-payouts`);
+      console.log('available payoures for admin response', response.data)
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
 
 export const requestInstructorPayout = createAsyncThunk(
   'payment/requestInstructorPayout',

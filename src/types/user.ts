@@ -22,6 +22,10 @@ export interface User {
   role: string;
   updatedAt: string;
   stripeAccountId?:string;
+  chargesEnabled?: boolean,
+  onboardingComplete?: boolean,
+  verificationSessionId?: string,
+  verificationStatus?: string,
   __v: number;
   _id: string;
 }

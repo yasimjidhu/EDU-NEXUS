@@ -34,7 +34,7 @@ const InstructorOverview = () => {
     const [enrolledStudentIds, setEnrolledStudentIds] = useState<string[]>([])
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [allUsers, setAllUSers] = useState<StudentState>([])
-    const [totalPages,setTotalPages] = useState<number>(0)
+    const [totalPages, setTotalPages] = useState<number>(0)
 
     const dispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.user);
@@ -51,7 +51,7 @@ const InstructorOverview = () => {
                     setSelectedCourseId(courses[0]._id)
                 }
 
-                const paymentsResponse = await dispatch(getInstructorCoursesTransaction({instructorId:user._id,limit:5,page:currentPage}));
+                const paymentsResponse = await dispatch(getInstructorCoursesTransaction({ instructorId: user._id, limit: 5, page: currentPage }));
                 const payments = paymentsResponse.payload.transactions;
                 setTotalPages(paymentsResponse.payload.totalPages)
 
@@ -223,7 +223,7 @@ const InstructorOverview = () => {
                     </table>
                 </div>
             </div>
-            <div className="bg-white p-4 rounded shadow">
+            <div className="bg-white p-4 rounded shadow mt-6">
                 <div className='flex justify-between'>
                     <h2 className="text-xl font-semibold mb-4">Students Overview</h2>
                     <h2 className="text-xl font-semibold mb-4">{studentsOverview?.title}</h2>

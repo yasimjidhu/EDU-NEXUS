@@ -19,6 +19,7 @@ const routes = {
       CATEGORIES: "/admin/categories",
       FEEDBACKS: "/admin/feedbacks",
       TRANSACTIONS: "/admin/transactions",
+      PAYOUTS: "/admin/payouts",
       REPORTS:'/admin/reports',
       REQUESTS: "/admin/requests",
       USERS: "/admin/users",
@@ -48,6 +49,7 @@ const routes = {
     },
     PUBLIC: {
       ROOT: "/",
+      KYC:'/kyc',
       ABOUT_US:'/about-us',
       CONTACT_US:'/contact-us',
       ALL_COURSES: "/allcourses",

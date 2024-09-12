@@ -9,6 +9,7 @@ import instructorReducer, { InstructorState } from '../slices/instructorSlice';
 import CategoryReducer, { CategoryState } from '../slices/adminSlice';
 import chatReducer,{ ChatState } from "../slices/chatSlice";
 import paymentReducer ,{ PaymentState } from "../slices/paymentSlice";
+import kycReducer from '../slices/kycSlice'
 
 export interface RootState {
   auth: AuthState;
@@ -19,6 +20,7 @@ export interface RootState {
   course: CourseState;
   chat:ChatState;
   payment:PaymentState;
+  kyc:any
 }
 
 const persistConfig = {
@@ -35,7 +37,8 @@ const rootReducer = combineReducers({
   category: CategoryReducer,
   course: courseReducer,
   chat:chatReducer,
-  payment:paymentReducer
+  payment:paymentReducer,
+  kyc:kycReducer
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

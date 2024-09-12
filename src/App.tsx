@@ -59,6 +59,8 @@ import AdminReportsPage from "./pages/Admin/Reports";
 import Reauthenticate from "./pages/Payment/Reauthenticate";
 import InstructorPaymentDashboard from "./pages/Instructor/InstructorPaymentDashboard";
 import { InstructorPayoutPage } from "./pages/Instructor/InstructorPayoutPage";
+import { AdminPayoutPage } from "./pages/Admin/AdminPayoutPage";
+import KYCPage from "./pages/UserPages/KycPage";
 
 function App() {
   return (
@@ -95,6 +97,7 @@ function App() {
                   <Route path={routes.ADMIN.CATEGORIES} element={<Categories />} />
                   <Route path={routes.ADMIN.FEEDBACKS} element={<FeedbackPage />} />
                   <Route path={routes.ADMIN.TRANSACTIONS} element={<AdminTransaction />} />
+                  <Route path={routes.ADMIN.PAYOUTS} element={<AdminPayoutPage />} />
                   <Route path={routes.ADMIN.REPORTS} element={<AdminReportsPage />} />
                   <Route path={routes.ADMIN.REQUESTS} element={<Requests />} />
                   <Route path={routes.ADMIN.USERS} element={<Users />} />
@@ -139,6 +142,7 @@ function App() {
                 <Route path={routes.PUBLIC.SETTINGS} element={<Settings />} />
                 <Route path={routes.PUBLIC.SUCCESS} element={<PaymentSuccess />} />
                 <Route path={routes.PUBLIC.REAUTHENTICATE} element={<Reauthenticate />} />
+                <Route path={routes.PUBLIC.KYC} element={<KYCPage />} />
               </Route>
 
               {/*  404 route and 403 */}

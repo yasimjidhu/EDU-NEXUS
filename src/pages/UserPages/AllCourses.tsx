@@ -25,7 +25,7 @@ const AllCourses: React.FC = () => {
 
   const fetchCourses = async (page: number, sort: string, filters: any) => {
     setIsLoading(true);
-    const response = await dispatch(getAllCourses({ page, sort, filters }));
+    const response = await dispatch(getAllCourses({ page,limit:6, sort, filters }));
     console.log('allcourses data', response.payload)
     const { courses, totalPages } = response.payload;
     setAllCourses(courses);

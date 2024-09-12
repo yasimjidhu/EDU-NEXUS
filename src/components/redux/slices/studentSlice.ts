@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { axiosInstance } from '../../../constants/axiosInstance';
-import { FeedbackPayload, FeedbackResponse } from '../../../types/feedback';
+import { FeedbackPayload } from '../../../types/feedback';
 
 export interface User {
   contact: {
@@ -27,6 +27,8 @@ export interface User {
   updatedAt: string;
   stripeAccountId?:string;
   onboardingComplete?:boolean;
+  verificationSessionId?: string,
+  verificationStatus?: string,
   __v: number;
   _id: string;
 }
