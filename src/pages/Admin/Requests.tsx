@@ -40,9 +40,9 @@ const Requests: React.FC = () => {
     dispatch(fetchUnVerifiedInstructors()).then((res) => setUnVerifiedInstructors(res.payload.instructors));
   }, [dispatch, currentPage, approvedInstructors, rejectedInstructors, approvedCourses, rejectedCourses]);
 
-  const handleApproval = async (email) => {
+  const handleApproval = async (email:string) => {
     try {
-      await dispatch(ApproveInstructor({ email }));
+      await dispatch(ApproveInstructor(email));
       toast.success('Instructor approved successfully');
       setApprovedInstructors((prev) => [...prev, email]);
     } catch (error) {

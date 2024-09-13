@@ -2,24 +2,31 @@ import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 import { RootState } from "../redux/store/store";
 
-// Define the types for the props
 interface PrivateRouteProps {
-  roles?: string[]; // Optional array of roles that can access the route
+  roles?: string[]; 
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ roles }) => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const isAuthenticated = !!user; // Ensure user exists to be considered authenticated
+  const userData = useSelector((state:RootState)=>state.user)
+
+  const isAuthenticated = !!user;
+  const isKycVerified = userData.user?.verificationStatus == 'verified' 
+  ;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 
   if (roles && !roles.includes(user?.role)) {
-    return <Navigate to="/forbidden" />; // Redirect to home or any other page if role does not match
+    return <Navigate to="/forbidden" />; 
   }
 
-  return <Outlet />; // Render child routes if authenticated and authorized
+  if(!isKycVerified && user?.role !== 'admin'){
+    return <Navigate to="/verification-pending" />;
+  }
+
+  return <Outlet />; 
 };
 
 export default PrivateRoute;

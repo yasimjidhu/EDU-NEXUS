@@ -1,5 +1,4 @@
 import React from 'react';
-import { fetchUserData } from '../../components/redux/slices/studentSlice';
 import {  useSelector } from 'react-redux';
 import {  RootState } from '../../components/redux/store/store';
 import { 
@@ -9,9 +8,7 @@ import {
   MapPin, 
   Calendar, 
   Users, 
-  Shield, 
-  Key, 
-  DollarSign, 
+  Shield,  
   Globe,
   CheckCircle,
   XCircle,
@@ -66,7 +63,7 @@ const UserProfile: React.FC = () => {
             <InfoItem icon={<Mail size={18} />} label="Email" value={authData.user.email} />
             <InfoItem icon={<Phone size={18} />} label="Phone" value={user.contact.phone} />
             <InfoItem icon={<MapPin size={18} />} label="Address" value={user.contact.address} />
-            <InfoItem icon={<Calendar size={18} />} label="Date of Birth" value={user.profile.dateOfBirth} />
+            <InfoItem icon={<Calendar size={18} />} label="Date of Birth" value={new Date(user.profile.dateOfBirth).toLocaleDateString()} />
             <InfoItem icon={<Users size={18} />} label="Gender" value={user.profile.gender} />
           </div>
         </div>
@@ -80,16 +77,7 @@ const UserProfile: React.FC = () => {
             value={user.isBlocked ? 'Blocked' : user.isRejected ? 'Rejected' : 'Active'}
             statusIcon={getStatusIcon()}
           />
-          {/* <StatusCard
-            icon={<Key size={20} />}
-            title="Authentication"
-            value={user.isGAuth ? 'Google Auth' : 'Standard'}
-          /> */}
-          {/* <StatusCard
-            icon={<DollarSign size={20} />}
-            title="Profit"
-            value={user.profit ? `$${user.profit.toFixed(2)}` : 'N/A'}
-          /> */}
+
           <StatusCard
             icon={<Globe size={20} />}
             title="Social"

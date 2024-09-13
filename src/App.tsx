@@ -61,6 +61,7 @@ import InstructorPaymentDashboard from "./pages/Instructor/InstructorPaymentDash
 import { InstructorPayoutPage } from "./pages/Instructor/InstructorPayoutPage";
 import { AdminPayoutPage } from "./pages/Admin/AdminPayoutPage";
 import KYCPage from "./pages/UserPages/KycPage";
+import KycPendingPage from "./pages/UserPages/KycVerificationPending";
 
 function App() {
   return (
@@ -148,6 +149,7 @@ function App() {
               {/*  404 route and 403 */}
               <Route path={routes.RESTRICTED.NOTFOUND} element={<NotFound />} />
               <Route path={routes.RESTRICTED.FORBIDDEN} element={<Forbidden />} />
+              <Route path={routes.RESTRICTED.KYCVERIFICATIONPENDING} element={<KycPendingPage />} />
             </Routes>
           </Router>
         </ErrorBoundary>

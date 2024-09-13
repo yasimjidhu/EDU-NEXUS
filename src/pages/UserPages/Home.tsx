@@ -31,14 +31,19 @@ const Home = () => {
         .then((res: any) => {
           toast.success(res.payload);
           dispatch(setOnboardingCompleted(true)); // Update Redux store after completion
-          navigate('/kyc')
         })
         .catch((error: any) => {
           toast.error(error.message);
         });
     }
-  }, [dispatch, user?.stripeAccountId, onboardingCompleted]);
+  }, [user?.stripeAccountId]);
 
+  console.log('user >>',user)
+  useEffect(()=>{
+    if(user && user.isVerified  && !user.verificationSessionId){
+      navigate('/kyc')
+    }
+  },[user?.isVerified,user?.onboardingComplete])
 
   useEffect(() => {
     fetchCourses(page);

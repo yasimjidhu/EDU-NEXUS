@@ -25,8 +25,8 @@ export interface User {
   qualification: string;
   role: string;
   updatedAt: string;
-  stripeAccountId?:string;
-  onboardingComplete?:boolean;
+  stripeAccountId?: string;
+  onboardingComplete?: boolean;
   verificationSessionId?: string,
   verificationStatus?: string,
   __v: number;
@@ -67,7 +67,7 @@ export const Register = createAsyncThunk(
     try {
       console.log('register reached in frontend')
       const response = await axiosInstance.post('/user/register', payload.formData);
-      console.log('response of register',response)
+      console.log('response of register', response)
       return response.data.user;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -131,8 +131,9 @@ export const ApproveInstructor = createAsyncThunk(
   'student/approve',
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/user/approve', email);
-      console.log('approve instructor response',response)
+      console.log('approve instructor reached slice', email)
+      const response = await axiosInstance.post('/user/approve', { email });
+      console.log('approve instructor response', response)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
@@ -168,12 +169,12 @@ export const updateUserDetails = createAsyncThunk(
 
 export const submitFeedback = createAsyncThunk(
   'student/submit-feedback',
-  async (feedback:FeedbackPayload, { rejectWithValue }) => {
+  async (feedback: FeedbackPayload, { rejectWithValue }) => {
     try {
       console.log('post submit feedback called', feedback);
-      const response = await axiosInstance.post(`/user/feedback`, {feedback:feedback});
+      const response = await axiosInstance.post(`/user/feedback`, { feedback: feedback });
       console.log('Response of sumbit feedback', response);
-      return response.data.message 
+      return response.data.message
     } catch (error: any) {
       const errorMessage = error.response?.data || 'An error occurred';
       return rejectWithValue(errorMessage);
@@ -188,7 +189,7 @@ export const getFeedbacks = createAsyncThunk(
       console.log('get  feedback called');
       const response = await axiosInstance.get(`/user/feedbacks`);
       console.log('Response of get feedbacks', response);
-      return response.data 
+      return response.data
     } catch (error: any) {
       const errorMessage = error.response?.data || 'An error occurred';
       return rejectWithValue(errorMessage);
@@ -214,7 +215,7 @@ const studentSlice = createSlice({
       })
       .addCase(Register.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
-        console.log('paylod of register in thunk',action.payload)
+        console.log('paylod of register in thunk', action.payload)
         state.user = action.payload.user;
         state.error = null;
       })
@@ -300,11 +301,14 @@ const studentSlice = createSlice({
       })
       .addCase(
         ApproveInstructor.fulfilled,
-        (state, action: PayloadAction<any>) => {
-          state.loading = false;
-          console.log('approved user is', action.payload)
-          state.user = action.payload.user;
-          state.error = null;
+        (state, action: PayloadAction<{ user: { isVerified: boolean } }>) => {
+          if (state.user) {
+            state.loading = false;
+            console.log('approved user is', action.payload);
+            state.user.isVerified = action.payload.user.isVerified;
+            console.log('insturctor verified',state.user)
+            state.error = null;
+          }
         }
       )
       .addCase(

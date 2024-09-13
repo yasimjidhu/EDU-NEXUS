@@ -2,18 +2,17 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { initiateKYC, checkKYCStatus } from '../../components/redux/slices/kycSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
-import { useNavigate } from 'react-router-dom';
 
 const KYCPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate(); // To programmatically navigate
 
     const { kycStatus, message, loading, error, verificationUrl } = useSelector((state: RootState) => state.kyc);
     const { user } = useSelector((state: RootState) => state.user);
 
     // Initiate KYC as soon as the component loads
     useEffect(() => {
-        if (user && user._id) {
+        console.log('user is',user)
+        if (user && user._id && user.isVerified) {
             dispatch(initiateKYC(user._id));
         }
     }, [dispatch, user]);
@@ -43,6 +42,7 @@ const KYCPage: React.FC = () => {
             <div className="mt-6 text-center">
                 {kycStatus && <p className="mt-2 font-semibold">KYC Status: {kycStatus}</p>}
             </div>
+            <h1 className='text-center text-md inter'>Please go through the kyc verification to complete the enrollment</h1>
         </div>
     );
 };

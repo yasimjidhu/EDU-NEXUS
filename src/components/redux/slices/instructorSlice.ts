@@ -89,7 +89,7 @@ export const ApproveInstructor = createAsyncThunk(
     async (email:string, { rejectWithValue }) => {
       try {
         console.log('request reached in register slice',email);
-        const response = await axiosInstance.post('/user/approve',email);
+        const response = await axiosInstance.post('/user/approve',{email});
         console.log('response of approveduser',response)
         return response.data;
       } catch (error: any) {

@@ -13,7 +13,7 @@ const getSignupValidationSchema = () => {
         username: Yup.string().required('Username is required'),
         email: Yup.string()
             .email('Invalid email address')
-            .matches(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Email must be a valid @gmail.com address')
+            // .matches(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Email must be a valid @gmail.com address')
             .required('Email is required'),
         password: Yup.string()
             .required('Password is required')
@@ -32,7 +32,7 @@ const getLoginValidationSchema = () => {
     return Yup.object({
         email: Yup.string()
             .email('Invalid email address')
-            .matches(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Email must be a valid @gmail.com address')
+            // .matches(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, 'Email must be a valid @gmail.com address')
             .required('Email is required'),
         password: Yup.string()
             .required('Password is required')

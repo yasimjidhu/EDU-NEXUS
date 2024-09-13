@@ -70,7 +70,8 @@ const routes = {
     },
     RESTRICTED:{
       NOTFOUND:'*',
-      FORBIDDEN:'/forbidden'
+      FORBIDDEN:'/forbidden',
+      KYCVERIFICATIONPENDING:'/verification-pending'
     }
   };
   
