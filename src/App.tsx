@@ -62,6 +62,7 @@ import { InstructorPayoutPage } from "./pages/Instructor/InstructorPayoutPage";
 import { AdminPayoutPage } from "./pages/Admin/AdminPayoutPage";
 import KYCPage from "./pages/UserPages/KycPage";
 import KycPendingPage from "./pages/UserPages/KycVerificationPending";
+import { StudentTransactions } from "./pages/UserPages/StudentTransactions";
 
 function App() {
   return (
@@ -128,6 +129,7 @@ function App() {
                   <Route path={routes.STUDENT.PROFILE} element={<UserProfile />} />
                   <Route path={routes.STUDENT.OVERVIEW} element={<StudentOverview />} />
                   <Route path={routes.STUDENT.MY_COURSES} element={<MyCourse />} />
+                  <Route path={routes.STUDENT.TRANSACTIONS} element={<StudentTransactions />} />
                   <Route path={routes.STUDENT.CHAT} element={<ChatUI />} />
                 </Route>
               </Route>

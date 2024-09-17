@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { User } from '../../types/user';
 import { getAllUsers } from '../../components/redux/slices/studentSlice';
 import CsvExporter from '../..//components/Admin/CsvExporter';
+import Pagination from '../../components/common/Pagination';
 
 
 const AdminTransaction = () => {
@@ -29,7 +30,7 @@ const AdminTransaction = () => {
         }
     }, []);
 
-    const { transactions, loading, error } = useSelector((state: RootState) => state.payment);
+    const { transactions,totalPages, loading, error } = useSelector((state: RootState) => state.payment);
     const { allCourses } = useSelector((state: RootState) => state.course)
 
     useEffect(() => {
@@ -63,6 +64,11 @@ const AdminTransaction = () => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
+
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+    };
+
     const getCourseName = (courseId: string) => {
         return allCourses?.find((course) => course._id == courseId)
     }
@@ -75,11 +81,11 @@ const AdminTransaction = () => {
 
     const filteredTransactions = transactions.filter((transaction) => {
         const lowerCaseSearchTerm = searchTerm?.toLowerCase() || "";
-    
+
         const courseName = getCourseName(transaction.courseId)?.title?.toLowerCase() || "";
         const userName = getUserName(transaction.userId)?.toLocaleLowerCase() || "";
         const statusMatches = filters.status === "" || transaction.status === filters.status;
-        
+
         return (
             statusMatches &&
             (
@@ -89,10 +95,6 @@ const AdminTransaction = () => {
             )
         );
     });
-    
-
-
-    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -103,7 +105,6 @@ const AdminTransaction = () => {
             default: return 'bg-gray-100 text-gray-800';
         }
     };
-
     const csvData = filteredTransactions.map((transaction) => ({
         Payment_id: transaction.id,
         User: getUserName(transaction.userId) || 'Unknown User',
@@ -200,21 +201,17 @@ const AdminTransaction = () => {
                     </tbody>
                 </table>
             </div>
-            <div className="mt-4 flex justify-between items-center">
-                <div>
-                    Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredTransactions.length)} of {filteredTransactions.length} entries
+            <div className="mt-4 flex justify-center items-center">
+                {/* Add Pagination Component Here */}
+                {totalPages > 1 && (
+                    <div className="flex justify-end items-center p-6">
+                        <Pagination
+                            currentPage={currentPage}
+                            onPageChange={handlePageChange}
+                            totalPages={totalPages}
+                        />
                 </div>
-                <div className="flex">
-                    {Array.from({ length: Math.ceil(filteredTransactions.length / itemsPerPage) }, (_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => paginate(i + 1)}
-                            className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1 ? 'bg-medium-rose text-white' : 'bg-gray-200'}`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                </div>
+                )}
             </div>
         </div>
     );

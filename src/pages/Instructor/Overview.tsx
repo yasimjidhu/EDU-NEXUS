@@ -31,6 +31,7 @@ const InstructorOverview = () => {
     const [error, setError] = useState(null);
     const [selectedCourseId, setSelectedCourseId] = useState<string>('')
     const [studentsOverview, setStudentsOverview] = useState<string>(null)
+    const [totalEnrollments,setTotalEnrollments] = useState <number>(0)
     const [enrolledStudentIds, setEnrolledStudentIds] = useState<string[]>([])
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [allUsers, setAllUSers] = useState<StudentState>([])
@@ -42,42 +43,65 @@ const InstructorOverview = () => {
     useEffect(() => {
         const fetchData = async () => {
             if (!user) return;
+    
             setIsLoading(true);
+    
             try {
-                const coursesResponse = await dispatch(getInstructorCourseDetailed(user?._id));
+                // Fetch courses data
+                const coursesResponse = await dispatch(getInstructorCourseDetailed(user._id));
                 const courses = coursesResponse.payload;
-                console.log('course in frontend', courses)
-                if (selectedCourseId == '') {
-                    setSelectedCourseId(courses[0]._id)
+                
+                if (courses.length === 0) {
+                    throw new Error('You don/t have any uploaded courses. Please upload a course first.');
                 }
-
-                const paymentsResponse = await dispatch(getInstructorCoursesTransaction({ instructorId: user._id, limit: 5, page: currentPage }));
+    
+                // Set default selected course ID if not already set
+                if (!selectedCourseId) {
+                    setSelectedCourseId(courses[0]._id);
+                }
+    
+                // Calculate total enrollments across all courses
+                const totalEnrollments = courses.reduce((acc, course) => acc + course.enrolledStudentsCount, 0);
+                setTotalEnrollments(totalEnrollments);
+    
+                // Fetch payments data
+                const paymentsResponse = await dispatch(getInstructorCoursesTransaction({
+                    instructorId: user._id,
+                    limit: 50,
+                    page: currentPage
+                }))
+                
                 const payments = paymentsResponse.payload.transactions;
-                setTotalPages(paymentsResponse.payload.totalPages)
-
+                setTotalPages(paymentsResponse.payload.totalPages);
+    
+                // Combine course and payment data
                 const combinedData = courses.map(course => {
+                    console.log('course is>>>',course)
                     const coursePayments = payments.filter(payment => payment.courseId === course._id);
+                    console.log('couyse paymebnts',coursePayments)
                     return {
                         id: course._id,
                         name: course.title,
-                        studentsEnrolled: coursePayments.length,
-                        totalRevenue: coursePayments.reduce((sum, payment) => sum + payment.instructorAmount / 100, 0),
-                        instructorRevenue: coursePayments.reduce((sum, payment) => sum + payment.instructorAmount / 100, 0),
+                        studentsEnrolled: course.enrolledStudentsCount,
+                        totalRevenue: coursePayments.reduce((sum, payment) => sum + (payment.instructorAmount / 100), 0),
+                        instructorRevenue: coursePayments.reduce((sum, payment) => sum + (payment.instructorAmount / 100), 0),
                         averageRating: course.averageRating || 0,
                     };
                 });
-
+    
                 setCourseData(combinedData);
-            } catch (err) {
-                setError('You dont have any uploaded courses, upload first');
-                console.error('Error fetching data:', err);
+    
+            } catch (error) {
+                setError(error.message);
+                console.error('Error fetching data:', error);
             } finally {
                 setIsLoading(false);
             }
         };
-
+    
         fetchData();
-    }, [dispatch, user?._id]);
+    }, [dispatch, user?._id, selectedCourseId, currentPage]);
+    
 
     useEffect(() => {
         // Define an async function inside useEffect
@@ -123,8 +147,6 @@ const InstructorOverview = () => {
 
     if (isLoading) return <div className="text-center p-4"><InstructorAnalyticsSkeleton /></div>;
 
-
-    const totalStudents = courseData.reduce((sum, course) => sum + course.studentsEnrolled, 0);
     const totalRevenue = courseData.reduce((sum, course) => sum + course.totalRevenue, 0);
     const averageRating = courseData.length > 0
         ? (courseData.reduce((sum, course) => sum + course.averageRating, 0) / courseData.length).toFixed(1)
@@ -138,7 +160,7 @@ const InstructorOverview = () => {
                 {courseData.map((course, index) => (
                     <div key={index} className="bg-white p-4 rounded shadow">
                         <h2 className="text-xl font-semibold mb-2">{course.name}</h2>
-                        <p>Students Enrolled: {course.studentsEnrolled}</p>
+                        <p>Students Enrolled: {totalEnrollments}</p>
                         <p>Average Rating: {course.averageRating.toFixed(1)}</p>
                         <p className='mt-2'>
                             Revenue:
@@ -154,7 +176,7 @@ const InstructorOverview = () => {
 
             <div className="bg-white p-4 rounded shadow mb-6">
                 <h2 className="text-xl font-semibold mb-4">Overall Statistics</h2>
-                <p>Total Students: {totalStudents}</p>
+                <p>Total Students: {totalEnrollments}</p>
                 <p>Average Rating: {averageRating}</p>
                 <p className='mt-2'> Total Revenue: <span className='text-xl inter text-green-600'>$ {totalRevenue.toFixed(2)}</span></p>
             </div>
@@ -262,10 +284,10 @@ const InstructorOverview = () => {
                                             </td>
                                             <td className="p-2">{getUser(student.studentId).firstName + ' ' + getUser(student.studentId).lastName}</td>
                                             <td className="p-2">{student.score ? student.score : 'N/A'}</td>
-                                            <td className="p-2">{studentsOverview.totalScore}</td>
+                                            <td className="p-2">{studentsOverview.totalScore ? studentsOverview.totaLScore : 'N/A'}</td>
                                             <td className="p-2">{student.attempts ? student.attempts : 'N/A'}</td>
                                             <td className={`p-2 ${student.score === undefined ? 'text-gray-600' : student.score >= studentsOverview.totalScore ? 'text-green-700' : 'text-red-600'}`}>
-                                                {student.score === undefined ? 'No Assessment' : student.score >= studentsOverview.totalScore ? 'Passed' : 'Failed'}
+                                                {student.score <= 0 ? 'No Assessment' : student.score >= studentsOverview.totalScore ? 'Passed' : 'Failed'}
                                             </td>
                                         </tr>
                                     ))}

@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
-import { PlayCircle, Clock, FileText, CheckCircle, CircleAlert } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { PlayCircle, Clock, FileText, CheckCircle, CircleAlert, RefreshCcw } from "lucide-react";
 import {
   getCourse,
   getCourseVideoUrl,
+  removeEnrollment,
   updateAssessmentCompletion,
   updateLessonProgress,
+  updateRefundStatus,
 } from "../../components/redux/slices/courseSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
@@ -13,6 +15,8 @@ import ReactPlayer from "react-player";
 import Certificate from "../../components/student/Certficate";
 import { Review } from "../../components/student/Review";
 import ReportModal from "../../components/student/ReportModal";
+import { toast } from "react-toastify";
+import { processRefund } from "../../components/redux/slices/paymentSlice";
 
 interface Attachment {
   title?: string;
@@ -48,13 +52,6 @@ interface Lesson {
   assessment?: Assessment;
 }
 
-interface CourseEntity {
-  _id?: string;
-  title: string;
-  description: string;
-  lessons: Lesson[];
-  assessments: Assessment[];
-}
 
 const ViewCourse: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -78,9 +75,11 @@ const ViewCourse: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [courseCompleted, setCourseCompleted] = useState(false);
   const [preventAssessment, setPreventAssessment] = useState<boolean>(false)
+  const [refundEligible,setRefundEligible] = useState<boolean>(true)
   const [videoUrl, setVideoUrl] = useState<string>('')
 
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate()
   const { user } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
@@ -154,7 +153,6 @@ const ViewCourse: React.FC = () => {
     setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
   };
 
-  console.log('current assessment is ', currentAssessment)
   const handleSubmitAssessment = async () => {
     if (!currentAssessment || !user?._id || !courseId) return;
 
@@ -186,18 +184,14 @@ const ViewCourse: React.FC = () => {
 
     const examStatus = score >= currentAssessment.passing_score ? 'passed' : 'failed';
 
-    console.log('actual score is', score)
     setAssessmentResult(score);
 
-    console.log('user exam status', examStatus)
     try {
       await dispatch(updateAssessmentCompletion({ userId: user._id, courseId, score, completedAssessmentId: currentAssessment._id, examStatus }));
-      console.log('Assessment completion updated successfully');
     } catch (error) {
       console.error('Error updating assessment completion:', error);
     }
   };
-  // console.log('course data',course.enrollments)
 
   useEffect(() => {
     if (completedLessons.size === totalLesson && totalLesson > 0) {
@@ -222,16 +216,36 @@ const ViewCourse: React.FC = () => {
     }
   }, [course, user?._id]);
 
+  const calculateCourseProgress = useCallback(() => {
+    const totalLessonsCompleted = completedLessons.size;
+    const courseProgress = (totalLessonsCompleted / totalLesson) * 100;
+
+
+    // Prevent refund if more than 30% of the course has been completed
+    if (courseProgress >= 30) {
+      setRefundEligible(false);
+    }
+  }, [completedLessons, totalLesson]);
+
+  useEffect(() => {
+    calculateCourseProgress();
+  }, [completedLessons, calculateCourseProgress]);
+
 
   const handleVideoProgress = useCallback(
     (progress: number) => {
-      if (!currentLesson || !user) return;
+      if (!currentLesson || !user || !courseId) return;
 
       setLessonProgress((prev) => ({
         ...prev,
         [currentLesson.lessonNumber]: progress,
       }));
+      console.log('progress',progress)
 
+      if(progress >= 30 && progress <= 32){
+        setRefundEligible(false)
+        dispatch(updateRefundStatus({courseId:courseId,userId:user._id,status:false}))
+      }
       if (progress >= 95 && !completedLessons.has(currentLesson._id || "")) {
         dispatch(
           updateLessonProgress({
@@ -243,9 +257,7 @@ const ViewCourse: React.FC = () => {
           })
         )
           .then(() => {
-            const updatedCompletedLessons = new Set(completedLessons).add(
-              currentLesson._id || ""
-            );
+            const updatedCompletedLessons = new Set(completedLessons).add(currentLesson._id || "");
             setCompletedLessons(updatedCompletedLessons);
             localStorage.setItem(
               `completedLessons-${courseId}-${user._id}`,
@@ -254,16 +266,42 @@ const ViewCourse: React.FC = () => {
             if (updatedCompletedLessons.size === totalLesson) {
               setCourseCompleted(true);
             }
+            calculateCourseProgress(); // Recalculate after each lesson is completed
           })
           .catch((error) => {
             console.error("Error updating lesson progress:", error);
           });
       }
     },
-
-    [currentLesson, user, courseId, dispatch, completedLessons, totalLesson]
+    [currentLesson, user, courseId, dispatch, completedLessons, totalLesson, calculateCourseProgress]
   );
 
+  const handleRefund = async () => {
+    if (!user || !courseId || !refundEligible) return;
+  
+    try {
+      // Process refund and remove enrollment concurrently using Promise.all
+      const [refundResult, removeEnrollmentResult] = await Promise.all([
+        dispatch(processRefund({ userId: user._id, courseId })),
+        dispatch(removeEnrollment({ courseId, userId: user._id }))
+      ]);
+  
+      // Check the result of refund
+      if (refundResult.meta.requestStatus === 'fulfilled' && removeEnrollmentResult.meta.requestStatus === 'fulfilled') {
+        navigate('/student/mycourses')
+        toast.success('Payment refunded and enrollment removed successfully');
+        
+      } else if (refundResult.meta.requestStatus !== 'fulfilled') {
+        toast.error('Refund process failed');
+      } else {
+        toast.error('Failed to remove enrollment');
+      }
+    } catch (error: any) {
+      toast.error('An error occurred while processing the refund');
+      console.error('Refund error:', error);
+    }
+  };
+  
   if (!course) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -288,31 +326,46 @@ const ViewCourse: React.FC = () => {
                 />
               </div>
             )}
+
             {
-              reportModalIsOpen && courseId && user?._id &&  (
+              reportModalIsOpen && courseId && user?._id && (
                 <ReportModal
-                 courseId={courseId}
-                 userId={user._id}
-                 userName={user.firstName + " " + user.lastName}
-                 isOpen={reportModalIsOpen}
-                 onClose={()=>setReportModalIsOpen(false)}
-                 courseName={course?.title}/>
+                  courseId={courseId}
+                  userId={user._id}
+                  userName={user.firstName + " " + user.lastName}
+                  isOpen={reportModalIsOpen}
+                  onClose={() => setReportModalIsOpen(false)}
+                  courseName={course?.title} />
               )
             }
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <div className="flex justify-between relative">
+              <div className="flex justify-between  relative">
                 <h1 className="text-2xl font-bold mb-2">
                   {currentLesson?.title || course.title}
                 </h1>
 
-                <div className="relative group">
-                  <CircleAlert color="red" size={30} className="cursor-pointer"  onClick={()=>setReportModalIsOpen(true)}/>
+                <div className="flex justify-end gap-4">
+                  {/* Report Course Icon with Tooltip */}
+                  <div className="relative group">
+                    <CircleAlert color="red" size={30} className="cursor-pointer" onClick={() => setReportModalIsOpen(true)} />
 
-                  {/* Tooltip */}
-                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 text-center bg-gray-500 text-white text-sm rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Report Course
+                    {/* Tooltip */}
+                    <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 text-center bg-gray-500 text-white text-sm rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      Report Course
+                    </div>
+                  </div>
+
+                  {/* Refund Icon with Tooltip */}
+                  <div className="relative group flex justify-center items-center">
+                    <RefreshCcw color="blue" size={30} className="cursor-pointer mb-1" onClick={handleRefund}/>
+
+                    {/* Tooltip */}
+                    <div className="absolute left-1/2 mt-20 transform -translate-x-1/2 w-32 text-center bg-gray-500 text-white text-sm rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {refundEligible ? 'Refund' : 'Refund restricted'}
+                    </div>
                   </div>
                 </div>
+
               </div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4 text-sm text-gray-500 mt-4">

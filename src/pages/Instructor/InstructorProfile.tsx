@@ -72,7 +72,7 @@ const InstructorProfile: React.FC = () => {
             <InfoItem icon={<Mail size={18} />} label="Email" value={user.email} />
             <InfoItem icon={<Phone size={18} />} label="Phone" value={user.contact.phone} />
             <InfoItem icon={<MapPin size={18} />} label="Address" value={user.contact.address} />
-            <InfoItem icon={<Calendar size={18} />} label="Date of Birth" value={user.profile.dateOfBirth} />
+            <InfoItem icon={<Calendar size={18} />} label="Date of Birth" value={new Date(user.profile.dateOfBirth).toLocaleDateString()} />
             <InfoItem icon={<Users size={18} />} label="Gender" value={user.profile.gender} />
           </div>
         </div>

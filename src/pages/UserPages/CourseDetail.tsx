@@ -81,6 +81,7 @@ const CourseDetails: React.FC = () => {
       try {
         const instructorsResponse = await dispatch(fetchVerifiedInstructors());
         setAllInstructors(instructorsResponse.payload.instructors);
+        console.log('allinstructors',instructorsResponse.payload.instructors)
       } catch (error) {
         console.error('Error fetching verified instructors:', error);
       }
@@ -185,7 +186,7 @@ const CourseDetails: React.FC = () => {
   
         if (paymentResponse.payload.data && paymentResponse.payload.data.id) {
           const result = await stripe.redirectToCheckout({
-            sessionId: paymentResponse.payload  .data.id,
+            sessionId: paymentResponse.payload.data.id,
           });
   
           if (result.error) {

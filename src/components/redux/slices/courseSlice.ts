@@ -470,6 +470,52 @@ export const updateLessonProgress = createAsyncThunk(
   }
 );
 
+export const removeEnrollment = createAsyncThunk(
+  'course/removeEnrollment',
+  async ({ courseId, userId }: { courseId: string, userId: string }, { rejectWithValue }) => {
+    try {
+      console.log('remove enrollment reached in slice', courseId);
+      
+      const response = await axiosInstance.delete(`/course/enrollments/remove`, {
+        params: {
+          courseId,
+          userId
+        }
+      });
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('Error removing enrollment:', error);
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
+export const updateRefundStatus = createAsyncThunk(
+  'course/updateRefundStatus',
+  async (
+    { courseId, userId, status }: { courseId: string; userId: string; status: boolean },
+    { rejectWithValue }
+  ) => {
+    try {
+      console.log('update refund status reached in slice', courseId);
+
+      const response = await axiosInstance.put(
+        `/course/enrollments/enrollment/refund-status/${userId}`,
+        { courseId, status }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Error updating refund status:', error);
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
+
 export const enrollToCourse = createAsyncThunk(
   'course/enrollment',
   async (data: EnrollmentEntity, { rejectWithValue }) => {

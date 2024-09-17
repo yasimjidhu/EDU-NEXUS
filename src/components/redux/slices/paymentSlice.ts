@@ -11,6 +11,7 @@ export interface PaymentState {
   error: string | null;
   data: string;
   transactions: any[];
+  totalPages:number;
   profit: number;
   onboardingCompleted: boolean
 }
@@ -20,6 +21,7 @@ const initialState: PaymentState = {
   error: null,
   data: "",
   transactions: [],
+  totalPages:0,
   profit: 0,
   onboardingCompleted: false
 };
@@ -39,6 +41,32 @@ export const makePayment = createAsyncThunk(
     }
   }
 )
+
+export const completePurchase = createAsyncThunk(
+  'payment/completePurchase',
+  async ({ sessionId }: { sessionId: string }, { rejectWithValue }) => {
+    try {
+      console.log('complete purchase called', sessionId)
+      const response = await axiosInstance.post('/payment/complete-purchase', { sessionId });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const processRefund = createAsyncThunk(
+  'payment/processRefund',
+  async ({ userId,courseId }: { userId: string,courseId:string }, { rejectWithValue }) => {
+    try {
+      console.log('process refund called', userId,courseId)
+      const response = await axiosInstance.post('/payment/refund', { userId,courseId });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 export const createAccountLink = createAsyncThunk(
   'payment/createAccountLink',
@@ -73,20 +101,6 @@ export const completeOnboarding = createAsyncThunk(
   }
 )
 
-
-
-export const completePurchase = createAsyncThunk(
-  'payment/completePurchase',
-  async ({ sessionId }: { sessionId: string }, { rejectWithValue }) => {
-    try {
-      console.log('complete purchase called', sessionId)
-      const response = await axiosInstance.post('/payment/complete-purchase', { sessionId });
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
 export const getTransactions = createAsyncThunk(
   'payment/getTransactions',
   async (filter: Record<string, any>, { rejectWithValue }) => {
@@ -138,11 +152,47 @@ export const getInstructorCoursesTransaction = createAsyncThunk(
   }
 );
 
+export const getStudentCoursesTransaction = createAsyncThunk(
+  'payment/getStudentCoursesTransaction',
+  async ({ userId, page, limit }: { userId: string; page: number; limit: number }, { rejectWithValue }) => {
+    try {
+      console.log('get instructor payment called in slice', userId, page, limit);
+
+      // Fetch transactions with pagination
+      const response = await axiosInstance.get(`/payment/find-transaction/${userId}`, {
+        params: { page, limit }
+      });
+      console.log('response data ofr', response.data)
+      const { transactions, totalTransactions } = response.data;
+
+      // Calculate total pages based on total transactions and limit
+      const totalPages = Math.ceil(totalTransactions / limit);
+
+      console.log('instructor payment data', transactions, totalPages, totalTransactions);
+
+      return {
+        transactions,
+        currentPage: page,
+        totalPages,
+        totalTransactions
+      };
+
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data);
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
+
 export const getInstructorAvailablePayouts = createAsyncThunk(
   'payment/getInstructorAvailablePayouts',
-  async (instructorId: string, { rejectWithValue }) => {
+  async (connectedAccountId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/payment/payouts/available-payouts/${instructorId}`);
+      console.log('get insturctoravailable payuts called',connectedAccountId)
+      const response = await axiosInstance.get(`/payment/payouts/available-payouts/${connectedAccountId}`);
       console.log('available payoures response', response.data)
       return response.data;
     } catch (error: any) {
@@ -240,9 +290,9 @@ export const getRecentPayouts = createAsyncThunk(
 
 export const getAdminAvailablePayouts = createAsyncThunk(
   'payment/getAdminAvailablePayouts',
-  async (_, { rejectWithValue }) => {
+  async (adminStripeAccountId:string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/payment/payouts/available-payouts`);
+      const response = await axiosInstance.get(`/payment/payouts/available-payouts/${adminStripeAccountId}`);
       console.log('available payoures for admin response', response.data)
       return response.data;
     } catch (error: any) {
@@ -337,7 +387,8 @@ const paymentSlice = createSlice({
       })
       .addCase(getTransactions.fulfilled, (state, action) => {
         state.loading = false;
-        state.transactions = action.payload;
+        state.transactions = action.payload.transactions;
+        state.totalPages = action.payload.totalPages;
       })
       .addCase(getTransactions.rejected, (state, action) => {
         state.loading = false;

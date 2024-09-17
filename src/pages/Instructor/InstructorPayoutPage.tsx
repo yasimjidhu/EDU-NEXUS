@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import dayjs from "dayjs";
 import Pagination from '../../components/common/Pagination';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from 'recharts';
 import { getInstructorAvailablePayouts, getInstructorCoursesTransaction, getInstructorsTodaysRevenue, getInstructorsTotalEarnings, getRecentPayouts, requestInstructorPayout } from '../../components/redux/slices/paymentSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers, StudentState } from '../../components/redux/slices/studentSlice';
-import { FIXED_PAYOUT_AMOUNT, MAX_PAYOUT_LIMIT } from '../../constants/payoutAmount';
+import { getAllUsers } from '../../components/redux/slices/studentSlice';
 import { getInstructorCourseDetailed } from '../../components/redux/slices/courseSlice';
+import { Legend } from 'chart.js';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
@@ -23,16 +23,20 @@ const InstructorPayoutPage = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
+        const [users, courses] = await Promise.all([
+          dispatch(getAllUsers()).unwrap(),
+          dispatch(getInstructorCourseDetailed(user?._id)).unwrap()
+        ]);
+        setAllUsers(users);
+        setCourseData(courses);
         await Promise.all([
-          dispatch(getAllUsers()).then(res => setAllUsers(res.payload)),
-          dispatch(getInstructorCourseDetailed(user?._id)).then(res => setCourseData(res.payload)),
           fetchAvailablePayouts(),
           getInstructorTodaysRevenue(),
           handleInstructorsTotalEarnings(),
@@ -42,7 +46,9 @@ const InstructorPayoutPage = () => {
       }
     };
 
-    fetchInitialData();
+    if (user?._id) {
+      fetchInitialData();
+    }
   }, [dispatch, user?._id]);
 
   useEffect(() => {
@@ -55,26 +61,26 @@ const InstructorPayoutPage = () => {
         setTransactions(response.transactions);
         setTotalPages(response.totalPages);
 
-        const dailyData = response.transactions.reduce((acc, curr) => {
+        const dailyData = response.transactions.reduce((acc: any, curr: any) => {
           const date = dayjs(curr.createdAt).format('YYYY-MM-DD');
-          acc[date] = acc[date] || { date, revenue: 0 };
+          if (!acc[date]) acc[date] = { date, revenue: 0 };
           acc[date].revenue += curr.instructorAmount;
           return acc;
         }, {});
 
-        const transformedData = Object.values(dailyData).map(entry => ({
+        const transformedData = Object.values(dailyData).map((entry: any) => ({
           ...entry,
           revenue: (entry.revenue / 100).toFixed(2)
-        })).sort((a, b) => new Date(a.date) - new Date(b.date));
+        })).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
         setLineChartData(transformedData);
 
-        const courseMap = courseData.reduce((acc, course) => {
+        const courseMap = courseData.reduce((acc: any, course: any) => {
           acc[course._id] = course.title;
           return acc;
         }, {});
 
-        const revenueData = response.transactions.reduce((acc, payment) => {
+        const revenueData = response.transactions.reduce((acc: any, payment: any) => {
           if (payment.status === "completed") {
             const courseTitle = courseMap[payment.courseId];
             if (courseTitle) {
@@ -86,7 +92,7 @@ const InstructorPayoutPage = () => {
 
         const pieData = Object.keys(revenueData).map(courseTitle => ({
           name: courseTitle,
-          value:parseFloat((revenueData[courseTitle] / 100).toFixed(2))
+          value: parseFloat((revenueData[courseTitle] / 100).toFixed(2))
         }));
 
         setPieChartData(pieData);
@@ -101,9 +107,8 @@ const InstructorPayoutPage = () => {
   }, [dispatch, user?._id, courseData, currentPage]);
 
   const fetchAvailablePayouts = async () => {
-    if (!user?._id) return;
     try {
-      const response = await dispatch(getInstructorAvailablePayouts(user._id)).unwrap();
+      const response = await dispatch(getInstructorAvailablePayouts(user?.stripeAccountId!)).unwrap();
       setAvailablePayouts(response.availablePayouts);
     } catch (error) {
       console.error('Error fetching available payouts:', error);
@@ -113,8 +118,9 @@ const InstructorPayoutPage = () => {
   const getInstructorTodaysRevenue = async () => {
     if (!user?._id) return;
     try {
-      const response = await dispatch(getInstructorsTodaysRevenue(user._id))
-      setTodaysRevenue(response.payload);
+      const response = await dispatch(getInstructorsTodaysRevenue(user._id)).unwrap();
+      console.log('payload of getinstructor todays revenuy', response)
+      setTodaysRevenue(response);
     } catch (error) {
       console.error('Error fetching today\'s revenue:', error);
     }
@@ -123,8 +129,8 @@ const InstructorPayoutPage = () => {
   const handleInstructorsTotalEarnings = async () => {
     if (!user?._id) return;
     try {
-      const response = await dispatch(getInstructorsTotalEarnings(user._id))
-      setTotalEarnings(response.payload);
+      const response = await dispatch(getInstructorsTotalEarnings(user._id)).unwrap();
+      setTotalEarnings(response);
     } catch (error) {
       console.error('Error fetching total earnings:', error);
     }
@@ -134,43 +140,11 @@ const InstructorPayoutPage = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handlePayout = async (transaction: any) => {
-    if (!user?._id) return;
-
-    if (availablePayouts < FIXED_PAYOUT_AMOUNT) {
-      alert('Insufficient funds for payout.');
-      return;
-    }
-
-    if (FIXED_PAYOUT_AMOUNT > MAX_PAYOUT_LIMIT) {
-      alert(`The fixed payout amount exceeds the maximum limit of $${MAX_PAYOUT_LIMIT}.`);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await dispatch(requestInstructorPayout({
-        paymentId: transaction.id,
-        accountId: transaction.instructorAccountId,
-        amount: FIXED_PAYOUT_AMOUNT * 100,
-        currency: 'usd',
-        email: user.email
-      }));
-      alert('Payout initiated successfully!');
-    } catch (error) {
-      console.error('Error initiating payout:', error);
-      alert('Payout failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  function getUser(userId: string) {
-    const user = allUsers.find(data => data._id == userId)
-    return user
+  const getUser = (userId: string) => {
+    return allUsers.find(data => data._id === userId);
   }
 
-  console.log('piechartdata',pieChartData)
+  const totalEnrollments = courseData.reduce((acc, course) => acc + course.enrolledStudentsCount, 0)
 
   return (
     <div className="bg-gray-100 min-h-screen p-8">
@@ -178,10 +152,10 @@ const InstructorPayoutPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[
-          { title: 'Available to payout', amount: `$ ${(availablePayouts / 100).toFixed(2)}`, color: 'bg-blue-600' },
+          { title: 'Total Paid Out', amount: `$ ${availablePayouts}`, color: 'bg-blue-600' },
           { title: 'Today\'s revenues', amount: `$ ${(todaysRevenue / 100).toFixed(2)}`, color: 'bg-green-500' },
           { title: 'Total earnings', amount: `$ ${(totalEarnings / 100).toFixed(2)}`, color: 'bg-yellow-500' },
-          { title: 'Total Students', amount: ` ${transactions.length}`, color: 'bg-red-500' },
+          { title: 'Total Students', amount: ` ${totalEnrollments}`, color: 'bg-red-500' },
         ].map((item, index) => (
           <div key={index} className={`${item.color} rounded-lg shadow-lg p-6 text-white`}>
             <h2 className="text-lg font-semibold mb-2">{item.title}</h2>
@@ -196,13 +170,16 @@ const InstructorPayoutPage = () => {
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Revenue Trend</h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={lineChartData}>
+              <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2} />
+              <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }} />
+              <legend />
+              <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2} dot={{ stroke: '#3B82F6', strokeWidth: 2 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
+
 
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Revenue Distribution</h2>
@@ -241,8 +218,6 @@ const InstructorPayoutPage = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payout Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payout</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -271,27 +246,6 @@ const InstructorPayoutPage = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${transaction.instructorPayoutStatus
-                        === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        transaction.instructorPayoutStatus
-                          === 'completed' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                        {transaction.instructorPayoutStatus
-                        }
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        className={`bg-pink-500 text-white font-semibold py-1 px-3 rounded-lg shadow-md transition duration-300 ease-in-out 
-                          ${availablePayouts < 50 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-600 hover:shadow-lg'}
-                         focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50`}
-                        onClick={() => handlePayout(transaction)}
-                        disabled={availablePayouts < 50} // Disable button if below threshold
-                      >
-                        Payout
-                      </button>
-
                     </td>
                   </tr>
                 ))}

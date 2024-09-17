@@ -52,7 +52,7 @@ const AdminOverview = () => {
         setPopularCourses(data)
 
         const transactionsResponse = await dispatch(getTransactions(filters));
-        const transactions = transactionsResponse.payload;
+        const transactions = transactionsResponse.payload.transactions;
         console.log('transaction new',transactionsResponse.payload)
 
         const combinedData = courses.map(course => {
@@ -62,8 +62,8 @@ const AdminOverview = () => {
             id: course._id,
             name: course.title,
             studentsEnrolled: courseTransactions.length,
-            totalRevenue: courseTransactions.reduce((sum, transaction) => sum + transaction.adminAmount , 0),
-            adminRevenue: courseTransactions.reduce((sum, transaction) => sum + transaction.adminAmount , 0),
+            totalRevenue: courseTransactions.reduce((sum, transaction) => sum + (transaction.adminAmount/100) , 0),
+            adminRevenue: courseTransactions.reduce((sum, transaction) => sum + (transaction.adminAmount/100) , 0),
             averageRating: course.averageRating || 0,
           };
         });
@@ -115,7 +115,7 @@ const AdminOverview = () => {
               <span
                 className={`ml-2 inter ${course.adminRevenue === 0 ? 'text-red-600' : 'text-green-600'}`}
               >
-                ₹ {course.adminRevenue.toFixed(2)}
+                $ {course.adminRevenue.toFixed(2)}
               </span>
             </p>
 
@@ -127,7 +127,7 @@ const AdminOverview = () => {
         <h2 className="text-xl font-semibold mb-4">Overall Statistics</h2>
         <p>Total Students: {totalStudents}</p>
         <p>Average Rating: {averageRating}</p>
-        <p className='mt-2'> Total Revenue: <span className='text-xl inter text-green-600'>₹ {totalRevenue.toFixed(2)}</span></p>
+        <p className='mt-2'> Total Revenue: <span className='text-xl inter text-green-600'> $ {totalRevenue.toFixed(2)}</span></p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -186,7 +186,7 @@ const AdminOverview = () => {
                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
                   <td className="p-2">{course.name}</td>
                   <td className="p-2">{course.studentsEnrolled}</td>
-                  <td className="p-2">₹{course.totalRevenue.toFixed(2)}</td>
+                  <td className="p-2">$ {course.totalRevenue.toFixed(2)}</td>
                   <td className="p-2">{course.averageRating.toFixed(1)}</td>
                 </tr>
               ))}

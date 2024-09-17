@@ -45,6 +45,7 @@ const routes = {
       OVERVIEW: "/student/overview",
       COURSE_DETAIL: "/student/course-detail/:id",
       MY_COURSES: "/student/mycourses",
+      TRANSACTIONS: "/student/transactions",
       CHAT:"/student/chat"
     },
     PUBLIC: {

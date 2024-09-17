@@ -6,7 +6,6 @@ import { getAdminAvailablePayouts, getAdminTotalEarnings, getTodaysAdminRevenue,
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsers } from '../../components/redux/slices/studentSlice';
-import { FIXED_PAYOUT_AMOUNT, MAX_PAYOUT_LIMIT } from '../../constants/payoutAmount';
 import { getAllCourses } from '../../components/redux/slices/courseSlice';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
@@ -23,7 +22,7 @@ const AdminPayoutPage = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
 
@@ -32,7 +31,7 @@ const AdminPayoutPage = () => {
       try {
         await Promise.all([
           dispatch(getAllUsers()).then(res => setAllUsers(res.payload)),
-          dispatch(getAllCourses({page:currentPage,limit:10})).then(res => {
+          dispatch(getAllCourses({ page: currentPage, limit: 10 })).then(res => {
             setCourseData(res.payload.courses)
             setTotalPages(res.payload.totalPages)
           }),
@@ -53,11 +52,12 @@ const AdminPayoutPage = () => {
 
       try {
         setLoading(true);
-        const response = await dispatch(getTransactions({  page: currentPage, limit: 10 })).unwrap();
-        setTransactions(response);
+        const response = await dispatch(getTransactions({ page: currentPage, limit: 5 })).unwrap();
+        console.log('rspeonse of fetch transactions in frontend',response)
+        setTransactions(response.transactions);
         setTotalPages(response.totalPages);
 
-        const dailyData = response.reduce((acc, curr) => {
+        const dailyData = response.transactions.reduce((acc, curr) => {
           const date = dayjs(curr.createdAt).format('YYYY-MM-DD');
           acc[date] = acc[date] || { date, revenue: 0 };
           acc[date].revenue += curr.adminAmount;
@@ -76,7 +76,7 @@ const AdminPayoutPage = () => {
           return acc;
         }, {});
 
-        const revenueData = response.reduce((acc, payment) => {
+        const revenueData = response.transactions.reduce((acc, payment) => {
           if (payment.status === "completed") {
             const courseTitle = courseMap[payment.courseId];
             if (courseTitle) {
@@ -88,7 +88,7 @@ const AdminPayoutPage = () => {
 
         const pieData = Object.keys(revenueData).map(courseTitle => ({
           name: courseTitle,
-          value:parseFloat((revenueData[courseTitle] / 100).toFixed(2))
+          value: parseFloat((revenueData[courseTitle] / 100).toFixed(2))
         }));
 
         setPieChartData(pieData);
@@ -102,11 +102,10 @@ const AdminPayoutPage = () => {
     fetchTransactions();
   }, [dispatch, user?._id, courseData, currentPage]);
 
-
-console.log('course data',courseData)
   const fetchAvailablePayouts = async () => {
     try {
-      const response = await dispatch(getAdminAvailablePayouts()).unwrap();
+      const adminStripeAccountId  = import.meta.env.VITE_STRIPE_ADMIN_ACCOUNT_ID || ''
+      const response = await dispatch(getAdminAvailablePayouts(adminStripeAccountId)).unwrap();
       setAvailablePayouts(response.availablePayouts);
     } catch (error) {
       console.error('Error fetching available payouts:', error);
@@ -135,43 +134,13 @@ console.log('course data',courseData)
     setCurrentPage(pageNumber);
   };
 
-  const handlePayout = async (transaction: any) => {
-    if (!user?._id) return;
-
-    if (availablePayouts < FIXED_PAYOUT_AMOUNT) {
-      alert('Insufficient funds for payout.');
-      return;
-    }
-
-    if (FIXED_PAYOUT_AMOUNT > MAX_PAYOUT_LIMIT) {
-      alert(`The fixed payout amount exceeds the maximum limit of $${MAX_PAYOUT_LIMIT}.`);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await dispatch(requestInstructorPayout({
-        paymentId: transaction.id,
-        accountId: transaction.instructorAccountId,
-        amount: FIXED_PAYOUT_AMOUNT * 100,
-        currency: 'usd',
-        email: user.email
-      }));
-      alert('Payout initiated successfully!');
-    } catch (error) {
-      console.error('Error initiating payout:', error);
-      alert('Payout failed');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   function getUser(userId: string) {
     const user = allUsers.find(data => data._id == userId)
     return user
   }
 
-  console.log('piechartdata',pieChartData)
+  console.log('piechartdata', pieChartData)
 
   return (
     <div className="bg-gray-100 min-h-screen p-8">
@@ -179,8 +148,8 @@ console.log('course data',courseData)
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[
-          { title: 'Available to payout', amount: `$ ${(availablePayouts / 100).toFixed(2)}`, color: 'bg-blue-600' },
-          { title: 'Today\'s revenue', amount: `$ ${(todaysRevenue / 100).toFixed(2) }`, color: 'bg-green-500' },
+          { title: 'Total Paid Out', amount: `$ ${availablePayouts }`, color: 'bg-blue-600' },
+          { title: 'Today\'s revenue', amount: `$ ${(todaysRevenue / 100).toFixed(2)}`, color: 'bg-green-500' },
           { title: 'Total earnings', amount: `$ ${(totalEarnings / 100).toFixed(2)}`, color: 'bg-yellow-500' },
           { title: 'Total Students', amount: ` ${transactions.length}`, color: 'bg-red-500' },
         ].map((item, index) => (
@@ -242,8 +211,6 @@ console.log('course data',courseData)
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payout Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payout</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -271,29 +238,6 @@ console.log('course data',courseData)
                         {transaction.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${transaction.instructorPayoutStatus
-                        === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        transaction.instructorPayoutStatus
-                          === 'completed' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                        {transaction.instructorPayoutStatus
-                        }
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        className={`bg-pink-500 text-white font-semibold py-1 px-3 rounded-lg shadow-md transition duration-300 ease-in-out 
-                          ${availablePayouts < 50 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-pink-600 hover:shadow-lg'}
-                         focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50`}
-                        onClick={() => handlePayout(transaction)}
-                        disabled={availablePayouts < 50} // Disable button if below threshold
-                      >
-                        Payout
-                      </button>
-
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -301,13 +245,13 @@ console.log('course data',courseData)
           </div>
           {/* Add Pagination Component Here */}
           {totalPages > 1 && (
-          <div className="flex justify-end items-center p-6">
-            <Pagination
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              totalPages={totalPages}
-            />
-          </div>
+            <div className="flex justify-end items-center p-6">
+              <Pagination
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                totalPages={totalPages}
+              />
+            </div>
           )}
         </div>
       ) : (

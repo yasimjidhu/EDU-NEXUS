@@ -22,9 +22,9 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ roles }) => {
     return <Navigate to="/forbidden" />; 
   }
 
-  if(!isKycVerified && user?.role !== 'admin'){
-    return <Navigate to="/verification-pending" />;
-  }
+  // if(user && userData.user  && !isKycVerified && user?.role !== 'admin'){
+  //   return <Navigate to="/verification-pending" />;
+  // }
 
   return <Outlet />; 
 };
