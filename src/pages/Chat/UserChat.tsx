@@ -45,7 +45,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const [audioDuration, setAudioDuration] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const audioRef = useRef(new Audio());
-
+  const [replay,setReplay] = useState<Message | null>(null)
   const { user } = useSelector((state: RootState) => state.user);
   const { messages, groups } = useSelector((state: RootState) => state.chat);
 
@@ -82,9 +82,6 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
       // Handler for receiving new messages
       const newMessageHandler = (newMessage: Message) => {
         console.log('New message received in user-specific room:', newMessage);
-        
-        // Dispatch action to add message to Redux store
-        // dispatch(addMessage(newMessage));
         
         // If the message is not from the currently selected conversation, mark as unread
         if (newMessage.conversationId !== selectedConversationId) {
@@ -199,6 +196,11 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         conversationId,
         senderId: user?._id || '',
         senderName:`${user?.firstName} ${user?.lastName}`,
+        replyTo: replay ? {
+          messageId:replay?._id,
+          senderId:replay?.senderId,
+          text:replay?.text
+        }:undefined,
         recipientEmail:selectedInstructor.email,
         senderProfile:user?.profile.avatar,
         text: inputMessage.trim(),
@@ -217,6 +219,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
         setInputMessage('');
         setSelectedFile(null);
         setAudioBlob(null);
+        setReplay(null)
         setUploadProgress(0);
         setAudioProgress(0);
         setAudioDuration(0);
@@ -299,6 +302,10 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
     setClickedItem(item)
   }
 
+  const handleReply = (message:Message)=>{
+    setReplay(message)
+  }
+
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-1/4 bg-white border-r border-gray-200">
@@ -345,7 +352,10 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
               key={selectedInstructor._id}
             />
             <div className="flex-1 overflow-y-auto">
-              <DisplayMessages messages={messages} />
+              <DisplayMessages
+               messages={messages}
+               onReply={handleReply}
+                />
             </div>
             <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
               <div className="flex items-center space-x-2 relative">

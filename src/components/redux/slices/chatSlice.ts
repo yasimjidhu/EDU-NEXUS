@@ -1,3 +1,4 @@
+
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '../../../constants/axiosInstance';
 import { Group, TStudent, UnreadMessage } from '../../../types/chat'
@@ -39,6 +40,7 @@ export const sendMessage = createAsyncThunk(
     }
   }
 );
+
 
 export const getMessages = createAsyncThunk(
   'chat/getMessages',
@@ -164,6 +166,13 @@ const chatSlice = createSlice({
     addMessage: (state, action: PayloadAction<Message>) => {
       state.messages.push(action.payload);
     },
+    deleteMessage: (state, action) => {
+      const messageId = action.payload;
+      // Remove the message from the messages array
+      state.messages = state.messages.filter(
+        (message) => message._id !== messageId.toString()
+      );
+    },
     updateMessageStatus: (state, action: PayloadAction<Message>) => {
       const index = state.messages.findIndex((msg: any) => msg._id == action.payload._id)
       if (index !== -1) {
@@ -173,6 +182,7 @@ const chatSlice = createSlice({
     clearMessages: (state) => {
       state.messages = [];
     },
+    
     clearGroup: (state) => {
       state.group = null;
     },
@@ -224,6 +234,14 @@ const chatSlice = createSlice({
         state.unreadCounts[conversationId] += 1;
       }
     },
+    decrementUnreadCount: (state, action: PayloadAction<string>) => {
+      const conversationId = action.payload;
+      if (!state.unreadCounts[conversationId]) {
+        state.unreadCounts[conversationId] = 0;
+      } else {
+        state.unreadCounts[conversationId] -= 1;
+      }
+    },
     resetUnreadCount: (state, action: PayloadAction<string>) => {
       const conversationId = action.payload;
       if (state.unreadCounts[conversationId]) {
@@ -268,6 +286,9 @@ const chatSlice = createSlice({
           },
         });
       }
+    },
+    deleteMessageFromUnreadMessages:(state,action:PayloadAction<Message>)=>{
+      state.unreadMessages.filter(msg => msg._id !== action.payload._id)
     },
 
     clearUnreadMessages: (state) => {
@@ -472,10 +493,13 @@ export const {
   markConversationAsRead,
   clearUnreadMessages,
   incrementUnreadCount,
+  decrementUnreadCount,
   resetUnreadCount,
   updateUnreadMessages,
   addGroupMessage,
-  updateGroupUnreadCount
+  updateGroupUnreadCount,
+  deleteMessage,
+  deleteMessageFromUnreadMessages
 
 } = chatSlice.actions;
 

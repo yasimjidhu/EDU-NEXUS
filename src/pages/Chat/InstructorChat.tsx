@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { User } from '../../components/redux/slices/studentSlice';
 import { useSocket } from '../../contexts/SocketContext';
-import { addMessage, createGroup, getMessagedStudents, getMessages, getUserJoinedGroups, incrementUnreadCount, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import {  createGroup, getMessagedStudents, getMessages, getUserJoinedGroups, incrementUnreadCount, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import Picker from 'emoji-picker-react'
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { Group, Message } from '../../types/chat';
@@ -42,6 +42,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   const [selectedConversationId, setSelectedConversationId] = useState<string>('')
   const [showMessages, setShowMessages] = useState<"user" | "group" | ''>('')
   const [clickedItem, setClickedItem] = useState<'students' | 'group' | '' | 'instructor'>('')
+  const [replay,setReplay] = useState<Message | null>(null)
 
 
   const { user } = useSelector((state: RootState) => state.user);
@@ -74,9 +75,6 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
       // Handler for receiving new messages
       const newMessageHandler = (newMessage: Message) => {
         console.log('New message received in user-specific room:', newMessage);
-
-        // Dispatch action to add message to Redux store
-        // dispatch(addMessage(newMessage));
 
         // If the message is not from the currently selected conversation, mark as unread
         if (newMessage.conversationId !== selectedConversationId) {
@@ -188,6 +186,11 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
         conversationId,
         senderId: user?._id || '',
         senderName: `${user?.firstName} ${user?.lastName}`,
+        replyTo: replay ? {
+          messageId:replay?._id,
+          senderId:replay?.senderId,
+          text:replay?.text
+        }:undefined,
         recipientEmail: selectedStudent.email,
         senderProfile: user?.profile.avatar,
         text: inputMessage.trim(),
@@ -291,6 +294,12 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     setClickedItem(item)
   }
 
+  
+  const handleReply = (message:Message)=>{
+    setReplay(message)
+  }
+
+
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-1/4 bg-white border-r border-gray-200 flex flex-col">
@@ -352,7 +361,10 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
   
             {/* Show Messages */}
             <div className="flex-1 overflow-y-auto">
-              <DisplayMessages messages={messages} />
+              <DisplayMessages
+               messages={messages}
+               onReply={handleReply}
+                />
             </div>
   
             <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutUser } from "../redux/slices/authSlice";
 import { AppDispatch, RootState } from "../redux/store/store";
-import { addMessage, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
+import { addMessage, decrementUnreadCount, deleteMessageFromUnreadMessages, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
 import { Message, UnreadMessage } from "../../types/chat";
 import { FileText, Headphones, Image } from "lucide-react";
 import { useSocket } from "../../contexts/SocketContext";
@@ -56,9 +56,7 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     if (socket) {
-      console.log('unread message in nvbar are', unreadMessages)
       const newMessageHandler = (newMessage: Message) => {
-        console.log('new message reached in navbar', newMessage)
         dispatch(addMessage(newMessage));
         if (newMessage.conversationId.includes(user?._id!)) {
           dispatch(incrementUnreadCount(newMessage.conversationId));
@@ -69,10 +67,18 @@ const Navbar: React.FC = () => {
         }
       };
 
+      const deletemessageHandler = (message:Message)=>{
+        console.log('deltemessage handler got',message)
+        dispatch(decrementUnreadCount(message.conversationId))
+        dispatch(deleteMessageFromUnreadMessages(message))
+      }
+
       socket.on('newMessage', newMessageHandler);
+      socket.on('messageDeleted',deletemessageHandler)
 
       return () => {
         socket.off('newMessage', newMessageHandler);
+        socket.off('messageDeleted', deletemessageHandler);
       };
     }
   }, [socket, dispatch, user?._id]);
