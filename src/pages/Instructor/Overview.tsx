@@ -8,6 +8,8 @@ import DropDown from '../../components/common/Dropdown';
 import { getAllUsers, StudentState } from '../../components/redux/slices/studentSlice';
 import InstructorAnalyticsSkeleton from '../../components/skelton/InstructorOverview';
 import Pagination from '../../components/common/Pagination';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -40,6 +42,7 @@ const InstructorOverview = () => {
     const dispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.user);
 
+    useDocumentTitle('Overview')
     useEffect(() => {
         const fetchData = async () => {
             if (!user) return;

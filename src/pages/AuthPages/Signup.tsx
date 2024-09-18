@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { getSignupValidationSchema } from "../../utils/Authvalidation";
 import { ErrorMessage, Field, Formik, Form } from "formik";
 import GoogleSignInButton from "../../components/authentication/GoogleSigninButton";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { toast } from "react-toastify";
 
 const SignupPage: React.FC = () => {
@@ -21,6 +22,8 @@ const SignupPage: React.FC = () => {
   const { username, email, password } = useSelector(
     (state: RootState) => state?.auth
   );
+
+  useDocumentTitle('Signup')
 
   const initialValues = {
     username: "",

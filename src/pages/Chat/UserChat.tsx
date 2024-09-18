@@ -12,6 +12,7 @@ import { ChatSidebar } from '../../components/chat/ChatSidebar';
 import { Header } from '../../components/chat/Header';
 import { DisplayMessages } from '../../components/chat/DisplayMessages';
 import { AudioRecord } from '../../components/chat/AudioRecorder';
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -53,6 +54,7 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const navigate = useNavigate()
   const { socket, onlineUsers } = useSocket();
 
+  useDocumentTitle('Messages')
 
   useEffect(() => {
     scrollToBottom();

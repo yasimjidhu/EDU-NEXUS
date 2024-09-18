@@ -1,10 +1,10 @@
-import { getStudentCoursesTransaction, processRefund } from "../../components/redux/slices/paymentSlice";
+import { getStudentCoursesTransaction } from "../../components/redux/slices/paymentSlice";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
-import { CheckCircle, XCircle, RefreshCcw, DollarSign, Calendar, CreditCard, IndianRupee } from "lucide-react";
+import { CheckCircle, RefreshCcw, Calendar, CreditCard, IndianRupee } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Pagination from "../../components/common/Pagination";
-import { toast } from "react-toastify";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 
 export const StudentTransactions = () => {
     const [transactions, setTransactions] = useState([]);
@@ -13,6 +13,8 @@ export const StudentTransactions = () => {
 
     const dispatch: AppDispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.user);
+
+    useDocumentTitle('Transactoins')
 
     useEffect(() => {
         if (!user) return;
@@ -26,6 +28,8 @@ export const StudentTransactions = () => {
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
     };
+
+    console.log('tranactions',transactions)
 
     return (
         <div className="container mx-auto p-6 bg-gradient-to-r from-blue-50 to-indigo-50 min-h-screen">

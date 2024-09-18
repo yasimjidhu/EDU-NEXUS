@@ -14,12 +14,14 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const UserProfile: React.FC = () => {
 
   const authData = useSelector((state:RootState)=>state.auth)
   const {user} = useSelector((state:RootState)=>state.user)
 
+  useDocumentTitle('Profile')
 
   if (!user) {
     return <div className="flex justify-center items-center h-screen">

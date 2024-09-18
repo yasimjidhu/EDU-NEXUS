@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import AllCategoriesSkeleton from '../../components/skelton/AllCategories';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const AllCategories = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,6 +14,8 @@ const AllCategories = () => {
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
+
+  useDocumentTitle('Categories')
 
   useEffect(() => {
     fetchCategories(currentPage);

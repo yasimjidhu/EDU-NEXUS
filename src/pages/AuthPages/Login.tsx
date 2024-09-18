@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import GoogleSignInButton from "../../components/authentication/GoogleSigninButton";
 import { RootState } from "../../components/redux/store/store";
 import { BeatLoader } from "react-spinners";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 
 const LoginPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -20,7 +21,7 @@ const LoginPage: React.FC = () => {
   const { loading, error } = useSelector((state: RootState) => state.auth);
   const {user} = useSelector((state: RootState) => state.user);
 
-    
+  useDocumentTitle('Login')
 
   const initialValues = {
     email: "",

@@ -5,6 +5,8 @@ import { getAssessments, deleteAssessment } from '../../components/redux/slices/
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import DeleteConfirmationModal from '../../components/content/DeleteConfirmationModal';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+
 
 interface Question {
   answer: string;
@@ -35,6 +37,7 @@ const Assessments: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.user);
 
+  useDocumentTitle('Assessments')
   useEffect(() => {
     dispatch(getAssessments(user?._id!))
       .then((res) => {

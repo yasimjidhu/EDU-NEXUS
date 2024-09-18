@@ -7,7 +7,8 @@ import { User } from '../../types/user';
 import { getAllUsers } from '../../components/redux/slices/studentSlice';
 import CsvExporter from '../..//components/Admin/CsvExporter';
 import Pagination from '../../components/common/Pagination';
-
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { getAllCourses } from '../../components/redux/slices/courseSlice';
 
 const AdminTransaction = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -21,7 +22,13 @@ const AdminTransaction = () => {
         status: '',
     });
     const [allUsers, setAllUsers] = useState<User[]>([])
+    const [allCourses, setAllCourses] = useState([]);
+    
+    useDocumentTitle('Transactions')
 
+    useEffect(()=>{
+        dispatch(getAllCourses({page:1})).then((res)=> setAllCourses(res.payload.courses))
+    },[])
     useEffect(() => {
         if (allUsers.length <= 0) {
             dispatch(getAllUsers()).then((res) => {
@@ -31,7 +38,6 @@ const AdminTransaction = () => {
     }, []);
 
     const { transactions,totalPages, loading, error } = useSelector((state: RootState) => state.payment);
-    const { allCourses } = useSelector((state: RootState) => state.course)
 
     useEffect(() => {
         const fetchTransactions = () => {
@@ -84,7 +90,7 @@ const AdminTransaction = () => {
 
         const courseName = getCourseName(transaction.courseId)?.title?.toLowerCase() || "";
         const userName = getUserName(transaction.userId)?.toLocaleLowerCase() || "";
-        const statusMatches = filters.status === "" || transaction.status === filters.status;
+        const statusMatches = filters.status === "" || transaction.status.toLowerCase() === filters.status.toLowerCase();
 
         return (
             statusMatches &&
@@ -106,10 +112,10 @@ const AdminTransaction = () => {
         }
     };
     const csvData = filteredTransactions.map((transaction) => ({
-        Payment_id: transaction.id,
+        Payment_id: transaction.stripe_payment_intent_id,
         User: getUserName(transaction.userId) || 'Unknown User',
         Course: getCourseName(transaction.courseId)?.title,
-        Amount: (transaction.amount / 100).toFixed(2),
+        Amount: parseInt(transaction.amountInINR),
         Currency: transaction.currency,
         Status: transaction.status,
         Date: new Date(transaction.createdAt).toLocaleDateString(),
@@ -125,6 +131,8 @@ const AdminTransaction = () => {
         { label: 'Date', key: 'Date' },
     ];
 
+    console.log('filtered transactiosn',filteredTransactions)
+    console.log('all courses',allCourses)
     return (
         <div className="container mx-auto px-4 py-2">
             <h1 className="text-2xl font-bold mb-6">Transaction History</h1>

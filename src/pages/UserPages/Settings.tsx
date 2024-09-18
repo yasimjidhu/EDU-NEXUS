@@ -6,6 +6,7 @@ import { Camera, Edit2 } from 'lucide-react';
 import { useFileUpload } from '../../hooks/useUploadFile';
 import { updateUserDetails } from '../../components/redux/slices/studentSlice';
 import { resetPassword } from '../../components/redux/slices/authSlice';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { toast } from 'react-toastify';
 
 const Settings: React.FC = () => {
@@ -23,7 +24,8 @@ const Settings: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, uploadProgress,handleFileSelect,selectedFile } = useFileUpload();
-
+  useDocumentTitle('Settings')
+  
   useEffect(() => {
     if (user) {
       setFormData(user);

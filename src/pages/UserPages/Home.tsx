@@ -9,10 +9,10 @@ import { ListCourses } from "../../components/common/ListCourses";
 import SkeletonLoader from "../../components/skelton/CourseList";
 import { completeOnboarding, setOnboardingCompleted } from "../../components/redux/slices/paymentSlice";
 import { toast } from "react-toastify";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 
 const Home = () => {
   const { user } = useSelector((state: RootState) => state.user);
-  const onboardingCompleted = useSelector((state: RootState) => state.payment.onboardingCompleted);
 
   const { categories } = useSelector((state: RootState) => state.category);
   const [allCourses, setAllCourses] = useState([])
@@ -22,6 +22,8 @@ const Home = () => {
 
   const navigate = useNavigate()
   const page = 1
+
+  useDocumentTitle('Home')
 
   useEffect(() => {
     if (user?.stripeAccountId && !user.onboardingComplete) {

@@ -16,6 +16,7 @@ import { Header } from '../../components/chat/Header';
 import { DisplayMessages } from '../../components/chat/DisplayMessages';
 import { AudioRecord } from '../../components/chat/AudioRecorder';
 import GroupChat from './GroupChat';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 interface ChatUIProps {
   currentUser?: { id: string; name: string; avatar: string };
@@ -47,6 +48,8 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
 
   const { user } = useSelector((state: RootState) => state.user);
   const { messages, loading, error, groups } = useSelector((state: RootState) => state.chat);
+
+  useDocumentTitle('Messages')
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()

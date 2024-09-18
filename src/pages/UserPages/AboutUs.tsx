@@ -1,6 +1,9 @@
 import React from 'react';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+
 
 const AboutUs = () => {
+    useDocumentTitle('About-us')
     return (
         <div className="bg-gray-50 py-16">
             <div className="max-w-7xl mx-auto p-8 bg-white shadow-lg rounded-lg">

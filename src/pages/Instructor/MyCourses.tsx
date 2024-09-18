@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllCoursesOfInstructor } from "../../components/redux/slices/courseSlice";
 import { PencilIcon } from "lucide-react";
 import CourseListingSkeleton from "../../components/skelton/courses";
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+
 
 const MyCourses = () => {
   const { categories } = useSelector((state: RootState) => state.category);
@@ -14,6 +16,8 @@ const MyCourses = () => {
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()
+
+  useDocumentTitle('My Courses')
 
   useEffect(() => {
     if (user._id) {

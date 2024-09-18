@@ -4,11 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { FeedbackEntity } from '../../types/feedback';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+
 
 const ContactUs: React.FC = () => {
     const dispatch: AppDispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.user);
 
+    useDocumentTitle('Contact-Us')
     const [formData, setFormData] = useState<FeedbackEntity>({
         name: '',
         email: '',

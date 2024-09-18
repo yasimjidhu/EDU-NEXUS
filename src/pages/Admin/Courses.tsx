@@ -10,6 +10,7 @@ import Pagination from "../../components/common/Pagination";
 import { useNavigate } from "react-router-dom";
 import { fetchAllInstructors } from "../../components/redux/slices/instructorSlice";
 import { budgetWiseCoursesCount } from "../../utils/getBudgetWiseCoursesCount";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 
 // Interfaces for types
 interface Instructor {
@@ -53,6 +54,7 @@ const Courses: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  useDocumentTitle('Courses')
   // Fetch categories, instructors, and courses on component mount and page change
   useEffect(() => {
     dispatch(getAllCategories(currentPage))

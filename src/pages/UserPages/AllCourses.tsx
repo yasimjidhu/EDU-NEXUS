@@ -6,6 +6,7 @@ import { AppDispatch } from '../../components/redux/store/store';
 import Pagination from '../../components/common/Pagination';
 import FilterAndSort from '../../components/common/FilterAndSort';
 import CourseListingSkeleton from '../../components/skelton/courses';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const AllCourses: React.FC = () => {
   const [allCourses, setAllCourses] = useState([]);
@@ -18,6 +19,8 @@ const AllCourses: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch: AppDispatch = useDispatch();
+
+  useDocumentTitle('Courses')
 
   useEffect(() => {
     fetchCourses(currentPage, sortBy, filters);

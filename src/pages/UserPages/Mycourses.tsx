@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { CourseState, getUserEnrolledCourses } from "../../components/redux/slices/courseSlice";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+
 
 const MyCourse: React.FC = () => {
   const { categories } = useSelector((state: RootState) => state.category);
@@ -11,6 +13,8 @@ const MyCourse: React.FC = () => {
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
+
+  useDocumentTitle('My Courses')
 
   useEffect(() => {
     if (user._id) {

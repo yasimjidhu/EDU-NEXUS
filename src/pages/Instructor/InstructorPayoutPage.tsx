@@ -7,7 +7,7 @@ import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsers } from '../../components/redux/slices/studentSlice';
 import { getInstructorCourseDetailed } from '../../components/redux/slices/courseSlice';
-import { Legend } from 'chart.js';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
@@ -27,6 +27,7 @@ const InstructorPayoutPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
 
+  useDocumentTitle('Payments')
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
