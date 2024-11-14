@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const refreshToken = async (refreshToken: string) => {
     try {
-        const response = await axios.post('https://mcartecommerce.online/auth/refresh-token', { refreshToken });
+        const response = await axios.post('https://api-gateway-new.onrender.com/auth/refresh-token', { refreshToken });
         const { access_token } = response.data;
 
         // Update cookies with refreshed access token

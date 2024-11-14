@@ -48,7 +48,7 @@ export const signupUser = createAsyncThunk<
     'auth/signup',
     async (data: SignupData, { rejectWithValue }) => {
         try {
-            const response = await axios.post('https://edu-nexus-frontend-2mve.vercel.app/auth/signup', data);
+            const response = await axios.post('https://api-gateway-new.onrender.com/auth/signup', data);
             const {user,token} = response.data
             
             localStorage.setItem('email',user.email)
@@ -71,7 +71,7 @@ OTPData,
     'auth/verifyotp',
     async (data: OTPData, { rejectWithValue }) => {
         try {
-            const response = await axios.post('https://edu-nexus-frontend-2mve.vercel.app/auth/verify-otp', data);
+            const response = await axios.post('https://api-gateway-new.onrender.com/auth/verify-otp', data);
             return response.data;
             
         } catch (error:any) {
@@ -88,7 +88,7 @@ ForgotPasswordData,
     'auth/resendotp',
     async (data:ForgotPasswordData, { rejectWithValue }) => {
       try {
-        const response = await axios.post('https://edu-nexus-frontend-2mve.vercel.app/auth/resendOtp',data);
+        const response = await axios.post('https://api-gateway-new.onrender.com/auth/resendOtp',data);
         console.log('response in authslice of resend otp',response)
         return response.data;
       } catch (error) {
@@ -109,7 +109,7 @@ export const userLogin = createAsyncThunk<
   async (data: LoginData, { rejectWithValue }) => {
     try {
         console.log('login called in slice',data)
-      const response = await axios.post('https://edu-nexus-frontend-2mve.vercel.app/auth/login', 
+      const response = await axios.post('https://api-gateway-new.onrender.com/auth/login', 
         data,{
         headers:{
             'Content-Type': 'application/json',

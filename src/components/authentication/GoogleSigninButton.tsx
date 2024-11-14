@@ -6,7 +6,7 @@ interface GoogleSignInButtonProps {
 
 const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ message }) => {
   const handleSignup = () => {
-    window.location.href = 'https://edu-nexus-frontend-2mve.vercel.app/auth/google';
+    window.location.href = 'https://api-gateway-new.onrender.com/auth/google';
   };
 
   return (
