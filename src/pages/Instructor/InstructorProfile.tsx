@@ -3,31 +3,31 @@ import { fetchUserData } from '../../components/redux/slices/studentSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { User } from '../../components/redux/slices/instructorSlice';
-import { 
-  User as UserIcon, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Shield, 
-  Key, 
-  DollarSign, 
+import {
+  User as UserIcon,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Users,
+  Shield,
+  Key,
   Globe,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  DollarSign
 } from 'lucide-react';
 
 const InstructorProfile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const dispatch: AppDispatch = useDispatch();
 
-  const {profit} = useSelector((state:RootState)=>state.payment)
+  const { profit } = useSelector((state: RootState) => state.payment)
 
   useEffect(() => {
     dispatch(fetchUserData()).then((res) => setUser(res.payload))
-    .catch((err)=>console.log('user notfound',err))
+      .catch((err) => console.log('user notfound', err))
   }, [dispatch]);
 
   if (!user) {
@@ -92,6 +92,7 @@ const InstructorProfile: React.FC = () => {
             value={user.isGAuth ? 'Google Auth' : 'Standard'}
           />
           <StatusCard
+            icon={<DollarSign size={20} />} // Added icon for profit
             title="Profit"
             value={profit ? `₹${profit.toFixed(2)}` : 'N/A'}
           />

@@ -1,20 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Text } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Text } from 'recharts';
 import { getInstructorCourseDetailed, getInstructorsStudentsOverview } from '../../components/redux/slices/courseSlice';
 import { getInstructorCoursesTransaction } from '../../components/redux/slices/paymentSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
-import DropDown from '../../components/common/Dropdown';
-import { getAllUsers, StudentState } from '../../components/redux/slices/studentSlice';
+import { getAllUsers } from '../../components/redux/slices/studentSlice';
 import InstructorAnalyticsSkeleton from '../../components/skelton/InstructorOverview';
 import Pagination from '../../components/common/Pagination';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
-
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-const CustomizedAxisTick = ({ x, y, payload }) => {
-
+const CustomizedAxisTick = ({ x, y, payload }: { x: any, y: any, payload: any }) => {
     const maxChars = 15; // Adjust this value based on your needs
     let displayName = payload.value;
     if (displayName.length > maxChars) {
@@ -27,105 +24,98 @@ const CustomizedAxisTick = ({ x, y, payload }) => {
     );
 };
 
-const InstructorOverview = () => {
-    const [courseData, setCourseData] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [selectedCourseId, setSelectedCourseId] = useState<string>('')
-    const [studentsOverview, setStudentsOverview] = useState<string>(null)
-    const [totalEnrollments,setTotalEnrollments] = useState <number>(0)
-    const [enrolledStudentIds, setEnrolledStudentIds] = useState<string[]>([])
-    const [currentPage, setCurrentPage] = useState<number>(1)
-    const [allUsers, setAllUSers] = useState<StudentState>([])
-    const [totalPages, setTotalPages] = useState<number>(0)
 
-    const dispatch = useDispatch();
+const InstructorOverview = () => {
+    const [courseData, setCourseData] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState<any>(true);
+    const [error, setError] = useState<any>(null);
+    const [selectedCourseId, setSelectedCourseId] = useState<any>('');
+    const [studentsOverview, setStudentsOverview] = useState<any>(null);
+    const [totalEnrollments, setTotalEnrollments] = useState<any>(0);
+    const [enrolledStudentIds, setEnrolledStudentIds] = useState<any>([]);
+    const [currentPage, setCurrentPage] = useState<any>(1);
+    const [allUsers, setAllUsers] = useState<any>([]);
+    const [totalPages, setTotalPages] = useState<number>(0);
+
+    const dispatch: AppDispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.user);
 
-    useDocumentTitle('Overview')
+    useDocumentTitle('Overview');
     useEffect(() => {
         const fetchData = async () => {
             if (!user) return;
-    
+
             setIsLoading(true);
-    
+
             try {
                 // Fetch courses data
                 const coursesResponse = await dispatch(getInstructorCourseDetailed(user._id));
-                const courses = coursesResponse.payload;
+                const courses = coursesResponse.payload as any;
                 
                 if (courses.length === 0) {
                     throw new Error('You don/t have any uploaded courses. Please upload a course first.');
                 }
-    
+
                 // Set default selected course ID if not already set
                 if (!selectedCourseId) {
                     setSelectedCourseId(courses[0]._id);
                 }
-    
+
                 // Calculate total enrollments across all courses
-                const totalEnrollments = courses.reduce((acc, course) => acc + course.enrolledStudentsCount, 0);
+                const totalEnrollments = courses.reduce((acc: any, course: any) => acc + course.enrolledStudentsCount, 0);
                 setTotalEnrollments(totalEnrollments);
-    
+
                 // Fetch payments data
                 const paymentsResponse = await dispatch(getInstructorCoursesTransaction({
                     instructorId: user._id,
                     limit: 50,
                     page: currentPage
-                }))
-                
-                const payments = paymentsResponse.payload.transactions;
+                })) as any
+
+                const payments = paymentsResponse.payload.transactions 
                 setTotalPages(paymentsResponse.payload.totalPages);
-    
+
                 // Combine course and payment data
-                const combinedData = courses.map(course => {
-                    console.log('course is>>>',course)
-                    const coursePayments = payments.filter(payment => payment.courseId === course._id);
-                    console.log('couyse paymebnts',coursePayments)
+                const combinedData = courses.map((course: any) => {
+                    const coursePayments = payments.filter((payment: any) => payment.courseId === course._id);
                     return {
                         id: course._id,
                         name: course.title,
                         studentsEnrolled: course.enrolledStudentsCount,
-                        totalRevenue: coursePayments.reduce((sum, payment) => sum + (payment.instructorAmount / 100), 0),
-                        instructorRevenue: coursePayments.reduce((sum, payment) => sum + (payment.instructorAmount / 100), 0),
+                        totalRevenue: coursePayments.reduce((sum: any, payment: any) => sum + (payment.instructorAmount / 100), 0),
+                        instructorRevenue: coursePayments.reduce((sum: any, payment: any) => sum + (payment.instructorAmount / 100), 0),
                         averageRating: course.averageRating || 0,
                     };
                 });
-    
+
                 setCourseData(combinedData);
-    
-            } catch (error) {
+
+            } catch (error: any) {
                 setError(error.message);
                 console.error('Error fetching data:', error);
             } finally {
                 setIsLoading(false);
             }
         };
-    
+
         fetchData();
     }, [dispatch, user?._id, selectedCourseId, currentPage]);
-    
 
     useEffect(() => {
-        // Define an async function inside useEffect
         const fetchStudentsData = async () => {
             if (user?._id && selectedCourseId) {
                 try {
-                    // Dispatch the async thunk and await the response
                     const resultAction = await dispatch(getInstructorsStudentsOverview({ instructorId: user._id, courseId: selectedCourseId }));
 
-                    // Handle the result
                     if (getInstructorsStudentsOverview.fulfilled.match(resultAction)) {
                         const studentsData = resultAction.payload;
-                        setStudentsOverview(studentsData[0])
-                        const studentIds = studentsData[0].enrolledStudents.map(item => item.userId);
+                        setStudentsOverview(studentsData[0]);
+                        const studentIds = studentsData[0].enrolledStudents.map((item: any) => item.userId);
                         setEnrolledStudentIds(studentIds);
-
                     } else {
-                        // Handle error case
                         console.error('Failed to fetch students data:', resultAction.payload);
                     }
-                } catch (error) {
+                } catch (error: any) {
                     console.error('Error dispatching getInstructorsStudentsOverview:', error);
                 }
             }
@@ -135,24 +125,28 @@ const InstructorOverview = () => {
     }, [dispatch, user?._id, selectedCourseId]);
 
     useEffect(() => {
-        dispatch(getAllUsers()).then(res => setAllUSers(res.payload))
+        dispatch(getAllUsers()).then((res: any) => setAllUsers(res.payload));
 
-    }, [])
+    }, []);
 
-    function getUser(userId: string) {
-        const user = allUsers.find(data => data._id == userId)
-        return user
-    }
 
-    const handlePageChange = (pageNumber: number) => {
+    const handlePageChange = (pageNumber: any) => {
         setCurrentPage(pageNumber);
     };
 
+    
+    console.log(studentsOverview)
+    console.log(enrolledStudentIds)
+    console.log(allUsers)
+
+    if(error){
+        console.log(error)
+    }
     if (isLoading) return <div className="text-center p-4"><InstructorAnalyticsSkeleton /></div>;
 
-    const totalRevenue = courseData.reduce((sum, course) => sum + course.totalRevenue, 0);
+    const totalRevenue = courseData.reduce((sum: any, course: any) => sum + course.totalRevenue, 0);
     const averageRating = courseData.length > 0
-        ? (courseData.reduce((sum, course) => sum + course.averageRating, 0) / courseData.length).toFixed(1)
+        ? (courseData.reduce((sum: any, course: any) => sum + course.averageRating, 0) / courseData.length).toFixed(1)
         : 'N/A';
 
     return (
@@ -160,7 +154,7 @@ const InstructorOverview = () => {
             <h1 className="text-3xl font-bold mb-6">Instructor Analytics</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {courseData.map((course, index) => (
+                {courseData.map((course: any, index: any) => (
                     <div key={index} className="bg-white p-4 rounded shadow">
                         <h2 className="text-xl font-semibold mb-2">{course.name}</h2>
                         <p>Students Enrolled: {totalEnrollments}</p>
@@ -190,7 +184,7 @@ const InstructorOverview = () => {
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={courseData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" height={60} tick={<CustomizedAxisTick />} interval={0} />
+                            <XAxis dataKey="name" height={60} tick={CustomizedAxisTick} interval={0} />
                             <YAxis />
                             <Tooltip />
                             <Bar dataKey="studentsEnrolled" fill="#8884d8" />
@@ -208,105 +202,24 @@ const InstructorOverview = () => {
                                 nameKey="name"
                                 cx="50%"
                                 cy="50%"
-                                outerRadius={80}
+                                outerRadius={100}
                                 fill="#8884d8"
-                                label
+                                label={({ name, value }: any) => `${name}: $${value.toFixed(2)}`}
                             >
-                                {courseData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                {courseData.map(( index: any) => (
+                                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip />
-                            <Legend />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
             </div>
 
-            <div className="bg-white p-4 rounded shadow">
-                <h2 className="text-xl font-semibold mb-4">Course Overview</h2>
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-gray-200">
-                                <th className="text-left p-2">Course Name</th>
-                                <th className="text-left p-2">Students Enrolled</th>
-                                <th className="text-left p-2">Total Revenue</th>
-                                <th className="text-left p-2">Average Rating</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {courseData.map((course, index) => (
-                                <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
-                                    <td className="p-2">{course.name}</td>
-                                    <td className="p-2">{course.studentsEnrolled}</td>
-                                    <td className="p-2">${course.totalRevenue.toFixed(2)}</td>
-                                    <td className="p-2">{course.averageRating.toFixed(1)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div className="bg-white p-4 rounded shadow mt-6">
-                <div className='flex justify-between'>
-                    <h2 className="text-xl font-semibold mb-4">Students Overview</h2>
-                    <h2 className="text-xl font-semibold mb-4">{studentsOverview?.title}</h2>
-
-                    <DropDown
-                        text='Select Course'
-                        data={courseData}
-                        onSelect={(id) => setSelectedCourseId(id)}
-                    />
-                </div>
-                {
-                    studentsOverview && (
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-gray-200">
-                                        <th className="text-left p-2">User</th>
-                                        <th className="text-left p-2">Full Name</th>
-                                        <th className="text-left p-2"> Score</th>
-                                        <th className="text-left p-2">Total Score</th>
-                                        <th className="text-left p-2">Attempts</th>
-                                        <th className="text-left p-2">Exam Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {studentsOverview.enrolledStudents.map((student, index) => (
-                                        <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
-                                            <td className="p-2">
-                                                <div className="rounded-full w-10 h-10 shadow-sm border-2 border-gray-600 overflow-hidden">
-                                                    <img
-                                                        src={getUser(student.studentId).profile.avatar}
-                                                        alt="avatar"
-                                                        className="w-full h-full object-cover rounded-full"
-                                                    />
-                                                </div>
-                                            </td>
-                                            <td className="p-2">{getUser(student.studentId).firstName + ' ' + getUser(student.studentId).lastName}</td>
-                                            <td className="p-2">{student.score ? student.score : 'N/A'}</td>
-                                            <td className="p-2">{studentsOverview.totalScore ? studentsOverview.totaLScore : 'N/A'}</td>
-                                            <td className="p-2">{student.attempts ? student.attempts : 'N/A'}</td>
-                                            <td className={`p-2 ${student.score === undefined ? 'text-gray-600' : student.score >= studentsOverview.totalScore ? 'text-green-700' : 'text-red-600'}`}>
-                                                {student.score <= 0 ? 'No Assessment' : student.score >= studentsOverview.totalScore ? 'Passed' : 'Failed'}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )
-                }
-                <div className="flex justify-end items-center p-6">
-                    <Pagination
-                        currentPage={currentPage}
-                        onPageChange={handlePageChange}
-                        totalPages={totalPages}
-                    />
-                </div>
-            </div>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store/store";
@@ -78,16 +78,10 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
         image: imageUrl,
       };
 
-      // const data = await dispatch(addCategory(payload))
-      // if(data.payload){
-      //   await dispatch(getAllCategories(1))
-      //   toast.success("Category added successfully");
-      //   onAddCategory(data.payload);
-      // }
-      const data = await dispatch(addCategory(payload));
+      const data = await dispatch(addCategory(payload as any));
 
       if (data.payload && 'name' in data.payload) {
-        const category = data.payload as Category; // Type assertion
+        const category = data.payload as Category; 
 
         if (category._id) { // Type guard for _id
           await dispatch(getAllCategories(1));

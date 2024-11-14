@@ -162,7 +162,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) =>
           )}
           <div className='flex justify-end space-x-2'>
             <p className={`text-xs ${currentUserId !== msg.senderId ? 'text-black' : 'text-gray-100'} mt-2`}>
-              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {new Date(msg.createdAt!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </p>
             {isCurrentUser && (
               <span className="ml-2">
@@ -202,7 +202,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId }) =>
 
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
-      const messageTimestamp = new Date(msg.createdAt).getTime();
+      const messageTimestamp = new Date(msg.createdAt!).getTime();
 
       if (userLeftTimestamp && messageTimestamp > userLeftTimestamp && !userLeftMessageRendered) {
         messagesToRender.push(

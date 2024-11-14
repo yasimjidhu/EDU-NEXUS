@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, MutableRefObject } from 'react';
+import {  useRef, useEffect, MutableRefObject } from 'react';
 
 export const useMessageObserver = (onMessageRead: (messageId: string,userId:string) => void): MutableRefObject<IntersectionObserver | null> => {
   const observedMessages = useRef<Set<string>>(new Set());

@@ -1,4 +1,3 @@
-import React from 'react';
 
 const CourseSkeleton = () => (
   <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-full">

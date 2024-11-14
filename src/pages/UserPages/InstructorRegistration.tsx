@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { toast } from "react-toastify";
 import { Register } from "../../components/redux/slices/studentSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { BeatLoader } from "react-spinners";
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -12,7 +12,6 @@ import { createAccountLink } from "../../components/redux/slices/paymentSlice";
 
 const InstructorRegistration: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
-  const navigate = useNavigate();
   const role = localStorage.getItem("role");
 
   const validationSchema = registrationFormSchema();
@@ -29,7 +28,7 @@ const InstructorRegistration: React.FC = () => {
     cv: null as File | null,
   };
 
-  const { loading, error ,user} = useSelector((state: RootState) => state.user);
+  const { loading,} = useSelector((state: RootState) => state.user);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -151,7 +150,7 @@ const InstructorRegistration: React.FC = () => {
           handleSubmit(values, { setSubmitting });
         }}
       >
-        {({ isSubmitting, setFieldValue, values }) => (
+        {({ setFieldValue, values }) => (
           <Form className="mt-2">
             <div className="bg-gray-300 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 rounded-xl px-8 py-2">
               <div className="p-4">

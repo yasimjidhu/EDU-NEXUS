@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import Navbar from "../../components/authentication/Navbar";
 import "../../index.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ const Home = () => {
   const { user } = useSelector((state: RootState) => state.user);
 
   const { categories } = useSelector((state: RootState) => state.category);
-  const [allCourses, setAllCourses] = useState([])
+  const [allCourses, setAllCourses] = useState<any[]>([])
   const [searchResults, setSearchResults] = useState<CourseState[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const dispatch: AppDispatch = useDispatch();
@@ -66,8 +66,8 @@ const Home = () => {
     }
   };
 
-  const handleSearchResults = (results: CourseState[]) => {
-    setSearchResults(results)
+  const handleSearchResults = (results: CourseState[]|null) => {
+    setSearchResults(results!)
   }
 
   const handleViewClick = (categoryId: string) => {
@@ -181,16 +181,16 @@ const Home = () => {
                 <div
                   key={index}
                   className="border transform hover:scale-105 transition-transform duration-300 cursor-pointer border-gray-200 shadow-xl rounded-md text-center p-6"
-                  onClick={() => handleViewClick(category.id)}>
+                  onClick={() => handleViewClick(category.id!)}>
                   <div className="rounded-full mx-auto w-36 h-36 shadow-sm border-2 border-gray-100 overflow-hidden">
                     <img
                       src={`${category.image}`}
-                      alt={category.name}
+                      alt={category.name!}
                       className="w-full  h-full object-cover rounded-full"
                     />
                   </div>
                   <h1 className="mt-3 text-md inter ">{category.name}</h1>
-                  <p className="text-sm inter">{category.coursesCount} Courses</p>
+                  <p className="text-sm inter">{category.coursesCoun} Courses</p>
                 </div>
               ))}
             </div>

@@ -108,8 +108,8 @@ const Categories: React.FC = () => {
               <div className="w-full md:w-1/3 flex justify-center md:justify-start mb-4 md:mb-0">
                 <div className="rounded-full overflow-hidden w-36 h-36">
                   <img
-                    src={category.image}
-                    alt={category.name}
+                    src={category.image?.toString()}
+                    alt={category.name?.toString()}
                     className="w-full h-full object-cover"
                   />
                 </div>

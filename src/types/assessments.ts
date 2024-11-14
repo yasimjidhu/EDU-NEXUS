@@ -8,7 +8,7 @@ interface Question {
 }
 
 interface IAssessment extends Document {
-  _id?:string;
+  _id:string;
   title?:string;
   total_score?: number;
   passing_score?: number;

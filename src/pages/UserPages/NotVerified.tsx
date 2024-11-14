@@ -1,13 +1,12 @@
 import React, { useEffect } from "react";
 import Navbar from "../../components/authentication/Navbar";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { AppDispatch, RootState } from "../../components/redux/store/store";
+import {  RootState } from "../../components/redux/store/store";
 
 
 const NotVerified: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch: AppDispatch = useDispatch()
   const { user } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {

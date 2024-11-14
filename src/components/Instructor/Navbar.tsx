@@ -1,25 +1,25 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutUser } from "../redux/slices/authSlice";
 import { AppDispatch, RootState } from "../redux/store/store";
 import { addMessage, decrementUnreadCount, deleteMessageFromUnreadMessages, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
-import { Message, UnreadMessage } from "../../types/chat";
+import { Message } from "../../types/chat";
 import { FileText, Headphones, Image } from "lucide-react";
 import { useSocket } from "../../contexts/SocketContext";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
-  const [userUnreadMessages, setUserUnreadMessages] = useState<UnreadMessage[]>([])
+  // const [userUnreadMessages, setUserUnreadMessages] = useState<UnreadMessage[]>([])
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { user, allUsers } = useSelector((state: RootState) => state.user);
-  const { unreadMessages, unreadCounts } = useSelector((state: RootState) => state.chat);
-  const { socket, onlineUsers } = useSocket();
+  const { user } = useSelector((state: RootState) => state.user);
+  const { unreadMessages } = useSelector((state: RootState) => state.chat);
+  const { socket } = useSocket();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -49,8 +49,8 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     if (user?._id) {
       dispatch(getUnreadMessages(user?._id!))
-      const userMessages = filteredUnreadMessages()
-      setUserUnreadMessages(userMessages)
+      // const userMessages = filteredUnreadMessages()
+      // setUserUnreadMessages(userMessages)
     }
   }, [dispatch, user?._id])
 
@@ -116,24 +116,17 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const filteredUnreadMessages = () => {
+  // const filteredUnreadMessages = () => {
 
-    const userUnreadMessages = unreadMessages.filter((item) => {
-      const [id1, id2] = item.conversationId.split("-");
+  //   const userUnreadMessages = unreadMessages.filter((item) => {
+  //     const [id1, id2] = item.conversationId.split("-");
 
-      // Check if the current user's ID is present in the conversation ID
-      return id1 === user?._id || id2 === user?._id;
-    });
+  //     // Check if the current user's ID is present in the conversation ID
+  //     return id1 === user?._id || id2 === user?._id;
+  //   });
 
-    return userUnreadMessages;
-  };
-
-
-  const totalUnreadMessages = useMemo(() => {
-    const values = Object.values(unreadCounts).reduce((total, count) => total + count, 0)
-    console.log('values', values)
-    return values
-  }, [unreadCounts])
+  //   return userUnreadMessages;
+  // };
 
   const unreadMessagesCount = unreadMessages.reduce((total, message) => total + (message.unreadCount || 0), 0);
 

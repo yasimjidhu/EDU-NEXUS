@@ -9,7 +9,7 @@ import CourseListingSkeleton from '../../components/skelton/courses';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const AllCourses: React.FC = () => {
-  const [allCourses, setAllCourses] = useState([]);
+  const [allCourses, setAllCourses] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState('');
@@ -30,7 +30,7 @@ const AllCourses: React.FC = () => {
     setIsLoading(true);
     const response = await dispatch(getAllCourses({ page,limit:6, sort, filters }));
     console.log('allcourses data', response.payload)
-    const { courses, totalPages } = response.payload;
+    const { courses, totalPages } = response.payload as any
     setAllCourses(courses);
     setTotalPages(totalPages);
     setIsLoading(false);

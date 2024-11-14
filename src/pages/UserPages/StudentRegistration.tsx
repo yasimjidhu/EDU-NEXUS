@@ -27,7 +27,7 @@ const StudentRegistration: React.FC = () => {
     profileImage: null as File | null,
   };
 
-  const { loading, error } = useSelector((state: RootState) => state.user);
+  const { loading } = useSelector((state: RootState) => state.user);
 
   const handleImageChange = (
     e: ChangeEvent<HTMLInputElement>,
@@ -90,7 +90,7 @@ const StudentRegistration: React.FC = () => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ isSubmitting, setFieldValue, values }) => (
+          {({  setFieldValue, values }) => (
             <Form className="mt-2">
               <div className="bg-gray-300 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 rounded-xl px-8 py-2">
                 <div className="p-4">

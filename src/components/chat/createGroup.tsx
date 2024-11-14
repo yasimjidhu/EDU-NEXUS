@@ -16,7 +16,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
   const [groupName, setGroupName] = useState('');
   const [groupDescription, setGroupDescription] = useState('');
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
-  const [groupImage, setGroupImage] = useState<File | null>(null);
+  // const [groupImage, setGroupImage] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
@@ -48,7 +48,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      setGroupImage(file);
       const reader = new FileReader();
       reader.onloadend = () => setImageUrl(reader.result as string);
       reader.readAsDataURL(file);
@@ -102,7 +101,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ show, handleClose, 
       setGroupName('');
       setGroupDescription('');
       setSelectedStudents([]);
-      setGroupImage(null);
       setImageUrl(null);
       setUploadedImageUrl(null);
     }

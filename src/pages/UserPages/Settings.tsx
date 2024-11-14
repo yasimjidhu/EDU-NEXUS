@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User } from '../../types/user';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
-import { Camera, Edit2 } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { useFileUpload } from '../../hooks/useUploadFile';
 import { updateUserDetails } from '../../components/redux/slices/studentSlice';
 import { resetPassword } from '../../components/redux/slices/authSlice';
@@ -20,7 +20,6 @@ const Settings: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, uploadProgress,handleFileSelect,selectedFile } = useFileUpload();
@@ -54,7 +53,6 @@ const Settings: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
   
     const userUpdateData: Partial<User> = {};
   
@@ -67,7 +65,7 @@ const Settings: React.FC = () => {
       userUpdateData.contact = {
         ...user?.contact, // Ensure existing contact data is preserved
         phone: formData?.contact?.phone,
-      };
+      } as any
     }
   
     // Handle profile image update
@@ -104,10 +102,8 @@ const Settings: React.FC = () => {
         console.error("Error updating profile:", error);
         toast.error("Failed to update profile.");
       } finally {
-        setIsLoading(false);
       }
     } else {
-      setIsLoading(false);
       toast.info("No changes to save.");
     }
   };

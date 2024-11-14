@@ -21,21 +21,19 @@ interface CategoryBlockConfirmationProps {
 }
 
 const CategoryBlockConfirmation: React.FC<CategoryBlockConfirmationProps> = ({ categoryId, onSuccess, onError }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
     const dispatch: AppDispatch = useDispatch();
 
     const handleConfirm = () => {
         setIsConfirmed(true);
-        setIsOpen(false);
     };
 
     const handleBlockCategory = async () => {
         console.log('handle bock called',categoryId,isConfirmed)
         if (!isConfirmed) return;
-        setIsLoading(true);
+        // setIsLoading(true);
         try {
             if(!categoryId){
                 return
@@ -45,7 +43,7 @@ const CategoryBlockConfirmation: React.FC<CategoryBlockConfirmationProps> = ({ c
         } catch (error) {
             onError?.(error);
         } finally {
-            setIsLoading(false);
+            // setIsLoading(false);    
             setIsConfirmed(false);
         }
     };
@@ -57,7 +55,7 @@ const CategoryBlockConfirmation: React.FC<CategoryBlockConfirmationProps> = ({ c
     }, [isConfirmed]);
 
     return (
-        <AlertDialog isOpen={isOpen} onOpenChange={setIsOpen}>
+        <AlertDialog>
             <AlertDialogTrigger className="bg-black hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-full ml-52">
                 Delete
             </AlertDialogTrigger>

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: default
+data:
+  VITE_CLOUDINARY_API_KEY: Mjc5NzUyNjM1MjM5ODQ5
+  VITE_CLOUDINARY_API_SECRET: alh1OUZsVU5SWUVKYzhieHJ3bjRhVTVLMk5V
+  VITE_CLOUDINARY_CLOUD_NAME: "dhla5xcqb"
+  VITE_CLOUDINARY_UPLOAD_URL: "https://api.cloudinary.com/v1_1/dhla5xcqb/image/upload"
+  VITE_CLOUDINARY_UPLOAD_PRESET: "ylexcxmk"
+  VITE_CLOUDINARY_CV_PRESET: "cv_preset"
+  VITE_CLOUDINARY_CATEGORY_PRESET: "Category_images"
+  VITE_CLOUDINARY_THUMBNAILS_PRESET: "thumbnails"
+  VITE_CLOUDINARY_VIDEO_PRESET: "videos"
+  VITE_CLOUDINARY_ATTACHMENTS_PRESET: "attachments"
+  VITE_CLOUDINARY_COURSE_FILES_PRESET: "courseFiles"
+  VITE_CLOUDINARY_CHAT_FILES_PRESET: "chatFiles"
+  VITE_COURSE_STREAM_URL: "http://localhost:4000/course/courses/stream-video"
+  VITE_STRIPE_PUBLISHABLE_KEY: "pk_test_51PaDenRuKRhsspaRHNjVL9Wa7y3eVVrs07vQwdB7Ic5aZdFGMVVva3OHHIad1Zk41K2cj6qk0rxQJz9vUffgqmIZ00qNmPfcAL"
+  VITE_STRIPE_ADMIN_ACCOUNT_ID: "acct_1PxSbl2LLnux89P1"
+

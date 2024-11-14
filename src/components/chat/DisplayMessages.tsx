@@ -111,10 +111,12 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages,onRep
 
     const handleReply = (message: Message) => {
         setReplyingTo(message);
-        onReply(message)
-        const inputField = document.getElementById('chat-input');
-        if (inputField) {
-            inputField.focus();
+        if(onReply){
+            onReply(message)
+            const inputField = document.getElementById('chat-input');
+            if (inputField) {
+                inputField.focus();
+            }
         }
     };
 
@@ -158,7 +160,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages,onRep
                                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
                                     : 'bg-white text-gray-800'
                                 }`}
-                            onMouseEnter={() => setHoveredMessageId(message._id)}
+                            onMouseEnter={() => setHoveredMessageId(message._id!)}
                             onMouseLeave={() => setHoveredMessageId(null)}
                         >
                             {message.replyTo?.text && (
@@ -175,7 +177,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages,onRep
                                         src={message.fileUrl}
                                         alt="Uploaded image"
                                         className="w-full rounded cursor-pointer"
-                                        onClick={() => handleImageClick(message.fileUrl)}
+                                        onClick={() => handleImageClick(message.fileUrl!)}
                                     />
                                 ) : message.fileType === 'video' ? (
                                     <video controls src={message.fileUrl} className="w-full rounded" />
@@ -187,7 +189,7 @@ export const DisplayMessages: React.FC<DisplayMessagesProps> = ({ messages,onRep
                             )}
                             <div className="text-xs mt-2 flex items-center justify-between">
                                 <span className={isCurrentUser ? 'text-blue-100' : 'text-gray-500'}>
-                                    {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {new Date(message.createdAt!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                                 <div className="flex items-center space-x-2">
                                     {!isCurrentUser && (

@@ -55,7 +55,7 @@ const ResetPassword: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar isAuthenticated={true} />
       <div className="grid grid-cols-2 px-10 justify-center items-center">
         <div className="w-full">
           <img src="/assets/images/reset-pass-img.png" width="80%" alt="" />

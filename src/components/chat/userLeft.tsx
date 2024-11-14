@@ -1,4 +1,3 @@
-import React from 'react';
 import { UserMinus } from 'lucide-react';
 
 const UserLeftMessage = ({ message }:{message:string}) => {

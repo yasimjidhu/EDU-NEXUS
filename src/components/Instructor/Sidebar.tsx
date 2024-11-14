@@ -1,5 +1,4 @@
 
-import { BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Wallet } from "lucide-react";
 

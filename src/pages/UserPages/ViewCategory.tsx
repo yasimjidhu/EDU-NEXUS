@@ -8,7 +8,7 @@ import FilterAndSort from '../../components/common/FilterAndSort';
 import CourseListingSkeleton from '../../components/skelton/courses';
 
 const ViewCategory: React.FC = () => {
-  const [allCourses, setAllCourses] = useState([]);
+  const [allCourses, setAllCourses] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState('');
@@ -22,14 +22,14 @@ const ViewCategory: React.FC = () => {
   const { categoryId } = useParams();
 
   useEffect(() => {
-    fetchCourses(categoryId, currentPage, sortBy, filters);
+    fetchCourses(categoryId!, currentPage, sortBy, filters);
   }, [currentPage, categoryId, sortBy, filters]);
 
   const fetchCourses = async (categoryId: string, page: number, sort: string, filters: any) => {
     if (categoryId) {
       setIsLoading(true)
       const response = await dispatch(getCategoryWiseCourses({ categoryId, page, sort, filters }));
-      const { courses, totalPages } = response.payload;
+      const { courses, totalPages } = response.payload as any
       setAllCourses(courses);
       setIsLoading(false)
       setTotalPages(totalPages);

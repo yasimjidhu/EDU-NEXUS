@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Pagination from "../../components/common/Pagination";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
+import { CourseState, getAllCourses } from "../../components/redux/slices/courseSlice";
 
 export const StudentTransactions = () => {
-    const [transactions, setTransactions] = useState([]);
+    const [transactions, setTransactions] = useState<any[]>([]);
+    const [allCourses,setAllCourses] = useState<CourseState[]>([])
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState<number>(1);
 
@@ -19,17 +21,25 @@ export const StudentTransactions = () => {
     useEffect(() => {
         if (!user) return;
         dispatch(getStudentCoursesTransaction({ userId: user?._id, limit: 10, page: currentPage }))
-            .then((res) => {
+            .then((res:any) => {
                 setTransactions(res.payload.transactions);
                 setTotalPages(res.payload.totalPages);
             });
+        dispatch(getAllCourses({page:1})).then((res:any)=>{
+            console.log('allcourse reposn',res.payload)
+            setAllCourses(res.payload.courses)
+        })
     }, [dispatch, user, currentPage]);
 
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
     };
 
-    console.log('tranactions',transactions)
+    const getCourseName = (courseId:string)=>{
+        const course = allCourses.find(course => course._id == courseId)
+        console.log('course found',course?.title)
+        return course?.title
+    }
 
     return (
         <div className="container mx-auto p-6 bg-gradient-to-r from-blue-50 to-indigo-50 min-h-screen">
@@ -38,7 +48,7 @@ export const StudentTransactions = () => {
                 <table className="w-full bg-white border-collapse">
                     <thead>
                         <tr className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white">
-                            <th className="py-3 px-6 text-left">Transaction ID</th>
+                            <th className="py-3 px-6 text-left">Course Name</th>
                             <th className="py-3 px-6 text-left">Date</th>
                             <th className="py-3 px-6 text-left">Amount (INR)</th>
                             <th className="py-3 px-6 text-left">Status</th>
@@ -51,7 +61,7 @@ export const StudentTransactions = () => {
                                 <td className="py-4 px-6 border-b border-indigo-100">
                                     <div className="flex items-center">
                                         <CreditCard className="mr-2 text-indigo-600" size={18} />
-                                        <span className="font-medium">{transaction.stripe_payment_intent_id || ''}</span>
+                                        <span className="font-medium">{getCourseName(transaction.courseId)}</span>
                                     </div>
                                 </td>
                                 <td className="py-4 px-6 border-b border-indigo-100">

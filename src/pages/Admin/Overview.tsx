@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Text } from 'recharts';
 import { getAllCourses, getPopularInstructorsCourses } from '../../components/redux/slices/courseSlice';
-import { getAllTransactions, getTransactions } from '../../components/redux/slices/paymentSlice';
-import { AppDispatch, RootState } from '../../components/redux/store/store';
+import {  getTransactions } from '../../components/redux/slices/paymentSlice';
+import {  AppDispatch } from '../../components/redux/store/store';
 import DisplayPopularInstructors from '../../components/Admin/DisplayPopularInstructors';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-const CustomizedAxisTick = ({ x, y, payload }) => {
+const CustomizedAxisTick = ({ x, y, payload }:{x:any,y:any,payload:any}) => {
   const maxChars = 15; // Adjust this value based on your needs
   let displayName = payload.value;
   if (displayName.length > maxChars) {
@@ -22,13 +22,12 @@ const CustomizedAxisTick = ({ x, y, payload }) => {
 };
 
 const AdminOverview = () => {
-  const [courseData, setCourseData] = useState([]);
+  const [courseData, setCourseData] = useState<any>([]);
   const [popularCourses, setPopularCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
-  const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.user);
+  const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +43,7 @@ const AdminOverview = () => {
       try {
         const coursesResponse = await dispatch(getAllCourses({ page: 1,limit:10 }));
         console.log('all courses response in frontend', coursesResponse)
-        const { courses, totalPages } = coursesResponse.payload;
+        const { courses }:{courses:any[]} = coursesResponse.payload as any
 
         const popularCoursesResponse = await dispatch(getPopularInstructorsCourses())
         const data = popularCoursesResponse.payload
@@ -52,7 +51,7 @@ const AdminOverview = () => {
         setPopularCourses(data)
 
         const transactionsResponse = await dispatch(getTransactions(filters));
-        const transactions = transactionsResponse.payload.transactions;
+        const transactions = transactionsResponse.payload.transactions as any[]
         console.log('transaction new',transactionsResponse.payload)
 
         const combinedData = courses.map(course => {
@@ -92,10 +91,10 @@ const AdminOverview = () => {
     );
   }
 
-  const totalStudents = courseData.reduce((sum, course) => sum + course.studentsEnrolled, 0);
-  const totalRevenue = courseData.reduce((sum, course) => sum + course.totalRevenue, 0);
+  const totalStudents = courseData.reduce((sum:any, course:any) => sum + course.studentsEnrolled, 0);
+  const totalRevenue = courseData.reduce((sum:any, course:any) => sum + course.totalRevenue, 0);
   const averageRating = courseData.length > 0
-    ? (courseData.reduce((sum, course) => sum + course.averageRating, 0) / courseData.length).toFixed(1)
+    ? (courseData.reduce((sum:any, course:any) => sum + course.averageRating, 0) / courseData.length).toFixed(1)
     : 'N/A';
 
 
@@ -105,7 +104,7 @@ const AdminOverview = () => {
       <h1 className="text-3xl font-bold mb-6">Admin Overview</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {courseData.map((course, index) => (
+        {courseData.map((course:any, index:any) => (
           <div key={index} className="bg-white p-4 rounded shadow">
             <h2 className="text-xl font-semibold mb-2">{course.name}</h2>
             <p>Students Enrolled: {course.studentsEnrolled}</p>
@@ -136,7 +135,7 @@ const AdminOverview = () => {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={courseData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" height={60} tick={<CustomizedAxisTick />} interval={0} />
+              <XAxis dataKey="name" height={60} tick={CustomizedAxisTick} interval={0} />
               <YAxis />
               <Tooltip />
               <Bar dataKey="studentsEnrolled" fill="#8884d8" />
@@ -158,7 +157,7 @@ const AdminOverview = () => {
                 fill="#8884d8"
                 label
               >
-                {courseData.map((entry, index) => (
+                {courseData.map(( index:any) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -182,7 +181,7 @@ const AdminOverview = () => {
               </tr>
             </thead>
             <tbody>
-              {courseData.map((course, index) => (
+              {courseData.map((course:any, index:any) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-100' : ''}>
                   <td className="p-2">{course.name}</td>
                   <td className="p-2">{course.studentsEnrolled}</td>

@@ -4,7 +4,6 @@ import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { useParams } from "react-router-dom";
 import {
   CourseState,
-  addReview,
   checkEnrollment,
   enrollToCourse,
   getCourse,
@@ -19,19 +18,15 @@ import {
   Globe,
   Languages,
   DollarSign,
-  Video,
-  ChevronUp,
-  ChevronDown,
   ExternalLink,
   Paperclip,
-  Star,
   IndianRupee,
 } from "lucide-react";
 import {  fetchVerifiedInstructors } from "../../components/redux/slices/instructorSlice";
 import { CompletionStatus } from "../../types/enrollment";
 import { toast } from "react-toastify";
 import { getAllUsers } from "../../components/redux/slices/studentSlice";
-import {  Elements, useElements, useStripe } from "@stripe/react-stripe-js";
+import {  Elements } from "@stripe/react-stripe-js";
 import {makePayment } from "../../components/redux/slices/paymentSlice";
 import { loadStripe } from "@stripe/stripe-js";
 import CourseDetailsSkelton from "../../components/skelton/CourseDetails";
@@ -39,9 +34,9 @@ import CourseDetailsSkelton from "../../components/skelton/CourseDetails";
 const CourseDetails: React.FC = () => {
 
   const { id } = useParams();
-  const stripe = useStripe()
-  const elements = useElements()
-  const [loading,setLoading] = useState(false)
+  // const stripe = useStripe()
+  // const elements = useElements()
+  // const [loading,setLoading] = useState(false)
   const dispatch: AppDispatch = useDispatch();
   const [courseData, setCourseData] = useState<CourseState | null>(null);
   const [trial, setTrial] = useState<string | null>(null);
@@ -54,22 +49,27 @@ const CourseDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { user } = useSelector((state: RootState) => state.user);
-  const courseStoredData = useSelector((state: RootState) => state.course);
+  // const courseStoredData = useSelector((state: RootState) => state.course);
 
-  const toggleLesson = (index) => {
-    setOpenLesson(openLesson === index ? null : index);
-  };
+  // const toggleLesson = (index:any) => {
+  //   setOpenLesson(openLesson === index ? null : index);
+  // };
+
+  console.log(userReviews)
+  console.log(allUsers)
+  console.log()
 
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         setIsLoading(true)
-        const courseResponse = await dispatch(getCourse(id));
+        const courseResponse = await dispatch(getCourse(id!));
         console.log('response of getcourse',courseResponse.payload)
         const course = courseResponse.payload.course;
         setCourseId(course._id);
         setCourseData(course);
         setIsLoading(false)
+        setOpenLesson(null)
         setTrial(course.trial.video);
       } catch (error) {
         setIsLoading(false)
@@ -92,7 +92,9 @@ const CourseDetails: React.FC = () => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    if (courseData?._id && user?._id) {
+    if (!courseData?._id || !user?._id) {
+      return
+    }
       const checkUserEnrollment = async () => {
         try {
           const res = await dispatch(
@@ -105,7 +107,7 @@ const CourseDetails: React.FC = () => {
       };
 
       checkUserEnrollment();
-    }
+    
   }, [dispatch, courseData, user, enrolled]);
 
   useEffect(() => {
@@ -133,7 +135,6 @@ const CourseDetails: React.FC = () => {
     }
   
     try {
-      setLoading(true);
   
       if (courseData.pricing.type === "free") {
         // Handle free course enrollment
@@ -148,7 +149,7 @@ const CourseDetails: React.FC = () => {
               completedAssessments: [],
               overallCompletionPercentage: 0,
             },
-          };
+          } as any
           const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
           setEnrolled(true);
           toast.success(enrolledStudent.payload.message);
@@ -180,9 +181,8 @@ const CourseDetails: React.FC = () => {
           email:user.email,
           adminAccountId:adminAccountId,
           instructorAccountId:instructorAccountId
-        }));
+        })) as any
 
-        console.log('paymentResposne in frontend',paymentResponse)
   
         if (paymentResponse.payload.data && paymentResponse.payload.data.id) {
           const result = await stripe.redirectToCheckout({
@@ -200,11 +200,9 @@ const CourseDetails: React.FC = () => {
       console.error('Error processing enrollment:', error);
       toast.error(`An error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
-      setLoading(false);
     }
   };
   
-  console.log('instructors data',allInstructors)
     enum Need {
       NAME = "name",
       PROFILE = "profile",
@@ -219,7 +217,7 @@ const CourseDetails: React.FC = () => {
   
     const getInstructorData = (
     
-      instructorId: string,
+      instructorId: string | undefined,
       need: Need
     ): string | Instructor | null => {
       const instructor = allInstructors.find(
@@ -258,7 +256,7 @@ const CourseDetails: React.FC = () => {
               </h1>
               <div className="flex justify-center">
                 <img
-                  src={courseData?.thumbnail}
+                  src={courseData?.thumbnail?.toString()}
                   alt="Course Thumbnail"
                   className="w-full rounded-lg shadow-lg mb-6"
                 />
@@ -309,7 +307,7 @@ const CourseDetails: React.FC = () => {
               ):(
                 <button
                   className="w-full  sm:w-auto bg-black hover:bg-strong-rose text-white font-bold py-1 px-6 rounded-full"
-                  onClick={() => handleEnrollment(courseData?._id)}
+                  onClick={() => handleEnrollment()}
                 >
                   {courseData?.pricing.type === "free"
                     ? "Enroll Now"
@@ -322,13 +320,13 @@ const CourseDetails: React.FC = () => {
               <h2 className="text-2xl font-bold mb-4">Instructor</h2>
               <div className="flex items-center ">
                 <img
-                  src={getInstructorData(courseData?.instructorRef, "profile")}
+                  src={getInstructorData(courseData?.instructorRef, Need.PROFILE)?.toString()}
                   alt="Instructor"
                   className="w-20 h-20 rounded-full mr-4 object-cover"
                 />
                 <div>
                   <h3 className="text-xl font-bold mt-4">
-                    {getInstructorData(courseData?.instructorRef, "name")}
+                    {getInstructorData(courseData?.instructorRef, Need.NAME)?.toString()}
                   </h3>
                   <p className="text-gray-600 mb-4"></p>
                   <div className="flex space-x-2">

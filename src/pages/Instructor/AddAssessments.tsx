@@ -41,7 +41,7 @@ const AddAssessments = () => {
     assessment_type: "quiz",
     questions: [],
   });
-  const [instructorCourses, setInstructorCourses] = useState([]);
+  const [instructorCourses, setInstructorCourses] = useState<any[]>([]);
   const [mode, setMode] = useState<"add" | "edit">("add");
 
   const dispatch: AppDispatch = useDispatch();
@@ -51,13 +51,13 @@ const AddAssessments = () => {
   const { user } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    if (user._id) {
+    if (user?._id) {
       dispatch(getAllCoursesOfInstructor(user?._id!)).then((res) => {
         setInstructorCourses(res.payload.courses);
         setAssessment(prev => ({ ...prev, instructor_id: user._id }));  
       });
     }
-  }, [dispatch, user._id]);
+  }, [dispatch, user?._id]);
 
   useEffect(() => {
     if (location.state) {

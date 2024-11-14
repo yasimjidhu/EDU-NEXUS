@@ -1,15 +1,6 @@
 import * as Yup  from 'yup'
 
 
-interface FormValues {
-    firstName:string
-    lastName:string
-    phone:string
-    address:string
-    email:string
-    dob:string
-}
-
 const registrationFormSchema = ()=>{
     return Yup.object({
     firstName:Yup.string()

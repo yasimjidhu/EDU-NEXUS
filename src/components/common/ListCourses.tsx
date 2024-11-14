@@ -19,7 +19,7 @@ export const ListCourses:React.FC<ListCoursesProps> = ({allCourses}) => {
         <div key={course._id} className="bg-white text-start rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
           <div className="h-44 overflow-hidden rounded-md">
             <img
-              src={course.thumbnail}
+              src={course.thumbnail!}
               alt={course.title}
               className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-300 cursor-pointer"
             />
@@ -39,7 +39,7 @@ export const ListCourses:React.FC<ListCoursesProps> = ({allCourses}) => {
               <p>{course.level}</p>
             </div>
           </div>
-          <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300" onClick={()=>handleStartClick(course._id)}>
+          <button className="bg-black py-1 px-3 text-white rounded-xl mt-4 flex items-center hover:bg-gray-800 transition-colors duration-300" onClick={()=>handleStartClick(course._id!)}>
             Start Course
             <span className="ml-2">
               <img src="/assets/png/next.png" alt="" className="w-4" />

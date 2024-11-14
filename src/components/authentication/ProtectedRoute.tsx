@@ -8,10 +8,10 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ roles }) => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const userData = useSelector((state:RootState)=>state.user)
+  // const userData = useSelector((state:RootState)=>state.user)
 
   const isAuthenticated = !!user;
-  const isKycVerified = userData.user?.verificationStatus == 'verified' 
+  // const isKycVerified = userData.user?.verificationStatus == 'verified' 
   ;
 
   if (!isAuthenticated) {

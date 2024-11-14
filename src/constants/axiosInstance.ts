@@ -5,7 +5,7 @@ interface RefreshTokenResponse {
 }
 
 export const axiosInstance: AxiosInstance = axios.create({
-  baseURL: 'http://localhost:4000',
+  baseURL: 'https://mcartecommerce.online',
   withCredentials: true,
 });
 
@@ -20,7 +20,7 @@ async function refreshToken(): Promise<string> {
   
   try {
     const response = await axios.post<RefreshTokenResponse>(
-      'http://localhost:4000/auth/refresh-token',
+      'https://mcartecommerce.online/auth/refresh-token',
       { refresh_token },
       { withCredentials: true }
     );

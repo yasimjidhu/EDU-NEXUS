@@ -1,4 +1,3 @@
-// AuthSuccess.tsx
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -10,14 +9,25 @@ const AuthSuccess: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const userString = params.get('user');
-    
-    if (userString) {
-      const user = JSON.parse(decodeURIComponent(userString));
-      console.log('this is the google login user',user)
+    const handleAuthSuccess = (user: any) => {
+      console.log('This is the Google login user:', user);
       dispatch(setUser(user));
-      navigate('/home'); // or wherever you want to redirect after successful login
+      navigate('/home');
+    };
+
+    // Check for user data in URL parameters
+    const searchParams = new URLSearchParams(location.search);
+    const userString = searchParams.get('user');
+    if (userString) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userString));
+        handleAuthSuccess(user);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        navigate('/signup'); // Redirect to signup page if there's an error
+      }
+    } else {
+      navigate('/signup'); // Redirect to signup page if no user data is found
     }
   }, [dispatch, navigate, location]);
 

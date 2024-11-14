@@ -9,7 +9,7 @@ import {
 } from "../../components/redux/slices/courseSlice";
 import axios from "axios";
 import { Image, Video } from "cloudinary-react";
-import { RootState } from "../../components/redux/store/store";
+import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 
@@ -25,8 +25,9 @@ const AddCourse: React.FC = () => {
   const [language, setLanguage] = useState<string>("English");
   const [category, setCategory] = useState<string>("");
   const [categoryRef, setCategoryRef] = useState<string>(
-    categories.length > 0 ? categories[0].id : ""
+    categories.length > 0 && categories[0].id ? categories[0].id : ""
   );
+  
   const [level, setLevel] = useState<"beginner" | "intermediate" | "expert">(
     "beginner"
   );
@@ -41,7 +42,7 @@ const AddCourse: React.FC = () => {
   const [updateLoading, setUpdateLoading] = useState<boolean>(false); 
   const [mode,setMode]=useState<"add"|"edit">("add")
 
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -73,8 +74,8 @@ const AddCourse: React.FC = () => {
 
       setTitle("");
       setDescription("");
-      setCategoryRef(categories.length > 0 ? categories[0].id : "");
-      setInstructorRef(user?._id)
+      setCategoryRef(categories.length > 0 && categories[0].id ? categories[0].id : "");
+      setInstructorRef(user?._id!)
       setLevel("beginner");
       setCertificationAvailable(false);
       setPricing({ type: "free", amount: 0 });
@@ -153,7 +154,7 @@ const AddCourse: React.FC = () => {
       pricing,
       level,
       courseAmount,
-      language
+      language,
     };
 
     try{
@@ -171,7 +172,7 @@ const AddCourse: React.FC = () => {
   }
 
   const handleNext = async () => {
-    setLoading(true);
+    setLoading(true); 
 
     const courseInfo = {
       courseId: location.state? location.state : null,

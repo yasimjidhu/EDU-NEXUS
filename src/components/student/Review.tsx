@@ -20,7 +20,7 @@ interface Review {
 export const Review: React.FC<ReviewProps> = ({ courseId }) => {
     const [newReview, setNewReview] = useState<string>("");
     const [newRating, setNewRating] = useState<number>(0);
-    const [allUsers, setAllUsers] = useState([]);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
     // const [reviews, setAllReviews] = useState<any>([]);
     const dispatch: AppDispatch = useDispatch();
 

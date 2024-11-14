@@ -140,7 +140,7 @@ export const AudioRecord: React.FC<AudioRecordProps> = ({
         }
     };
 
-    const shouldShowSendButton = isRecording || audioBlob || selectedFile || inputMessage.trim() !== '';
+    // const shouldShowSendButton = isRecording || audioBlob || selectedFile || inputMessage.trim() !== '';
 
     return (
         <div className="flex-grow flex items-center bg-white rounded-full border border-gray-300">

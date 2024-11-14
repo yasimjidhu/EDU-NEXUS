@@ -11,27 +11,28 @@ import { clearInstructorState } from "../redux/slices/instructorSlice";
 import useDebounce from "../../hooks/useDebounce";
 import { CourseState, searchCourses } from "../redux/slices/courseSlice";
 import { ArrowDownCircle, Image, Headphones, FileText } from "lucide-react";
-import { addGroupMessage, addMessage, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
-import { Message, UnreadMessage } from "../../types/chat";
+import { addGroupMessage, getUnreadMessages, incrementUnreadCount, updateUnreadMessages } from "../redux/slices/chatSlice";
+import { Message } from "../../types/chat";
 import { useSocket } from "../../contexts/SocketContext";
 
 interface NavbarProps {
   isAuthenticated: boolean;
-  onSearch: (results: CourseState[]) => void;
+  onSearch?: (results: CourseState[] | null) => void;  // Make onSearch optional
 }
+
 
 const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userUnreadMessages, setUserUnreadMessages] = useState<UnreadMessage[]>([])
+  // const [userUnreadMessages, setUserUnreadMessages] = useState<UnreadMessage[]>([])
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const { user, allUsers } = useSelector((state: RootState) => state.user);
+  const { user } = useSelector((state: RootState) => state.user);
   const authData = useSelector((state: RootState) => state.auth);
   const { unreadMessages, unreadCounts } = useSelector((state: RootState) => state.chat);
-  const { socket, onlineUsers } = useSocket();
+  const { socket, } = useSocket();
 
 
   const navigate = useNavigate();
@@ -89,18 +90,21 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
     if (debouncedSearchQuery) {
       dispatch(searchCourses(debouncedSearchQuery)).then((result) => {
         if (searchCourses.fulfilled.match(result)) {
-          onSearch(result.payload);
+          if (onSearch) { // Check if onSearch is defined
+            onSearch(result.payload);
+          }
           setShowMessage(true);
         }
       });
     }
-  }, [debouncedSearchQuery, dispatch]);
+  }, [debouncedSearchQuery, dispatch, onSearch]);
+  
 
   useEffect(() => {
     if (user?._id) {
       dispatch(getUnreadMessages(user._id));
-      const userMessages = filteredUnreadMessages()
-      setUserUnreadMessages(userMessages)
+      // const userMessages = filteredUnreadMessages()
+      // setUserUnreadMessages()
     }
   }, [dispatch, user?._id]);
 
@@ -113,15 +117,15 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onSearch }) => {
   };
 
 
-  const filteredUnreadMessages = () => {
+  // const filteredUnreadMessages = () => {
 
-    const usersUnreadMessages = unreadMessages.filter((item) => {
-      const [id1, id2] = item.conversationId.split("-");
-      // Check if the current user's ID is present in the conversation ID
-      return id1 === user?._id || id2 === user?._id;
-    });
-    return usersUnreadMessages;
-  };
+  //   const usersUnreadMessages = unreadMessages.filter((item) => {
+  //     const [id1, id2] = item.conversationId.split("-");
+  //     // Check if the current user's ID is present in the conversation ID
+  //     return id1 === user?._id || id2 === user?._id;
+  //   });
+  //   return usersUnreadMessages;
+  // };
 
 
   const handleLogout = async () => {

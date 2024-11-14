@@ -59,7 +59,7 @@ const kycSlice = createSlice({
         })
         builder.addCase(initiateKYC.rejected, (state, action) => {
             state.loading = false;
-            state.error = action.payload as string;
+            state.error = action.payload as any;
         });
 
         // Check KYC Status
@@ -73,7 +73,7 @@ const kycSlice = createSlice({
         });
         builder.addCase(checkKYCStatus.rejected, (state, action) => {
             state.loading = false;
-            state.error = action.payload as string;
+            state.error = action.payload as any
         });
     },
 });

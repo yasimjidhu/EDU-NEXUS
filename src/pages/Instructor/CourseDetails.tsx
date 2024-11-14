@@ -1,12 +1,10 @@
-import React, { ChangeEvent, SetStateAction, useEffect, useState } from "react";
+import React, {  useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../components/redux/store/store";
 import { useParams } from "react-router-dom";
 import {
   CourseState,
-  addReview,
   checkEnrollment,
-  enrollToCourse,
   getCourse,
   getReviews,
 } from "../../components/redux/slices/courseSlice";
@@ -19,16 +17,13 @@ import {
   Globe,
   Languages,
   DollarSign,
-  Video,
   ChevronUp,
   ChevronDown,
   ExternalLink,
   Paperclip,
-  Star,
 } from "lucide-react";
 import {  fetchVerifiedInstructors } from "../../components/redux/slices/instructorSlice";
-import { CompletionStatus } from "../../types/enrollment";
-import { toast } from "react-toastify";
+
 import { getAllUsers } from "../../components/redux/slices/studentSlice";
 import CourseDetailsSkelton from "../../components/skelton/CourseDetails";
 
@@ -46,10 +41,10 @@ const CourseDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { user } = useSelector((state: RootState) => state.user);
-  const userData = useSelector((state: RootState) => state.auth);
-  const courseStoredData = useSelector((state: RootState) => state.course);
+  // const userData = useSelector((state: RootState) => state.auth);
+  // const courseStoredData = useSelector((state: RootState) => state.course);
 
-  const toggleLesson = (index) => {
+  const toggleLesson = (index:any) => {
     setOpenLesson(openLesson === index ? null : index);
   };
 
@@ -116,26 +111,26 @@ const CourseDetails: React.FC = () => {
     dispatch(getAllUsers()).then((res)=>setAllUsers(res.payload))
   }, []);
 
-  const handleEnrollment = async (courseId: string) => {
-    const enrollmentInfo = {
-      userId: user?._id,
-      courseId: courseId,
-      enrolledAt: new Date().toISOString(),
-      completionStatus: CompletionStatus.Enrolled,
-      progress: {
-        completedLessons: [],
-        completedAssessments: [],
-        overallCompletionPercentage: 0,
-      },
-    };
-    try {
-      const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
-      setEnrolled(true);
-      toast.success(enrolledStudent.payload.message);
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
+  // const handleEnrollment = async (courseId: string) => {
+  //   const enrollmentInfo = {
+  //     userId: user?._id,
+  //     courseId: courseId,
+  //     enrolledAt: new Date().toISOString(),
+  //     completionStatus: CompletionStatus.Enrolled,
+  //     progress: {
+  //       completedLessons: [],
+  //       completedAssessments: [],
+  //       overallCompletionPercentage: 0,
+  //     },
+  //   };
+  //   try {
+  //     const enrolledStudent = await dispatch(enrollToCourse(enrollmentInfo));
+  //     setEnrolled(true);
+  //     toast.success(enrolledStudent.payload.message);
+  //   } catch (error: any) {
+  //     toast.error(error.message);
+  //   }
+  // };
 
   enum Need {
     NAME = "name",
@@ -169,6 +164,7 @@ const CourseDetails: React.FC = () => {
     return null;
   };
 
+  console.log(allUsers)
   if (!courseData) {
     return <div className="flex justify-center items-center h-screen">
       <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
@@ -190,7 +186,7 @@ const CourseDetails: React.FC = () => {
             </h1>
             <div className="flex justify-center">
               <img
-                src={courseData?.thumbnail}
+                src={courseData?.thumbnail!}
                 alt="Course Thumbnail"
                 className="w-full rounded-lg shadow-lg mb-6"
               />
@@ -240,13 +236,13 @@ const CourseDetails: React.FC = () => {
             <h2 className="text-2xl font-bold mb-4">Instructor</h2>
             <div className="flex items-center ">
               <img
-                src={getInstructorData(courseData?.instructorRef, "profile")}
+                src={getInstructorData(courseData?.instructorRef, Need.PROFILE)?.toString()}
                 alt="Instructor"
                 className="w-20 h-20 rounded-full mr-4 object-cover"
               />
               <div>
                 <h3 className="text-xl font-bold mt-4">
-                  {getInstructorData(courseData?.instructorRef, "name")}
+                  {getInstructorData(courseData?.instructorRef,Need.NAME)?.toString()}
                 </h3>
                 <p className="text-gray-600 mb-4"></p>
                 <div className="flex space-x-2">

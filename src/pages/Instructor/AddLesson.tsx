@@ -6,7 +6,6 @@ import {
   clearCourseInfo,
   getCourse,
   submitCourse,
-  updateCourse,
   updateLesson,
 } from "../../components/redux/slices/courseSlice";
 import { BeatLoader } from "react-spinners";
@@ -101,6 +100,7 @@ const AddLesson: React.FC = () => {
     }
   };
 
+  console.log(index)
   const handleInputChange = (field: keyof Lesson, value: string) => {
     setCurrentLesson((prev) => ({
       ...prev,
@@ -158,8 +158,10 @@ const AddLesson: React.FC = () => {
     }
     const updatedLessons = lessons.map((lesson, index) => ({
       ...lesson,
-      lessonNumber: (index + 1).toString()
+      lessonNumber: (index + 1).toString(),
+      duration: lesson.duration || "0", 
     }));
+    
     try {
       if (mode === "add") {
         await dispatch(submitCourse({ ...course, lessons: updatedLessons }) as any);

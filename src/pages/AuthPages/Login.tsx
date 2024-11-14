@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Formik, Form, ErrorMessage, Field } from "formik";
@@ -18,8 +18,7 @@ const LoginPage: React.FC = () => {
 
   type AppDispatch = ThunkDispatch<any, any, any>;
 
-  const { loading, error } = useSelector((state: RootState) => state.auth);
-  const {user} = useSelector((state: RootState) => state.user);
+  const { loading } = useSelector((state: RootState) => state.auth);
 
   useDocumentTitle('Login')
 
@@ -78,7 +77,7 @@ const LoginPage: React.FC = () => {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting }) => (
+                {() => (
                   <Form className="space-y-4">
                     <div>
                       <label

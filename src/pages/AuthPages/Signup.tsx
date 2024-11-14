@@ -1,10 +1,9 @@
 import Navbar from "../../components/authentication/Navbar";
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { signupUser } from "../../components/redux/slices/authSlice";
-import { RootState } from "../../components/redux/store/store";
 import { BeatLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
 import { getSignupValidationSchema } from "../../utils/Authvalidation";
@@ -19,9 +18,9 @@ const SignupPage: React.FC = () => {
 
   type AppDispatch = ThunkDispatch<any, any, any>;
 
-  const { username, email, password } = useSelector(
-    (state: RootState) => state?.auth
-  );
+  // const { username, email, password } = useSelector(
+  //   (state: RootState) => state?.auth
+  // );
 
   useDocumentTitle('Signup')
 

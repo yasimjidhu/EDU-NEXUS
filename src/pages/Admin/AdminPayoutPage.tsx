@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import dayjs from "dayjs";
 import Pagination from '../../components/common/Pagination';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { getAdminAvailablePayouts, getAdminTotalEarnings, getTodaysAdminRevenue, getTransactions, requestInstructorPayout } from '../../components/redux/slices/paymentSlice';
+import { getAdminAvailablePayouts, getAdminTotalEarnings, getTodaysAdminRevenue, getTransactions } from '../../components/redux/slices/paymentSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsers } from '../../components/redux/slices/studentSlice';
@@ -11,13 +11,13 @@ import { getAllCourses } from '../../components/redux/slices/courseSlice';
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
 const AdminPayoutPage = () => {
-  const [transactions, setTransactions] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   const [availablePayouts, setAvailablePayouts] = useState(0);
   const [todaysRevenue, setTodaysRevenue] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
-  const [courseData, setCourseData] = useState([]);
-  const [lineChartData, setLineChartData] = useState([]);
+  const [courseData, setCourseData] = useState<any[]>([]);
+  const [lineChartData, setLineChartData] = useState<any[]>([]);
   const [pieChartData, setPieChartData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,8 +32,9 @@ const AdminPayoutPage = () => {
         await Promise.all([
           dispatch(getAllUsers()).then(res => setAllUsers(res.payload)),
           dispatch(getAllCourses({ page: currentPage, limit: 10 })).then(res => {
-            setCourseData(res.payload.courses)
-            setTotalPages(res.payload.totalPages)
+            const payload = res.payload as any
+            setCourseData(payload.courses)
+            setTotalPages(payload.totalPages)
           }),
           fetchAvailablePayouts(),
           getTodaysRevenue(),
@@ -53,21 +54,23 @@ const AdminPayoutPage = () => {
       try {
         setLoading(true);
         const response = await dispatch(getTransactions({ page: currentPage, limit: 5 })).unwrap();
-        console.log('rspeonse of fetch transactions in frontend',response)
+        console.log('rspeonse of fetch transactions in frontend', response)
         setTransactions(response.transactions);
         setTotalPages(response.totalPages);
 
-        const dailyData = response.transactions.reduce((acc, curr) => {
+        const dailyData = response.transactions.reduce((acc: any, curr: any) => {
           const date = dayjs(curr.createdAt).format('YYYY-MM-DD');
           acc[date] = acc[date] || { date, revenue: 0 };
           acc[date].revenue += curr.adminAmount;
           return acc;
         }, {});
 
-        const transformedData = Object.values(dailyData).map(entry => ({
-          ...entry,
-          revenue: (entry.revenue / 100).toFixed(2)
-        })).sort((a, b) => new Date(a.date) - new Date(b.date));
+        const transformedData = Object.values(dailyData)
+          .map((entry: any) => ({
+            ...entry,
+            revenue: (entry.revenue / 100).toFixed(2),
+          }))
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
         setLineChartData(transformedData);
 
@@ -76,7 +79,7 @@ const AdminPayoutPage = () => {
           return acc;
         }, {});
 
-        const revenueData = response.transactions.reduce((acc, payment) => {
+        const revenueData = response.transactions.reduce((acc: any, payment: any) => {
           if (payment.status === "completed") {
             const courseTitle = courseMap[payment.courseId];
             if (courseTitle) {
@@ -104,7 +107,7 @@ const AdminPayoutPage = () => {
 
   const fetchAvailablePayouts = async () => {
     try {
-      const adminStripeAccountId  = import.meta.env.VITE_STRIPE_ADMIN_ACCOUNT_ID || ''
+      const adminStripeAccountId = import.meta.env.VITE_STRIPE_ADMIN_ACCOUNT_ID || ''
       const response = await dispatch(getAdminAvailablePayouts(adminStripeAccountId)).unwrap();
       setAvailablePayouts(response.availablePayouts);
     } catch (error) {
@@ -141,6 +144,9 @@ const AdminPayoutPage = () => {
   }
 
   console.log('piechartdata', pieChartData)
+  if(loading){
+    return <h1>loading</h1>
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen p-8">
@@ -148,7 +154,7 @@ const AdminPayoutPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[
-          { title: 'Total Paid Out', amount: `$ ${availablePayouts }`, color: 'bg-blue-600' },
+          { title: 'Total Paid Out', amount: `$ ${availablePayouts}`, color: 'bg-blue-600' },
           { title: 'Today\'s revenue', amount: `$ ${(todaysRevenue / 100).toFixed(2)}`, color: 'bg-green-500' },
           { title: 'Total earnings', amount: `$ ${(totalEarnings / 100).toFixed(2)}`, color: 'bg-yellow-500' },
           { title: 'Total Students', amount: ` ${transactions.length}`, color: 'bg-red-500' },
@@ -188,7 +194,7 @@ const AdminPayoutPage = () => {
                 fill="#8884d8"
                 label
               >
-                {pieChartData?.map((entry, index) => (
+                {pieChartData?.map(( index:any) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

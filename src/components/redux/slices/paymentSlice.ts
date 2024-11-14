@@ -192,7 +192,7 @@ export const getInstructorAvailablePayouts = createAsyncThunk(
   async (connectedAccountId: string, { rejectWithValue }) => {
     try {
       console.log('get insturctoravailable payuts called',connectedAccountId)
-      const response = await axiosInstance.get(`/payment/payouts/available-payouts/${connectedAccountId}`);
+      const response = await axiosInstance.get(`/payment/payouts/available-payout/${connectedAccountId}`);
       console.log('available payoures response', response.data)
       return response.data;
     } catch (error: any) {

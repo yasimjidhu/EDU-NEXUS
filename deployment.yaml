@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edu-nexus-frontend
+  labels:
+    app: edu-nexus-frontend
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: edu-nexus-frontend
+  template:
+    metadata:
+      labels:
+        app: edu-nexus-frontend
+    spec:
+      containers:
+        - name: edu-nexus-frontend
+          image: edunexus.azurecr.io/edu-nexus-frontend:v12
+          ports:
+            - containerPort: 5173
+          env:
+            - name: VITE_CLOUDINARY_API_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_API_KEY
+            - name: VITE_CLOUDINARY_API_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_API_SECRET
+            - name: VITE_CLOUDINARY_CLOUD_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_CLOUD_NAME
+            - name: VITE_CLOUDINARY_UPLOAD_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_UPLOAD_URL
+            - name: VITE_CLOUDINARY_UPLOAD_PRESET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_UPLOAD_PRESET
+            - name: VITE_CLOUDINARY_CV_PRESET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_CV_PRESET
+            - name: VITE_CLOUDINARY_CATEGORY_PRESET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_CATEGORY_PRESET
+            - name: VITE_CLOUDINARY_THUMBNAILS_PRESET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_THUMBNAILS_PRESET
+            - name: VITE_CLOUDINARY_VIDEO_PRESET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_VIDEO_PRESET
+            - name: VITE_CLOUDINARY_ATTACHMENTS_PRESET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_ATTACHMENTS_PRESET
+            - name: VITE_CLOUDINARY_COURSE_FILES_PRESET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_COURSE_FILES_PRESET
+            - name: VITE_CLOUDINARY_CHAT_FILES_PRESET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_CLOUDINARY_CHAT_FILES_PRESET
+            - name: VITE_COURSE_STREAM_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_COURSE_STREAM_URL
+            - name: VITE_STRIPE_PUBLISHABLE_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_STRIPE_PUBLISHABLE_KEY
+            - name: VITE_STRIPE_ADMIN_ACCOUNT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: VITE_STRIPE_ADMIN_ACCOUNT_ID
+
+      imagePullSecrets:
+        - name: acr-auth
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: edu-nexus-frontend
+  labels:
+    app: edu-nexus-frontend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 5173
+  selector:
+    app: edu-nexus-frontend

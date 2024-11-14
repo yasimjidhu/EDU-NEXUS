@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUnreadMessages, getUserJoinedGroups } from '../redux/slices/chatSlice';
 import { User } from '../redux/slices/studentSlice';
-import { Group, Message } from '../../types/chat';
+import { Group } from '../../types/chat';
 import { AppDispatch, RootState } from '../redux/store/store';
 
 interface ChatSidebarProps {
@@ -61,8 +61,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     (conversationId: string) => {
       const latestMessage = messages
         .filter((msg) => msg.conversationId === conversationId)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-      return latestMessage ? new Date(latestMessage.createdAt).getTime() : 0;
+        .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())[0];
+      return latestMessage ? new Date(latestMessage.createdAt!).getTime() : 0;
     },
     [messages]
   );

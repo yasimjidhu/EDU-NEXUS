@@ -16,12 +16,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     const token = sessionStorage.getItem('access_token');
 
-    const newSocket = io('http://localhost:3006', {
+    const newSocket = io('https://mcartecommerce.online', {
+      path:'/chat/socket.io',
       auth: { token },
-      transports: ['websocket'],
+      transports: ['websocket','polling'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      timeout: 10000  
     });
 
     newSocket.on('connect', () => {

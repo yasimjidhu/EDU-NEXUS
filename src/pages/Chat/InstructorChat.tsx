@@ -23,7 +23,7 @@ interface ChatUIProps {
   onStartCall?: (studentId: string, type: 'audio' | 'video') => void;
 }
 
-const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
+const InstructorChat: React.FC<ChatUIProps> = () => {
   const [messagedStudents, setMessagedStudents] = useState<User[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -47,7 +47,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
 
 
   const { user } = useSelector((state: RootState) => state.user);
-  const { messages, loading, error, groups } = useSelector((state: RootState) => state.chat);
+  const { messages } = useSelector((state: RootState) => state.chat);
 
   useDocumentTitle('Messages')
 
@@ -139,6 +139,10 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
     };
   }, []);
 
+console.log(uploadProgress)
+console.log(audioProgress)
+console.log(audioDuration)
+console.log(joinedGroups)
 
   useEffect(() => {
     if (showMessages.trim() !== '' && selectedConversationId.trim() !== '') {
@@ -327,7 +331,7 @@ const InstructorChat: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => 
           selectedGroup={selectedGroup}
           onClickEntity={handleClickEntity}
           user={'instructor'}
-          className="flex-1 overflow-y-auto" // Ensure this fills the remaining space
+          // className="flex-1 overflow-y-auto" // Ensure this fills the remaining space
         />
       </div>
   

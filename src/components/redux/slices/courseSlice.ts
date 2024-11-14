@@ -67,7 +67,7 @@ export interface CourseState {
   allCourses?: CourseState[]
   reviews?: Review[];
   _id?: string;
-  reviewCounts?: number;
+  reviewCounts?: any;
   reports?: ReportEntity[];
 }
 
@@ -116,7 +116,7 @@ interface UpdateData {
   pricing: Pricing
   level: 'beginner' | 'intermediate' | 'expert';
   courseAmount: number | null;
-  lessons: Lesson[];
+  lessons?: Lesson[];
 }
 
 
@@ -736,7 +736,7 @@ const courseSlice = createSlice({
         state.loading = false;
         // Reset course state after successful submission
         Object.assign(state, action.payload.course)
-        state = courseSlice.caseReducers.clearCourseInfo(state);
+        state = courseSlice.caseReducers.clearCourseInfo();
       })
       .addCase(submitCourse.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;

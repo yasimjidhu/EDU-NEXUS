@@ -1,6 +1,6 @@
 // MessageInput.tsx
 import React, { useState } from 'react';
-import { Send, Paperclip, Mic, Smile } from 'lucide-react';
+import {  Smile } from 'lucide-react';
 import Picker from 'emoji-picker-react';
 import { AudioRecord } from './AudioRecorder';
 
@@ -18,7 +18,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
+  // const [isRecording, setIsRecording] = useState(false);
 
   const handleSubmit = () => {
     if (message.trim() || selectedFile || audioBlob) {
@@ -26,7 +26,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => {
       setMessage('');
       setSelectedFile(null);
       setAudioBlob(null);
-      setIsRecording(false);
+      // setIsRecording(false);
     }
   };
 

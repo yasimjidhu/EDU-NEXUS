@@ -8,7 +8,6 @@ import { resendOtp, verifyOTP } from "../../components/redux/slices/authSlice";
 import {
   startCountdown,
   decrementTimer,
-  resetTimer,
 } from "../../components/redux/slices/otpSlice";
 import { toast } from "react-toastify";
 import { BeatLoader } from "react-spinners";

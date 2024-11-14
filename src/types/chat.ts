@@ -7,7 +7,7 @@ export interface Message {
     senderProfile?: string;
     text?: string;
     fileUrl?: string;
-    fileType?: 'audio' | 'image' | 'video';
+    fileType?: 'audio' | 'image' | 'video' | string;
     status: string;
     createdAt?: Date;
     updatedAt?: Date;

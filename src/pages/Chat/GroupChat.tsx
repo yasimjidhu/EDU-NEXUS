@@ -25,17 +25,16 @@ interface GroupChatProps {
 }
 
 const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  // const [messages, setMessages] = useState<Message[]>([]);
   const [groupData, setGroupData] = useState<Group | null>(null);
-  const [alertMessage, setAlertMessage] = useState('');
   const [inputMessage, setInputMessage] = useState('');
   const [groupMessages, setGroupMessages] = useState<Message[]>([])
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // contexts
-  const { socket, onlineUsers } = useSocket();
-  const { messagedStudents, loading } = useMessagedStudents()
+  const { socket } = useSocket();
+  const { messagedStudents } = useMessagedStudents()
 
   // store
   const { user } = useSelector((state: RootState) => state.user);
@@ -46,9 +45,9 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
   const groupId = location.state ? location.state : id;
 
   // custom hooks
-  const { isTyping, handleTyping } = useTypingStatus(socket, groupId, user?._id || '');
+  const {  handleTyping } = useTypingStatus(socket, groupId, user?._id || '');
   const { selectedFile, setSelectedFile, uploadProgress, setUploadProgress, handleFileSelect, uploadFile } = useFileUpload();
-  const { audioBlob, setAudioBlob, audioProgress, audioDuration, handleRecordedAudio, uploadAudio, setAudioProgress, setAudioDuration } = useAudioRecording();
+  const { audioBlob, setAudioBlob, audioProgress,  handleRecordedAudio, uploadAudio, setAudioProgress, setAudioDuration } = useAudioRecording();
 
   const userName = `${user?.firstName} ${user?.lastName}`
 
@@ -86,7 +85,7 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, []);
 
   const fetchGroupData = async (groupId: string) => {
     try {
@@ -106,10 +105,6 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
     }
   };
 
-  const showAlertMessage = (message: string) => {
-    setAlertMessage(message);
-    setTimeout(() => setAlertMessage(''), 3000);
-  };
 
   const handleSendMessage = async () => {
     if ((inputMessage.trim() || audioBlob || selectedFile) && socket) {
@@ -160,10 +155,10 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputMessage(e.target.value);
-    handleTyping();
-  };
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setInputMessage(e.target.value);
+  //   handleTyping();
+  // };
 
   const handleOnSendMessage = (message: message) => {
     if (message.audioBlob) {
@@ -274,13 +269,6 @@ const GroupChat: React.FC<GroupChatProps> = ({ id, userId }) => {
         <MessageInput
           onSendMessage={handleOnSendMessage}
         />
-
-        {/* Alert message */}
-        {alertMessage && (
-          <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white py-2 px-4 rounded-full shadow-lg">
-            {alertMessage}
-          </div>
-        )}
       </div>
     </div>
   );

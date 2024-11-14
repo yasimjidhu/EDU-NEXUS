@@ -17,13 +17,13 @@ const MyCourse: React.FC = () => {
   useDocumentTitle('My Courses')
 
   useEffect(() => {
-    if (user._id) {
+    if (user?._id) {
       dispatch(getUserEnrolledCourses(user._id)).then((res: any) => {
         console.log('result of enrolled courses of student', res);
         setMyCourses(res.payload.courses || []);
       });
     }
-  }, [user._id, dispatch]);
+  }, [user?._id, dispatch]);
 
   const handleCardClick = (courseId: string) => {
     navigate(`/view-course/${courseId}`);
@@ -42,7 +42,7 @@ const MyCourse: React.FC = () => {
             >
               <div className="relative h-48 overflow-hidden">
                 <img
-                  src={course.thumbnail}
+                  src={course.thumbnail!}
                   alt={course.title}
                   className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-300"
                 />
@@ -60,7 +60,7 @@ const MyCourse: React.FC = () => {
                     className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-full text-sm transition-colors duration-300"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleCardClick(course._id);
+                      handleCardClick(course._id!);
                     }}
                   >
                     View Course

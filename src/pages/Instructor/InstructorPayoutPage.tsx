@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import dayjs from "dayjs";
 import Pagination from '../../components/common/Pagination';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from 'recharts';
-import { getInstructorAvailablePayouts, getInstructorCoursesTransaction, getInstructorsTodaysRevenue, getInstructorsTotalEarnings, getRecentPayouts, requestInstructorPayout } from '../../components/redux/slices/paymentSlice';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, CartesianGrid } from 'recharts';
+import { getInstructorAvailablePayouts, getInstructorCoursesTransaction, getInstructorsTodaysRevenue, getInstructorsTotalEarnings } from '../../components/redux/slices/paymentSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsers } from '../../components/redux/slices/studentSlice';
@@ -12,15 +12,14 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
 const InstructorPayoutPage = () => {
-  const [transactions, setTransactions] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   const [availablePayouts, setAvailablePayouts] = useState(0);
   const [todaysRevenue, setTodaysRevenue] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
-  const [courseData, setCourseData] = useState([]);
-  const [lineChartData, setLineChartData] = useState([]);
+  const [courseData, setCourseData] = useState<any[]>([]);
+  const [lineChartData, setLineChartData] = useState<any>([]);
   const [pieChartData, setPieChartData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -30,10 +29,13 @@ const InstructorPayoutPage = () => {
   useDocumentTitle('Payments')
   useEffect(() => {
     const fetchInitialData = async () => {
+      if(!user){
+        return
+      }
       try {
         const [users, courses] = await Promise.all([
           dispatch(getAllUsers()).unwrap(),
-          dispatch(getInstructorCourseDetailed(user?._id)).unwrap()
+          dispatch(getInstructorCourseDetailed(user._id)).unwrap()
         ]);
         setAllUsers(users);
         setCourseData(courses);
@@ -57,7 +59,6 @@ const InstructorPayoutPage = () => {
       if (!user?._id) return;
 
       try {
-        setLoading(true);
         const response = await dispatch(getInstructorCoursesTransaction({ instructorId: user._id, page: currentPage, limit: 5 })).unwrap();
         setTransactions(response.transactions);
         setTotalPages(response.totalPages);
@@ -100,7 +101,6 @@ const InstructorPayoutPage = () => {
       } catch (error) {
         console.error('Error fetching transactions:', error);
       } finally {
-        setLoading(false);
       }
     };
 
@@ -196,7 +196,7 @@ const InstructorPayoutPage = () => {
                 fill="#8884d8"
                 label
               >
-                {pieChartData?.map((entry, index) => (
+                {pieChartData?.map(( index:any) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

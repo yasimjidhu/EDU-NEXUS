@@ -57,7 +57,6 @@ import ContactUs from "./pages/UserPages/ContactUs";
 import FeedbackPage from "./pages/Admin/Feedbacks";
 import AdminReportsPage from "./pages/Admin/Reports";
 import Reauthenticate from "./pages/Payment/Reauthenticate";
-import InstructorPaymentDashboard from "./pages/Instructor/InstructorPaymentDashboard";
 import { InstructorPayoutPage } from "./pages/Instructor/InstructorPayoutPage";
 import { AdminPayoutPage } from "./pages/Admin/AdminPayoutPage";
 import KYCPage from "./pages/UserPages/KycPage";
@@ -119,8 +118,7 @@ function App() {
                   <Route path={routes.INSTRUCTOR.COURSE_DETAIL} element={<CourseDetails />} />
                   <Route path={routes.INSTRUCTOR.PAYMENTS} element={<InstructorPayoutPage />} />
                   <Route path={routes.INSTRUCTOR.CHAT} element={<InstructorChat />} />
-                  <Route path={routes.INSTRUCTOR.CHATGROUP} element={<GroupChat />} />
-                  <Route path={routes.INSTRUCTOR.SETTINGS} element={<Users />} />
+                  <Route path={routes.INSTRUCTOR.CHATGROUP} element={<GroupChat id="" userId=""/>} />
                 </Route>
               </Route>
 

@@ -19,20 +19,13 @@ interface Instructor {
   lastName: string;
 }
 
-interface FilterState {
-  instructors: string[];
-  price: string[];
-  review: number[];
-  level: string[];
-  category: string[];
-}
-
-interface Category {
-  _id: string;
-  name: string;
-  description: string;
-  image: string;
-}
+type FilterState = {
+  instructors: (string | number)[];
+  price: (string | number)[];
+  review: (string | number)[];
+  level: (string | number)[];
+  category: (string | number)[];
+};
 
 const Courses: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -90,9 +83,12 @@ const Courses: React.FC = () => {
 
     if (filters.review.length > 0) {
       result = result.filter((course) => {
-        return course.rating !== undefined && filters.review.some((rating) => course.rating! >= rating);
+        const courseRating = course.rating ?? 0; // Default to 0 if undefined
+        return filters.review.some((rating) => Number(courseRating) >= Number(rating));
       });
     }
+    
+    
 
     if (filters.level.length > 0) {
       result = result.filter((course) => filters.level.includes(course.level));
@@ -219,7 +215,7 @@ const Courses: React.FC = () => {
                       <h6 className="text-2xl font-bold text-green-600">
                         ${course.pricing.amount}
                       </h6>
-                      <button className="bg-medium-rose text-white px-4 py-2 rounded-full hover:bg-strong-rose transition duration-300" onClick={() => handleViewCourse(course._id)}>
+                      <button className="bg-medium-rose text-white px-4 py-2 rounded-full hover:bg-strong-rose transition duration-300" onClick={() => handleViewCourse(course._id!)}>
                         View Course
                       </button>
                     </div>
@@ -266,7 +262,9 @@ const Courses: React.FC = () => {
                   />
                   <label htmlFor={`price-${priceOption}`} className="ml-2 text-gray-700">{priceOption}</label>
                 </div>
-                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{budgetWiseCount[priceOption]}</span>
+                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  {budgetWiseCount[priceOption as keyof typeof budgetWiseCount]}
+                </span>
               </div>
             ))}
           </div>
@@ -318,7 +316,7 @@ const Courses: React.FC = () => {
         </div>
       </div>
       {
-        totalPages >  1 && (
+        totalPages > 1 && (
           <div className=' mt-8'>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
           </div>

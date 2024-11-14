@@ -5,8 +5,8 @@ export enum CompletionStatus {
 }   
 
 export interface CheckEnrollment{
-    userId:string;
-    courseId:string
+    userId:string|undefined;
+    courseId:string|undefined;
 }
 export interface UpdateAssessmentPayload {
     userId: string;

@@ -1,13 +1,11 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { createAccountLink } from '../../components/redux/slices/paymentSlice';
-import { RootState } from '../../components/redux/store/store';
+import { AppDispatch, RootState } from '../../components/redux/store/store';
 
 const Reauthenticate: React.FC = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
 
   const {user} = useSelector((state:RootState)=>state.user)
 

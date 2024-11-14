@@ -107,7 +107,7 @@ const ViewCourse: React.FC = () => {
         }
 
         const initialProgress = response.payload.course.lessons.reduce(
-          (acc, lesson) => {
+          (acc:any, lesson:any) => {
             acc[lesson.lessonNumber] = 0;
             return acc;
           },
@@ -117,7 +117,7 @@ const ViewCourse: React.FC = () => {
         setLessonProgress(initialProgress);
 
         const savedCompletedLessons = localStorage.getItem(
-          `completedLessons-${courseId}-${user._id}`
+          `completedLessons-${courseId}-${user?._id}`
         );
         if (savedCompletedLessons) {
           setCompletedLessons(new Set(JSON.parse(savedCompletedLessons)));
@@ -158,18 +158,18 @@ const ViewCourse: React.FC = () => {
 
     const unansweredQuestions = currentAssessment.questions.filter(
       (question) => !userAnswers[question._id]
-    );
+    ) as any
 
     if (unansweredQuestions.length > 0) {
       setFormErrors(
-        unansweredQuestions.map((q) => `Please answer question: ${q.question}`)
+        unansweredQuestions.map((q:any) => `Please answer question: ${q.question}`)
       );
       return;
     }
 
     setFormErrors([]);
     const correctAnswers = currentAssessment.questions.reduce(
-      (count, question) => {
+      (count, question:any) => {
         const userAnswer = userAnswers[question._id]?.trim().toLowerCase();
         const correctAnswer = question.answer.trim().toLowerCase();
         return count + (userAnswer === correctAnswer ? 1 : 0);
@@ -205,7 +205,7 @@ const ViewCourse: React.FC = () => {
     const { assessments, enrollments } = course;
     const passMark = assessments[0]?.passing_score;
 
-    const userEnrollment = enrollments.find(({ userId }) => userId === user?._id);
+    const userEnrollment = enrollments.find(({ userId }:{userId:string}) => userId === user?._id);
 
     if (!userEnrollment) return;
 
@@ -461,7 +461,7 @@ const ViewCourse: React.FC = () => {
                           <p className="font-semibold mb-2">
                             {
                               currentAssessment.questions[currentQuestionIndex]
-                                .question
+                                .text
                             }
                           </p>
                           <div className="space-y-2">
@@ -557,7 +557,7 @@ const ViewCourse: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
               <h2 className="text-xl font-bold mb-4">Course Content</h2>
               <ul className="space-y-2">
-                {course.lessons.map((lesson, index) => (
+                {course.lessons.map((lesson:any, index:any) => (
                   <li
                     key={lesson.lessonNumber}
                     className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${currentLesson?._id === lesson._id

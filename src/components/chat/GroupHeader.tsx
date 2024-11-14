@@ -9,7 +9,7 @@ interface GroupHeaderProps {
   onLeaveGroup: () => void;
 }
 
-const GroupHeader: React.FC<GroupHeaderProps> = ({ groupName, participantsCount, onJoinGroup, onLeaveGroup }) => (
+export const GroupHeader: React.FC<GroupHeaderProps> = ({ groupName, participantsCount, onJoinGroup, onLeaveGroup }) => (
   <div className="bg-[#075e54] p-3 text-white flex items-center justify-between">
     <div className="flex items-center">
       <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>

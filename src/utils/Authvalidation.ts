@@ -1,11 +1,5 @@
-import React from 'react'
 import * as Yup from 'yup'
 
-interface FormValues {
-    username?: string
-    email: string
-    password: string
-}
 
 // Validation schema function for signup
 const getSignupValidationSchema = () => {
@@ -22,7 +16,7 @@ const getSignupValidationSchema = () => {
             .matches(/[0-9]/, 'Password must contain at least one number')
             .matches(/[@$!%*?&#]/, 'Password must contain at least one special character'),
         confirmPassword: Yup.string()
-            .oneOf([Yup.ref('password'), null], 'Passwords must match')
+            .oneOf([Yup.ref('password')], 'Passwords must match')
             .required('Confirm Password is required'),
     })
 }
@@ -61,7 +55,7 @@ const getResetPasswordSchema = () => {
             .matches(/[0-9]/, 'Password must contain at least one number')
             .matches(/[@$!%*?&#]/, 'Password must contain at least one special character'),
         confirmNewPassword: Yup.string()
-            .oneOf([Yup.ref('newPassword'), null], 'Passwords must match')
+            .oneOf([Yup.ref('newPassword')], 'Passwords must match')
             .required('Confirm Password is required'),
     });
 };

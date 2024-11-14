@@ -1,4 +1,3 @@
-import React from 'react';
 import { X } from 'lucide-react';
 
 const Lightbox = ({ imageUrl, onClose }: { imageUrl: string; onClose: () => void }) => {

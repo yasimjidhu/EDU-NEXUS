@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../components/redux/store/store';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../components/redux/store/store';
 import { useNavigate } from 'react-router-dom';
 import { fetchUnVerifiedInstructors, fetchVerifiedInstructors } from '../../components/redux/slices/instructorSlice';
 import { toast } from 'react-toastify';
@@ -15,27 +15,27 @@ const Requests: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [instructorEmail, setInstructorEmail] = useState<string>('');
+  // const [instructorEmail, setInstructorEmail] = useState<string>('');
   const [show, setShow] = useState<"users" | "courses">("users");
-  const [unpublishedCourses, setUnpublishedCourses] = useState([])
-  const [allCategories, setAllCategories] = useState([])
-  const [verifiedInstructors, setVerifiedInstructors] = useState([])
+  const [unpublishedCourses, setUnpublishedCourses] = useState<any[]>([])
+  const [allCategories, setAllCategories] = useState<any[]>([])
+  const [verifiedInstructors, setVerifiedInstructors] = useState<any[]>([])
   const [unVerifiedInstructors, setUnVerifiedInstructors] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
-  const [approvedInstructors, setApprovedInstructors] = useState([]);
-  const [rejectedInstructors, setRejectedInstructors] = useState([]);
-  const [approvedCourses, setApprovedCourses] = useState([]);
-  const [rejectedCourses, setRejectedCourses] = useState([]);
+  const [approvedInstructors, setApprovedInstructors] = useState<any[]>([]);
+  const [rejectedInstructors, setRejectedInstructors] = useState<any[]>([]);
+  const [approvedCourses, setApprovedCourses] = useState<any[]>([]);
+  const [rejectedCourses, setRejectedCourses] = useState<any[]>([]);
 
 
-  const { user } = useSelector((state: RootState) => state.user);
-  const { courseRequests } = useSelector((state: RootState) => state.course);
+  // const { user } = useSelector((state: RootState) => state.user);
+  // const { courseRequests } = useSelector((state: RootState) => state.course);
 
   useEffect(() => {
-    dispatch(fetchCourseRequests(currentPage)).then((res) => {
+    dispatch(fetchCourseRequests(currentPage)).then((res:any) => {
       setUnpublishedCourses(res.payload.courses);
     });
-    dispatch(getAllCategories(currentPage)).then((res) => setAllCategories(res.payload.categories));
+    dispatch(getAllCategories(currentPage)).then((res:any) => setAllCategories(res.payload.categories));
     dispatch(fetchVerifiedInstructors()).then((res) => setVerifiedInstructors(res.payload.instructors));
     dispatch(fetchUnVerifiedInstructors()).then((res) => setUnVerifiedInstructors(res.payload.instructors));
   }, [dispatch, currentPage, approvedInstructors, rejectedInstructors, approvedCourses, rejectedCourses]);
@@ -51,9 +51,9 @@ const Requests: React.FC = () => {
     }
   };
 
-  const handleRejection = async (email) => {
+  const handleRejection = async (email:string) => {
     try {
-      await dispatch(RejectInstructor({ email }));
+      await dispatch(RejectInstructor(email));
       toast.success('Instructor rejected successfully');
       setRejectedInstructors((prev) => [...prev, email]);
     } catch (error) {
@@ -62,7 +62,7 @@ const Requests: React.FC = () => {
     }
   };
 
-  const handleCourseApproval = async (courseId, email) => {
+  const handleCourseApproval = async (courseId:string, email:string) => {
     try {
       await dispatch(approveCourse({ courseId, email }));
       toast.success('Course approved successfully');
@@ -73,7 +73,7 @@ const Requests: React.FC = () => {
     }
   };
 
-  const handleCourseRejection = async (courseId, email) => {
+  const handleCourseRejection = async (courseId:string, email:string) => {
     try {
       await dispatch(rejectCourse({ courseId, email }));
       toast.success('Course rejected successfully');
@@ -131,7 +131,7 @@ const Requests: React.FC = () => {
     }
 
     if (need === Need.NAME) {
-      return `${instructor.firstName} ${instructor.lastName}`;
+      return `${instructor.firstName} ${instructor.lastName}` ;
     } else if (need === Need.PROFILE) {
       return instructor.profile.avatar;
     } else if (need == Need.EMAIL) {
@@ -214,7 +214,6 @@ const Requests: React.FC = () => {
                         <button
                           className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
                           onClick={() => {
-                            setInstructorEmail(item.email);
                             handleApproval(item.email);
                           }}
                         >
@@ -261,12 +260,12 @@ const Requests: React.FC = () => {
                   <div className="flex space-x-3 col-span-3 text-justify">
                     <div className="  rounded-full w-10 h-10 shadow-sm border-2 border-gray-600 overflow-hidden">
                       <img
-                        src={`${getInstructorData(course.instructorRef, "profile")}`}
+                        src={`${getInstructorData(course.instructorRef, Need.PROFILE)}`}
                         alt="avatar"
                         className="w-full h-full object-cover rounded-full"
                       />
                     </div>
-                    <h4 className="inter mt-2">{getInstructorData(course.instructorRef, "name")}</h4>
+                    <h4 className="inter mt-2">{getInstructorData(course.instructorRef, Need.NAME)?.toString()}</h4>
                   </div>
                   <div className="flex col-span-3 justify-start items-center space-x-2">
                     <h4 className="inter">{course.title}</h4>
@@ -286,14 +285,30 @@ const Requests: React.FC = () => {
                     </button>
                     <button
                       className="text-center bg-medium-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-                      onClick={() => handleCourseApproval(course._id, getInstructorData(course.instructorRef, "email"))}
+                      onClick={() => {
+                        const instructorEmail = getInstructorData(course?.instructorRef!, Need.EMAIL);
+                        
+                        // Ensure instructorEmail is not null before passing it to the handler
+                        if (instructorEmail) {
+                          handleCourseApproval(course._id, instructorEmail.toString());
+                        } else {
+                          console.error("Instructor not found or invalid email.");
+                        }
+                      }}
                     >
                       Approve
                     </button>
                     <button
                       className="text-center bg-strong-rose text-white inter py-1 px-3 rounded-lg cursor-pointer"
-                      onClick={() => handleCourseRejection(course._id, getInstructorData(course.instructorRef, "email"))}
-                    >
+                      onClick={() => {
+                        const instructorEmail = getInstructorData(course.instructorRef, Need.EMAIL);
+                      
+                        if (instructorEmail && typeof instructorEmail === 'string') {
+                          handleCourseRejection(course._id, instructorEmail);
+                        } else {
+                          console.error("Instructor email is invalid or not found.");
+                        }
+                      }}>
                       Reject
                     </button>
                   </div>

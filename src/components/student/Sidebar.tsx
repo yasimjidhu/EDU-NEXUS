@@ -1,5 +1,5 @@
 
-import { BarChart2, Currency, IndianRupee, Pocket, Settings, ShoppingBagIcon, User, Wallet } from "lucide-react";
+import { BarChart2, Settings, ShoppingBagIcon, User, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 
 

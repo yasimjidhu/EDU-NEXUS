@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Table } from '../../components/common/Table'
 import { AppDispatch, RootState } from '../../components/redux/store/store'
 import { useDispatch, useSelector } from 'react-redux'
@@ -6,12 +6,12 @@ import { getStudentEnrollmentOverview } from '../../components/redux/slices/cour
 
 export const Analytics = () => {
     const { user } = useSelector((state: RootState) => state.user)
-    const [data,setData] = useState([])
+    const [data] = useState([])
 
     const dispatch:AppDispatch = useDispatch();
 
     useEffect(()=>{
-        dispatch(getStudentEnrollmentOverview(user?._id))
+        dispatch(getStudentEnrollmentOverview(user?._id!))
     },[dispatch])
 
     const Headings = [

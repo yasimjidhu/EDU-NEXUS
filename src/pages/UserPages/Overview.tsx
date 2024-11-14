@@ -1,7 +1,6 @@
-import IAssessment from '../../types/assessments';
 import { getStudentAssessments, getStudentCourseOverview } from '../../components/redux/slices/courseSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -30,7 +29,7 @@ const StudentOverview = () => {
   };
 
   const transformStudentOverviewData = (data: any) => {
-    const courses = data.courses || [];
+    const courses = data.courses as any[]|| [];
     const totalCourses = courses.length;
     const completedCourses = courses.filter((course) => course.progress === 100).length;
     const averageGrade = courses.reduce((sum, course) => sum + (course.averageGrade || 0), 0) / totalCourses;
@@ -68,7 +67,7 @@ const StudentOverview = () => {
               <p className="text-gray-600">{user?.email}</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-600">Joined: {new Date(user?.createdAt).toDateString()}</p>
+              <p className="text-sm text-gray-600">Joined: {new Date(user?.createdAt!).toDateString()}</p>
               <p className="text-sm text-gray-600">Total Courses: {studentInfo.totalCourses}</p>
             </div>
           </div>

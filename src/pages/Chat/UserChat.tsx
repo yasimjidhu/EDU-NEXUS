@@ -1,10 +1,10 @@
 import React, { lazy, Suspense, useState, useEffect, useRef } from 'react';
-import { Smile, Plus } from 'lucide-react';
+import { Smile } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { getEnrolledStudentInstructors } from '../../components/redux/slices/courseSlice';
 import { User } from '../../components/redux/slices/studentSlice';
-import { addMessage, createGroup, getMessages, getUserJoinedGroups, incrementUnreadCount, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
+import {  createGroup, getMessages, getUserJoinedGroups, incrementUnreadCount, markConversationAsRead, sendMessage, updateMessageStatus } from '../../components/redux/slices/chatSlice';
 import { useSocket } from '../../contexts/SocketContext';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { Group, Message } from '../../types/chat';
@@ -25,7 +25,7 @@ interface ChatUIProps {
   onStartCall?: (instructorId: string, type: 'audio' | 'video') => void;
 }
 
-const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
+const ChatUI: React.FC<ChatUIProps> = () => {
   const [enrolledInstructors, setEnrolledInstructors] = useState<User[]>([]);
   const [selectedInstructor, setSelectedInstructor] = useState<User | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -45,10 +45,15 @@ const ChatUI: React.FC<ChatUIProps> = ({ currentUser, onStartCall }) => {
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const audioRef = useRef(new Audio());
+  // const audioRef = useRef(new Audio());
   const [replay,setReplay] = useState<Message | null>(null)
   const { user } = useSelector((state: RootState) => state.user);
-  const { messages, groups } = useSelector((state: RootState) => state.chat);
+  const { messages} = useSelector((state: RootState) => state.chat);
+
+  console.log(joinedGroups)
+  console.log(audioProgress)
+  console.log(audioDuration)
+  console.log(uploadProgress)
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate()

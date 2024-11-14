@@ -6,7 +6,7 @@ interface StudentsListProps {
   students: User[];
 }
 
-const StudentsList: React.FC<StudentsListProps> = ({ students }) => (
+export const StudentsList: React.FC<StudentsListProps> = ({ students }) => (
   <div className="w-1/4 bg-white p-4 overflow-y-auto">
     <h3 className="text-lg font-semibold mb-4">Students</h3>
     <ul>

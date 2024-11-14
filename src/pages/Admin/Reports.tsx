@@ -1,8 +1,7 @@
 import { ShieldX } from 'lucide-react';
 import { disableCourse, getAllReports, updateReportStatus } from '../../components/redux/slices/courseSlice';
 import { AppDispatch } from '../../components/redux/store/store';
-import { ReportEntity } from '../../types/reports';
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
@@ -29,15 +28,6 @@ const AdminReportsPage = () => {
             .catch((error) => console.error('Error updating report status:', error));
     };
 
-    const handleExportReports = async () => {
-        try {
-            const csvData = convertToCSV(reports);
-            downloadCSV(csvData);
-        } catch (error) {
-            console.error('Error exporting reports:', error);
-        }
-    };
-
     const handleDisableCourseClick = async (courseId: string) => {
     
         try {
@@ -55,27 +45,6 @@ const AdminReportsPage = () => {
         }
     };
 
-    const convertToCSV = (data: any[]): string => {
-        const header = 'Course,Reported By,Reason,Status,Date\n';
-        const rows = data.map(report => {
-            const date = new Date(report.createdAt).toLocaleDateString();
-            return `${report.courseName},${report.userName},${report.reason},${report.status},${date}`;
-        });
-        return header + rows.join('\n');
-    };
-
-    const downloadCSV = (csvData: string) => {
-        const blob = new Blob([csvData], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'reports.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-
     return (
         <div className="min-h-screen bg-gray-100 p-6">
             <header className="mb-6">
@@ -92,12 +61,6 @@ const AdminReportsPage = () => {
                         <option value="resolved">Resolved</option>
                     </select>
                 </div>
-                <button
-                    onClick={handleExportReports}
-                    className="bg-black text-white px-4 py-2 rounded"
-                >
-                    Export Reports
-                </button>
             </div>
         
             {reports && reports.length > 0 ? (
@@ -129,7 +92,7 @@ const AdminReportsPage = () => {
                                 </tr>
                             </thead>
                             <tbody className="text-gray-600 text-sm font-light">
-                                {group.reports.map((report, index) => (
+                                {group.reports.map((report:any, index:any) => (
                                     <tr key={index} className="border-b border-gray-200 hover:bg-gray-100">
                                         <td className="py-3 px-6">{report.userName}</td>
                                         <td className="py-3 px-6">{report.reason}</td>
@@ -169,8 +132,6 @@ const AdminReportsPage = () => {
             </div>
         </div>
     );
-
-
 };
 
 export default AdminReportsPage;

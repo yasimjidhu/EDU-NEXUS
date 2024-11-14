@@ -13,7 +13,7 @@ const DropDown: React.FC<DropDownProps> = ({ text, data, onSelect }) => {
   return (
     <div className="bg-medium-rose text-black rounded-xl mb-4">
       <Dropdown label={text} className="bg-gray-400 text-black">
-        {data.map((item) => (
+        {data.map((item:any) => (
           <Dropdown.Item
             key={item.id} 
             className="text-black bg-white hover:bg-blue-200"

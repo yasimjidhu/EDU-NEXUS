@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Search, Download, ArrowUpDown } from 'lucide-react';
+import {  Search, ArrowUpDown } from 'lucide-react';
 import { getTransactions } from '../../components/redux/slices/paymentSlice';
 import { AppDispatch, RootState } from '../../components/redux/store/store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,12 +22,12 @@ const AdminTransaction = () => {
         status: '',
     });
     const [allUsers, setAllUsers] = useState<User[]>([])
-    const [allCourses, setAllCourses] = useState([]);
+    const [allCourses, setAllCourses] = useState<any[]>([]);
     
     useDocumentTitle('Transactions')
 
     useEffect(()=>{
-        dispatch(getAllCourses({page:1})).then((res)=> setAllCourses(res.payload.courses))
+        dispatch(getAllCourses({page:1})).then((res:any)=> setAllCourses(res.payload.courses))
     },[])
     useEffect(() => {
         if (allUsers.length <= 0) {

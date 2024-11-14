@@ -20,14 +20,14 @@ const MyCourses = () => {
   useDocumentTitle('My Courses')
 
   useEffect(() => {
-    if (user._id) {
+    if (user?._id) {
       setIsLoading(true)
       dispatch(getAllCoursesOfInstructor(user._id)).then((res) => {
         setMyCourses(res.payload.courses);
         setIsLoading(false)
       });
     }
-  }, [dispatch, user._id]);
+  }, [dispatch, user?._id]);
 
   const handleEditClick = (e: React.MouseEvent, courseId: string) => {
     e.preventDefault(); 
