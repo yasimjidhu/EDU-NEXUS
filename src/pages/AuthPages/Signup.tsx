@@ -178,7 +178,7 @@ const SignupPage: React.FC = () => {
             </div>
             <div className="p-4">
               <img
-                src="/public/assets/images/signup.png"
+                src="/assets/images/signup.png"
                 alt="Signup illustration"
                 width='90%'
               />

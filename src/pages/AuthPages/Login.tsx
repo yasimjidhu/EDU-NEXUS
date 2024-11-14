@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full lg:w-4/5 mx-auto">
             <div className="flex justify-center p-2">
               <img
-                src="/public/assets/images/login.png"
+                src="/assets/images/login.png"
                 className=" h-auto object-contain"
                 alt="Login illustration"
                 width='90%'

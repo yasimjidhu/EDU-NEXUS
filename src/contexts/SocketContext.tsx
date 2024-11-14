@@ -16,7 +16,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     const token = sessionStorage.getItem('access_token');
 
-    const newSocket = io('https://mcartecommerce.online', {
+    const newSocket = io('https://edu-nexus-frontend-2mve.vercel.app', {
       path:'/chat/socket.io',
       auth: { token },
       transports: ['websocket','polling'],

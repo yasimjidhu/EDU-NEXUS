@@ -5,7 +5,7 @@ interface RefreshTokenResponse {
 }
 
 export const axiosInstance: AxiosInstance = axios.create({
-  baseURL: 'https://mcartecommerce.online',
+  baseURL: 'https://edu-nexus-frontend-2mve.vercel.app',
   withCredentials: true,
 });
 
@@ -20,7 +20,7 @@ async function refreshToken(): Promise<string> {
   
   try {
     const response = await axios.post<RefreshTokenResponse>(
-      'https://mcartecommerce.online/auth/refresh-token',
+      'https://edu-nexus-frontend-2mve.vercel.app/auth/refresh-token',
       { refresh_token },
       { withCredentials: true }
     );

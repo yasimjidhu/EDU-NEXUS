@@ -146,7 +146,7 @@ const OtpVerify: React.FC = () => {
       <div className="container mx-auto p-10">
         <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="w-[80%]">
-            <img src="/public/assets/images/verify.png" alt="" />
+            <img src="/assets/images/verify.png" alt="" />
           </div>
           <div className="h-full flex flex-col justify-center p-6 ">
             <form onSubmit={handleSubmit}>

@@ -6,7 +6,7 @@ interface GoogleSignInButtonProps {
 
 const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ message }) => {
   const handleSignup = () => {
-    window.location.href = 'https://mcartecommerce.online/auth/google';
+    window.location.href = 'https://edu-nexus-frontend-2mve.vercel.app/auth/google';
   };
 
   return (
