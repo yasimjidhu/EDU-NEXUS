@@ -20,7 +20,7 @@ async function refreshToken(): Promise<string> {
   
   try {
     const response = await axios.post<RefreshTokenResponse>(
-      'https://api-gateway-new.onrender.com/auth/refresh-token',
+      'https://auth-service-new.onrender.com/auth/refresh-token',
       { refresh_token },
       { withCredentials: true }
     );
