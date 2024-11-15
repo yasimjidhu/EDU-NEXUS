@@ -24,6 +24,8 @@ async function refreshToken(): Promise<string> {
       { refresh_token },
       { withCredentials: true }
     );
+    console.log('refresh token',refresh_token)
+    console.log('refresh token passed and access token got',response.data.access_token)
     // Update the access token cookie
     document.cookie = `access_token=${response.data.access_token}; path=/`;
     return response.data.access_token;
@@ -47,12 +49,14 @@ function getAccessTokenFromCookies(): string | null {
 axiosInstance.interceptors.request.use(
   async (config) => {
     let token = getAccessTokenFromCookies();
+    console.log('this is the access token from cookies',token)
     if (!token) {
       token = await refreshToken(); // Refresh token if access token is undefined
+      console.log('this is the refresh token from backend',token)
     }
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
-    }
+    } 
     return config;
   },
   (error) => Promise.reject(error)
