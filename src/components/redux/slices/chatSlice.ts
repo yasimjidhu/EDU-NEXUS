@@ -33,9 +33,11 @@ export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
   async (message: Message, { rejectWithValue }) => {
     try {
+      console.log('send message called',message)
       const response = await axiosInstance.post('/chat/message', message);
       return response.data;
     } catch (error: any) {
+      console.log(error)
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -47,6 +49,7 @@ export const getMessages = createAsyncThunk(
   async (conversationId: string, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/chat/messages/${conversationId}`);
+      console.log('response data of getmessages',response.data)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);

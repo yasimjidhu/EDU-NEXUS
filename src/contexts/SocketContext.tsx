@@ -15,6 +15,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     const token = sessionStorage.getItem('access_token');
+    console.log('token for chat',token)
 
     const newSocket = io('https://api-gateway-new.onrender.com', {
       path:'/chat/socket.io',
