@@ -35,21 +35,17 @@ async function refreshToken(): Promise<string> {
   }
 }
 
-// Function to get the access token from cookies
-function getAccessTokenFromCookies(): string | null {
-  const cookies = document.cookie.split(';').map(cookie => cookie.trim());
-  const accessTokenCookie = cookies.find(cookie => cookie.startsWith('access_token='));
-  if (accessTokenCookie) {
-    return accessTokenCookie.split('=')[1];
-  }
-  return null;
+function getAccessTokenFromSessionStorage(): string | null {
+  const accessToken = sessionStorage.getItem('access_token');
+  return accessToken ? accessToken : null;
 }
+
 
 // Request interceptor to add the access token to requests
 axiosInstance.interceptors.request.use(
   async (config) => {
-    let token = getAccessTokenFromCookies();
-    console.log('this is the access token from cookies',token)
+    let token = getAccessTokenFromSessionStorage();
+    console.log('this is the access token from session storage',token)
     if (!token) {
       token = await refreshToken(); // Refresh token if access token is undefined
       console.log('this is the refresh token from backend',token)

@@ -117,11 +117,10 @@ export const userLogin = createAsyncThunk<
       }
     );
       const {access_token,refresh_token} = response.data
-
-      localStorage.setItem('access_token',access_token)
-      localStorage.setItem('refresh_token',refresh_token)
-
-      sessionStorage.setItem('access_token',access_token)
+    
+      console.log('access token in login',access_token)
+      sessionStorage.setItem('access_token', access_token);
+      localStorage.setItem('refresh_token', refresh_token);
 
       return response.data;
     } catch (error: any) {

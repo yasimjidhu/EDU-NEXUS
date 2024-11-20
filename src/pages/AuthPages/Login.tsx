@@ -42,7 +42,9 @@ const LoginPage: React.FC = () => {
         throw new Error(response.payload.error);
       }
       console.log('response of login',response)
-      
+      sessionStorage.setItem('access_token', response.payload.access_token);
+      localStorage.setItem('refresh_token', response.payload.refresh_token);
+
       if (response.payload?.user?.role == "admin") {
         navigate("/admin/overview");
       } else {
