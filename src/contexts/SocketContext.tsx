@@ -17,8 +17,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const token = sessionStorage.getItem('access_token');
     console.log('token for chat',token)
 
-    const newSocket = io('https://api-gateway-new.onrender.com', {
-      path:'/chat/socket.io',
+    const newSocket = io('https://chat-service-hcpy.onrender.com', {
+      path:'/socket.io',
       auth: { token },
       transports: ['websocket','polling'],
       reconnection: true,

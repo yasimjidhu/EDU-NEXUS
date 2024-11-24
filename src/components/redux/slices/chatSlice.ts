@@ -1,8 +1,8 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axiosInstance from '../../../constants/axiosInstance';
 import { Group, TStudent, UnreadMessage } from '../../../types/chat'
 import { Message } from '../../../types/chat';
+import axios from 'axios';
 
 
 export interface ChatState {
@@ -33,8 +33,8 @@ export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
   async (message: Message, { rejectWithValue }) => {
     try {
-      console.log('send message called',message)
-      const response = await axiosInstance.post('/chat/message', message);
+      console.log('send message called', message)
+      const response = await axios.post('https://chat-service-hcpy.onrender.com/message', message);
       return response.data;
     } catch (error: any) {
       console.log(error)
@@ -48,8 +48,8 @@ export const getMessages = createAsyncThunk(
   'chat/getMessages',
   async (conversationId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/chat/messages/${conversationId}`);
-      console.log('response data of getmessages',response.data)
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/messages/${conversationId}`,{withCredentials:true});
+      console.log('response data of getmessages', response.data)
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -61,7 +61,7 @@ export const getUnreadMessages = createAsyncThunk(
   'chat/get-unread-messages',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/chat/unread-messages/${userId}`);
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/unread-messages/${userId}`,{withCredentials:true});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -73,7 +73,9 @@ export const getMessagedStudents = createAsyncThunk(
   'chat/getMessagedStudents',
   async (instructorId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/chat/messaged-students/${instructorId}`);
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/messaged-students/${instructorId}`,{
+        withCredentials:true
+      });
       console.log('response of messaged students fetch', response)
       return response.data;
     } catch (error: any) {
@@ -87,7 +89,8 @@ export const createGroup = createAsyncThunk(
   'chat/createGroup',
   async (groupData: Omit<Group, '_id'>, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/chat/group', groupData);
+      const response = await axios.post('https://chat-service-hcpy.onrender.com/group', groupData,
+        {withCredentials:true});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -99,7 +102,9 @@ export const getGroup = createAsyncThunk(
   'chat/getGroup',
   async (groupId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/chat/group/${groupId}`);
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/group/${groupId}`,{
+        withCredentials:true
+      });
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -111,7 +116,8 @@ export const getUserJoinedGroups = createAsyncThunk(
   'chat/getJoinedGroups',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/chat/joined-groups/${userId}`);
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/joined-groups/${userId}`,
+        { withCredentials: true });
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -123,7 +129,7 @@ export const getGroupMessages = createAsyncThunk(
   'chat/group-messages',
   async (groupId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/chat/group-messages/${groupId}`);
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/group-messages/${groupId}`,{withCredentials:true});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -135,7 +141,7 @@ export const addUsersToGroup = createAsyncThunk(
   'groups/addUsersToGroup',
   async ({ groupId, userIds }: { groupId: string, userIds: string[] }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/chat/addToGroup/${groupId}`, { userIds });
+      const response = await axios.post(`https://chat-service-hcpy.onrender.com/addToGroup/${groupId}`, { userIds },{withCredentials:true});
       console.log('response of add user to group', response.data)
       return response.data;
     } catch (error: any) {
@@ -149,13 +155,14 @@ export const removeUserFromGroup = createAsyncThunk(
   async ({ groupId, userId }: { groupId: string, userId: string }, { rejectWithValue }) => {
     try {
       console.log('')
-      const response = await axiosInstance.delete(`/chat/group/leave`, {
-        params: { groupId, userId }
+      const response = await axios.delete(`https://chat-service-hcpy.onrender.com/group/leave`, {
+        withCredentials: true, 
+        params: { groupId, userId },
       });
-      console.log('response of reomve user frmo grtoups',response.data)
+      console.log('response of reomve user frmo grtoups', response.data)
       return response.data.group
     } catch (error: any) {
-      console.log('error while removing user from group',error)
+      console.log('error while removing user from group', error)
       return rejectWithValue(error.response?.data || 'Failed to remove user');
     }
   }
@@ -185,7 +192,7 @@ const chatSlice = createSlice({
     clearMessages: (state) => {
       state.messages = [];
     },
-    
+
     clearGroup: (state) => {
       state.group = null;
     },
@@ -251,7 +258,7 @@ const chatSlice = createSlice({
         state.unreadCounts[conversationId] = 0;  // Reset unread count to 0
       }
     },
-    
+
     updateUnreadMessages: (state, action: PayloadAction<Message>) => {
       console.log('update unread messages reached', action.payload)
       const newMessage = action.payload;
@@ -290,7 +297,7 @@ const chatSlice = createSlice({
         });
       }
     },
-    deleteMessageFromUnreadMessages:(state,action:PayloadAction<Message>)=>{
+    deleteMessageFromUnreadMessages: (state, action: PayloadAction<Message>) => {
       state.unreadMessages.filter(msg => msg._id !== action.payload._id)
     },
 
