@@ -34,7 +34,7 @@ export const sendMessage = createAsyncThunk(
   async (message: Message, { rejectWithValue }) => {
     try {
       console.log('send message called', message)
-      const response = await axios.post('https://chat-service-hcpy.onrender.com/message', message);
+      const response = await axios.post('https://chat-service-hcpy.onrender.com/chat/message', message);
       return response.data;
     } catch (error: any) {
       console.log(error)
@@ -48,7 +48,7 @@ export const getMessages = createAsyncThunk(
   'chat/getMessages',
   async (conversationId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`https://chat-service-hcpy.onrender.com/messages/${conversationId}`,{withCredentials:true});
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/chat/messages/${conversationId}`,{withCredentials:true});
       console.log('response data of getmessages', response.data)
       return response.data;
     } catch (error: any) {
@@ -61,7 +61,7 @@ export const getUnreadMessages = createAsyncThunk(
   'chat/get-unread-messages',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`https://chat-service-hcpy.onrender.com/unread-messages/${userId}`,{withCredentials:true});
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/chat/unread-messages/${userId}`,{withCredentials:true});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -73,7 +73,7 @@ export const getMessagedStudents = createAsyncThunk(
   'chat/getMessagedStudents',
   async (instructorId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`https://chat-service-hcpy.onrender.com/messaged-students/${instructorId}`,{
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/chat/messaged-students/${instructorId}`,{
         withCredentials:true
       });
       console.log('response of messaged students fetch', response)
@@ -89,7 +89,7 @@ export const createGroup = createAsyncThunk(
   'chat/createGroup',
   async (groupData: Omit<Group, '_id'>, { rejectWithValue }) => {
     try {
-      const response = await axios.post('https://chat-service-hcpy.onrender.com/group', groupData,
+      const response = await axios.post('https://chat-service-hcpy.onrender.com/chat/group', groupData,
         {withCredentials:true});
       return response.data;
     } catch (error: any) {
@@ -102,7 +102,7 @@ export const getGroup = createAsyncThunk(
   'chat/getGroup',
   async (groupId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`https://chat-service-hcpy.onrender.com/group/${groupId}`,{
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/chat/group/${groupId}`,{
         withCredentials:true
       });
       return response.data;
@@ -116,7 +116,7 @@ export const getUserJoinedGroups = createAsyncThunk(
   'chat/getJoinedGroups',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`https://chat-service-hcpy.onrender.com/joined-groups/${userId}`,
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/chat/joined-groups/${userId}`,
         { withCredentials: true });
       return response.data;
     } catch (error: any) {
@@ -129,7 +129,7 @@ export const getGroupMessages = createAsyncThunk(
   'chat/group-messages',
   async (groupId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`https://chat-service-hcpy.onrender.com/group-messages/${groupId}`,{withCredentials:true});
+      const response = await axios.get(`https://chat-service-hcpy.onrender.com/chat/group-messages/${groupId}`,{withCredentials:true});
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
@@ -141,7 +141,7 @@ export const addUsersToGroup = createAsyncThunk(
   'groups/addUsersToGroup',
   async ({ groupId, userIds }: { groupId: string, userIds: string[] }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`https://chat-service-hcpy.onrender.com/addToGroup/${groupId}`, { userIds },{withCredentials:true});
+      const response = await axios.post(`https://chat-service-hcpy.onrender.com/chat/addToGroup/${groupId}`, { userIds },{withCredentials:true});
       console.log('response of add user to group', response.data)
       return response.data;
     } catch (error: any) {
@@ -155,7 +155,7 @@ export const removeUserFromGroup = createAsyncThunk(
   async ({ groupId, userId }: { groupId: string, userId: string }, { rejectWithValue }) => {
     try {
       console.log('')
-      const response = await axios.delete(`https://chat-service-hcpy.onrender.com/group/leave`, {
+      const response = await axios.delete(`https://chat-service-hcpy.onrender.com/chat/group/leave`, {
         withCredentials: true, 
         params: { groupId, userId },
       });

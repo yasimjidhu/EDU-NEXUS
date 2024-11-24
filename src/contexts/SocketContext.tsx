@@ -18,6 +18,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     console.log('token for chat',token)
 
     const newSocket = io('https://chat-service-hcpy.onrender.com', {
+      path:'/path/socket.io',
       auth: { token },
       transports: ['websocket','polling'],
       reconnection: true,
