@@ -188,7 +188,11 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
     'auth/generate-tokens',
     async (user: any, { rejectWithValue }) => {
       try {
-        const response = await axios.post('https://api-gateway-new.onrender.com/auth/token', user);
+        const response = await axios.post('https://api-gateway-new.onrender.com/auth/token', user,{
+            headers:{
+                'Content-Type': 'application/json',
+            }
+        });
         console.log('generated tokens in frontend',response.data)
         const {tokens} = response.data
         localStorage.setItem('access_token',tokens.access_token)
