@@ -184,7 +184,24 @@ export const logoutUser = createAsyncThunk<any, void, { rejectValue: RejectValue
     }
   );
 
-
+  export const generateTokensForOauthUsers = createAsyncThunk<any, any, { rejectValue: RejectValue }>(
+    'auth/generate-tokens',
+    async (user: any, { rejectWithValue }) => {
+      try {
+        const response = await axios.post('https://auth-service-new.onrender.com/token', user);
+        console.log('generated tokens in frontend',response.data)
+        const {tokens} = response.data
+        localStorage.setItem('access_token',tokens.access_token)
+        localStorage.setItem('refresh_token',tokens.refresh_token)
+        sessionStorage.setItem('access_token',tokens.access_token)
+        return response.data;
+      } catch (error) {
+        console.error(error);
+        return rejectWithValue({ error: 'Error occurred in generateTokensForOauthUsers' });
+      }
+    }
+  );
+  
 
   export const logoutAdmin = createAsyncThunk<any, void, { rejectValue: RejectValue }>(
     'auth/logout-admin',
@@ -289,6 +306,19 @@ const authSlice = createSlice({
                 state.loading = false
                 state.error = action.payload?.error || 'An error occured'
             })
+            .addCase(generateTokensForOauthUsers.pending,(state)=>{
+                state.loading = true
+                state.error = null
+            })
+            .addCase(generateTokensForOauthUsers.fulfilled,(state)=>{
+                state.loading = false
+                state.error = null
+            })
+            .addCase(generateTokensForOauthUsers.rejected,(state,action:PayloadAction<RejectValue | undefined>)=>{
+                state.loading = false
+                state.error = action.payload?.error || 'An error occured'
+            })
+            
         }
 });
 

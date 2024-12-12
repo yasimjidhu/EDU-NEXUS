@@ -127,11 +127,7 @@ const categorySlice = createSlice({
                 state.loading = false;
                 state.categories = action.payload.categories;
                 state.error = null;
-            })
-            // .addCase(getAllCategories.rejected, (state, action: PayloadAction<RejectValue | undefined>) => {
-            //     state.loading = false;
-            //     state.error = action.payload?.error || 'Failed to fetch categories';
-            // })
+            })  
 
         },
 });

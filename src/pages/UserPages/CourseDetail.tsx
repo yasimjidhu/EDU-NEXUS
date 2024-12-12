@@ -133,7 +133,7 @@ const CourseDetails: React.FC = () => {
       toast.error("Course data or user information is missing");
       return;
     }
-  
+    console.log('user in course details',user)
     try {
   
       if (courseData.pricing.type === "free") {

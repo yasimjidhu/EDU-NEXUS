@@ -1,17 +1,27 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { setUser } from '../redux/slices/authSlice';
+import { generateTokensForOauthUsers, setUser } from '../redux/slices/authSlice';
+import { AppDispatch } from '../redux/store/store';
 
 const AuthSuccess: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch:AppDispatch = useDispatch()
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const handleAuthSuccess = (user: any) => {
+    const handleAuthSuccess = async (user: any) => {
       console.log('This is the Google login user:', user);
       dispatch(setUser(user));
+      try {
+        await dispatch(generateTokensForOauthUsers(user)).unwrap(); // Wait for token generation
+        localStorage.setItem('email', user.email);
+        navigate('/home');
+      } catch (error) {
+        console.error('Error generating tokens:', error);
+        navigate('/signup'); // Redirect to signup if token generation fails
+      }
+      localStorage.setItem('email',user.email)
       navigate('/home');
     };
 
